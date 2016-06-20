@@ -7,7 +7,6 @@
   "authors": [
     {
       "name": "Romain Cottard",
-      "email": "no-reply@gmail.com",
       "role": "Developer"
     }
 
@@ -17,12 +16,6 @@
     "psr-4": {
       "Eureka\\Component\\Orm\\": "./"
     }
-  },
+  }
 
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/velkuns/component-orm"
-    }
-  ]
 }
