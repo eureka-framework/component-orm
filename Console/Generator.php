@@ -91,7 +91,7 @@ class Generator extends Eurekon\Console
             throw new \RuntimeException('Cannot created output directory! (dir:' . $directory . ')');
         }
 
-        $configs = $this->findConfigs($data, $configName, true);
+        $configs = $this->findConfigs($file, $data, $configName, true);
 
         $builder = new Builder();
         $builder->setDatabase(Database::get($dbName));
@@ -103,14 +103,17 @@ class Generator extends Eurekon\Console
     /**
      * Find configs.
      *
+     * @param string $currentFile
      * @param array  $data
      * @param string $configName Filter on name
      * @param bool   $doLoadJoins
      * @return array|Config
      */
-    protected function findConfigs(array $data, $configName = '', $doLoadJoins = false)
+    protected function findConfigs($currentFile, array $data, $configName = '', $doLoadJoins = false)
     {
         $configs = array();
+
+        $data = $this->replace($currentFile, $data);
 
         foreach ($data['configs'] as $name => $config) {
 
@@ -119,7 +122,7 @@ class Generator extends Eurekon\Console
             }
 
             if ($doLoadJoins) {
-                $this->loadJoins($config, $data);
+                $this->loadJoins($currentFile, $config, $data);
             } else {
                 $config['joins'] = array();
             }
@@ -137,11 +140,12 @@ class Generator extends Eurekon\Console
     /**
      * Load joined configs.
      *
+     * @param  string $currentFile
      * @param  array $config Current config
      * @param  array $data Global current config data
      * @return $this
      */
-    protected function loadJoins(&$config, $data)
+    protected function loadJoins($currentFile, &$config, $data)
     {
         if (empty($config['joins']) || !is_array($config['joins'])) {
             $config['joins'] = array();
@@ -151,15 +155,82 @@ class Generator extends Eurekon\Console
 
         foreach ($config['joins'] as $joinName => &$joinConfig) {
 
+            $filename = $currentFile;
             if (isset($joinConfig['file']) && 'this' !== $joinConfig['file']) {
+                //echo '$file: ' . $joinConfig['file'] . PHP_EOL;
                 $filename = str_replace('EKA_ROOT', EKA_ROOT, $joinConfig['file']);
                 $yaml     = new Yaml();
                 $data     = $yaml->load($filename);
             }
 
-            $joinConfig['class'] = $this->findConfigs($data, $joinName);
+            $joinConfig['class'] = $this->findConfigs($filename, $data, $joinName);
         }
 
         return $this;
+    }
+
+    /**
+     * Add config value(s).
+     *
+     * @param    string $currentFile
+     * @param    mixed $config Configuration value.
+     * @return   mixed
+     */
+    public function replace($currentFile, $config)
+    {
+        $patterns = array(
+            'constants' => array(
+                '`EKA_[A-Z_]+`',
+            ), 'php'    => array(
+                '__DIR__',
+            ),
+        );
+
+        if (!is_array($config)) {
+
+            foreach ($patterns['constants'] as $pattern) {
+                if ((bool) preg_match_all($pattern, $config, $matches)) {
+
+                    $matches   = array_unique($matches[0]);
+                    $constants = array();//'.' => '');
+
+                    foreach ($matches as $index => $constant) {
+                        $constants[$constant] = constant($constant);
+                    }
+
+                    $config = str_replace(array_keys($constants), array_values($constants), $config);
+
+                    if (is_numeric($config)) {
+                        $config = (int) $config;
+                    }
+                }
+            }
+
+            $currentDir = dirname($currentFile);
+            foreach ($patterns['php'] as $pattern) {
+
+                switch ($pattern) {
+                    case '__DIR__':
+                        $replace = $currentDir;
+                        break;
+                    default:
+                        continue 2;
+                }
+
+                $config = str_replace($pattern, $replace, $config);
+            }
+
+            if (false !== strpos($config, '..')) {
+                $config = realpath($config);
+            }
+
+        } elseif (is_array($config)) {
+
+            foreach ($config as $key => $conf) {
+                $config[$key] = $this->replace($currentFile, $conf);
+            }
+        }
+
+        return $config;
     }
 }
