@@ -16,6 +16,13 @@
     "psr-4": {
       "Eureka\\Component\\Orm\\": "./src/Orm/"
     }
+  },
+
+  "require": {
+    "eureka/component-cache": "^1.0.0",
+    "eureka/component-database": "^1.0.1",
+    "eureka/component-dependency": "^1.0.0",
+    "eureka/component-yaml": "^1.0.0"
   }
 
 }

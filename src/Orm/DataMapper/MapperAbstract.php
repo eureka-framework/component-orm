@@ -10,7 +10,7 @@
 namespace Eureka\Component\Orm\DataMapper;
 
 use Eureka\Component\Cache\CacheWrapperAbstract as Cache;
-use Eureka\Component\Error\ExceptionNoData;
+use Eureka\Component\Database\ExceptionNoData;
 use Eureka\Component\Dependency\Container;
 
 /**

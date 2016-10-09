@@ -102,6 +102,8 @@ abstract class DataAbstract
     public function setExists($exists)
     {
         $this->exists = (bool) $exists;
+
+        return $this;
     }
 
     /**
