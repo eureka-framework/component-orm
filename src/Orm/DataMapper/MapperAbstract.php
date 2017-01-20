@@ -111,6 +111,11 @@ abstract class MapperAbstract
     protected $offset = null;
 
     /**
+     * @var bool If true, does not throw an exception for not mapped fields (ie : COUNT()) in setDataValue
+     */
+    protected $ignoreNotMappedFields = false;
+
+    /**
      * @var string $databaseConfig Database config name.
      */
     protected $databaseConfig = '';
@@ -875,12 +880,30 @@ abstract class MapperAbstract
     protected function setDataValue($data, $field, $value)
     {
         if (!isset($this->dataNamesMap[$field]['set'])) {
+
+            if (true === $this->ignoreNotMappedFields) {
+                return $this;
+            }
+
             throw new \DomainException('Field have not mapping with Data instance (field: ' . $field . ')');
         }
 
         $method = $this->dataNamesMap[$field]['set'];
 
         $data->{$method}($value);
+
+        return $this;
+    }
+
+    /**
+     * Set value for ignoreNotMappedFields
+     *
+     * @param bool $value
+     * @return $this
+     */
+    public function setIgnoreNotMappedFields($value)
+    {
+        $this->ignoreNotMappedFields = (bool) $value;
 
         return $this;
     }
