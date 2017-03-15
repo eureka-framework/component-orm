@@ -20,7 +20,7 @@
 
   "require": {
     "eureka/component-cache": "^1.0",
-    "eureka/component-config": "^1.2",
+    "eureka/component-config": "^1.1",
     "eureka/component-container": "^1.0",
     "eureka/component-database": "^1.0",
     "eureka/component-dependency": "^1.0",
