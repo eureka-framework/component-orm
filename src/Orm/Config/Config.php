@@ -38,7 +38,6 @@ class Config extends ConfigAbstract
         $this->cachePrefix = $config['cache']['prefix'];
 
         //~ Db
-        $this->dbConfig = $config['db']['config'];
         $this->dbTable  = $config['db']['table'];
         $this->dbPrefix = $config['db']['prefix'];
 

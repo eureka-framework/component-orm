@@ -223,9 +223,9 @@ abstract class ConfigAbstract implements ConfigInterface
             throw new \Exception('Namespace is empty!');
         }
 
-        if (empty($this->dbConfig)) {
+        /*if (empty($this->dbConfig)) {
             throw new \Exception('Database config name is empty!');
-        }
+        }*/
 
         if (empty($this->dbTable)) {
             throw new \Exception('Database table name is empty!');

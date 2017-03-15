@@ -578,6 +578,21 @@ abstract class MapperAbstract
     }
 
     /**
+     * Persist data in database.
+     *
+     * @param  DataAbstract $data
+     * @return bool
+     */
+    public function persist(DataAbstract $data)
+    {
+        if ($data->exists()) {
+            return $this->update($data);
+        } else {
+            return $this->insert($data);
+        }
+    }
+
+    /**
      * Insert active row (or update row if it possible).
      *
      * @param  DataAbstract $data

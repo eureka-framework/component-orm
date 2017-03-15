@@ -9,9 +9,11 @@
 
 namespace Eureka\Component\Orm\Console;
 
+use Eureka\Component\Container\Container;
 use Eureka\Component\Database\Database;
 use Eureka\Component\Orm\Builder;
 use Eureka\Component\Orm\Config\Config;
+use Eureka\Component\Config\Config as Conf;
 use Eureka\Component\Yaml\Yaml;
 use Eureka\Eurekon;
 
@@ -46,8 +48,9 @@ class Generator extends Eurekon\Console
 
         $help = new Eurekon\Help('...', true);
         $help->addArgument('', 'directory', 'Config directory to inspect for config file', true, true);
-        $help->addArgument('', 'config', 'Config name in config file to generate.', true, false);
+        $help->addArgument('', 'namespace', 'Config namespace (default: global.database)', true, false);
         $help->addArgument('', 'db', 'Database config name', true, false);
+        $help->addArgument('', 'item', 'Config name in config file to generate.', true, false);
 
         $help->display();
     }
@@ -59,10 +62,16 @@ class Generator extends Eurekon\Console
      */
     public function run()
     {
-        $argument   = Eurekon\Argument::getInstance();
-        $directory  = (string) $argument->get('directory');
-        $configName = (string) $argument->get('config');
-        $dbName     = (string) $argument->get('db');
+        $argument        = Eurekon\Argument::getInstance();
+        $directory       = (string) $argument->get('directory');
+        $configName      = (string) $argument->get('item');
+        $configNamespace = (string) $argument->get('namespace', null, 'global.database');
+        $dbName          = (string) $argument->get('db');
+
+        //~ Init db connection
+        $container  = Container::getInstance();
+        $config  = $container->get('config');
+        Database::getInstance()->setConfig($config->get($configNamespace));
 
         $directory = realpath(trim(rtrim($directory, '\\')));
         $file      = $directory . DIRECTORY_SEPARATOR . 'orm.yml';
