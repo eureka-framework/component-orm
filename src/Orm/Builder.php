@@ -547,7 +547,7 @@ class Builder
         $content = '<?php
 
 /**
- * Copyright (c) 2010-2016 ' . $this->config->getAuthor() . '
+ * Copyright (c) 2010-' . date('Y') . ' ' . $this->config->getAuthor() . '
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -600,7 +600,7 @@ abstract class ' . $this->config->getClassname() . 'Abstract extends DataAbstrac
         $content = '<?php
 
 /**
- * Copyright (c) 2010-2016 ' . $this->config->getAuthor() . '
+ * Copyright (c) 2010-' . date('Y') . ' ' . $this->config->getAuthor() . '
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -659,7 +659,7 @@ class ' . $this->config->getClassname() . ' extends Abstracts\\' . $this->config
         $content = '<?php
 
 /**
- * Copyright (c) 2010-2016 ' . $this->config->getAuthor() . '
+ * Copyright (c) 2010-' . date('Y') . ' ' . $this->config->getAuthor() . '
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -819,7 +819,7 @@ abstract class ' . $this->config->getClassname() . 'MapperAbstract extends Mappe
         $content = '<?php
 
 /**
- * Copyright (c) 2010-2016 ' . $this->config->getAuthor() . '
+ * Copyright (c) 2010-' . date('Y') . ' ' . $this->config->getAuthor() . '
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
