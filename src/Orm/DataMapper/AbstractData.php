@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2010-2016 Romain Cottard
+ * Copyright (c) Romain Cottard
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,14 +9,14 @@
 
 namespace Eureka\Component\Orm\DataMapper;
 
-use Eureka\Component\Dependency;
+use Doctrine\DBAL\Connection as ConnectionInterface;
 
 /**
  * DataMapper Data abstract class.
  *
  * @author  Romain Cottard
  */
-abstract class DataAbstract
+abstract class AbstractData implements DataInterface
 {
     /**
      * @var bool $hasAutoIncrement If data has auto increment value.
@@ -34,9 +34,9 @@ abstract class DataAbstract
     protected $updated = array();
 
     /**
-     * @var Dependency\ContainerInterface $dependencyContainer
+     * @var ConnectionInterface $db DatabaseInterface
      */
-    protected $dependencyContainer = null;
+    protected $db = null;
 
     /**
      * Return cache key for the current data instance.
@@ -46,11 +46,21 @@ abstract class DataAbstract
     abstract public function getCacheKey();
 
     /**
+     * AbstractData constructor.
+     *
+     * @param ConnectionInterface $db
+     */
+    public function __construct(ConnectionInterface $db)
+    {
+        $this->db = $db;
+    }
+
+    /**
      * Set auto increment value.
      * Must be overridden to use internal property setter method, according to the data class definition.
      *
      * @param  integer $id
-     * @return self
+     * @return $this
      */
     public function setAutoIncrementId($id)
     {
@@ -63,18 +73,9 @@ abstract class DataAbstract
         return $this;
     }
 
-    /**
-     * DataAbstract constructor.
-     *
-     * @param Dependency\ContainerInterface $container
-     */
-    public function __construct(Dependency\ContainerInterface $container = null)
-    {
-        $this->initDependencyContainer($container);
-    }
 
     /**
-     * If the data set is new.
+     * If the dataset is new.
      *
      * @return bool
      */
@@ -84,7 +85,7 @@ abstract class DataAbstract
     }
 
     /**
-     * If the data set exists.
+     * If the dataset exists.
      *
      * @return bool
      */
@@ -94,10 +95,10 @@ abstract class DataAbstract
     }
 
     /**
-     * If the data set exists.
+     * If the dataset exists.
      *
      * @param  bool $exists
-     * @return self
+     * @return $this
      */
     public function setExists($exists)
     {
@@ -125,7 +126,7 @@ abstract class DataAbstract
     /**
      * Reset updated list of properties
      *
-     * @return self
+     * @return $this
      */
     public function resetUpdated()
     {
@@ -135,19 +136,50 @@ abstract class DataAbstract
     }
 
     /**
-     * Initialize dependency container.
+     * Empties the join* fields
      *
-     * @param  Dependency\ContainerInterface $container
-     * @return self
+     * @return void
      */
-    public function initDependencyContainer(Dependency\ContainerInterface $container = null)
+    public function resetLazyLoadedData()
     {
-        if (null === $container) {
-            $container = Dependency\Container::getInstance();
+        $attributes = get_object_vars($this);
+
+        foreach ($attributes as $attribute => $value) {
+            if (strpos($attribute, 'join') === 0) {
+                $this->$attribute = null;
+            }
+        }
+    }
+
+    /**
+     * Get connection.
+     *
+     * @return ConnectionInterface
+     */
+    public function getConnection()
+    {
+        return $this->db;
+    }
+
+    /**
+     * Get object as array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        static $exludedProperties = ['db', 'hasAutoIncrement', 'exists', 'updated'];
+
+        $array = [];
+
+        foreach ($this as $name => $value) {
+            if (in_array($name, $exludedProperties)) {
+                continue;
+            }
+
+            $array[$name] = $value;
         }
 
-        $this->dependencyContainer = $container;
-
-        return $this;
+        return $array;
     }
 }

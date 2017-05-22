@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2010-2016 Romain Cottard
+ * Copyright (c) Romain Cottard
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,32 +14,52 @@ namespace Eureka\Component\Orm\Config;
  *
  * @author  Romain Cottard
  */
-abstract class ConfigAbstract implements ConfigInterface
+abstract class AbstractConfig implements ConfigInterface
 {
     /**
-     * @var string $version
+     * @var string $version Version
      */
     protected $version = '1.0.0';
 
     /**
-     * @var bool $hasCache
+     * @var bool $hasCache If use cache in orm classes
      */
     protected $hasCache = false;
 
     /**
-     * @var string $author
+     * @var string $author Comment author name <email>
      */
     protected $author = '';
 
     /**
-     * @var string $classname
+     * @var string $classname Base class name of generated classes.
      */
     protected $classname = '';
 
     /**
-     * @var string $namespace
+     * @var string $namespace Namespace for generated classes.
      */
     protected $namespace = '';
+
+    /**
+     * @var string $baseNamespaceForData
+     */
+    protected $baseNamespaceForData = 'Eureka\Domain';
+
+    /**
+     * @var string $baseNamespaceForMapper
+     */
+    protected $baseNamespaceForMapper = 'Eureka\Domain';
+
+    /**
+     * @var string $basePathForData
+     */
+    protected $basePathForData = '';
+
+    /**
+     * @var string $basePathForMapper
+     */
+    protected $basePathForMapper = '/';
 
     /**
      * @var string $dbConfig Database config name.
@@ -57,17 +77,17 @@ abstract class ConfigAbstract implements ConfigInterface
     protected $dbPrefix = '';
 
     /**
-     * @var string $cacheName
+     * @var string $cacheName Cache name config.
      */
     protected $cacheName = '';
 
     /**
-     * @var string $cachePrefix
+     * @var string $cachePrefix Cache name prefix.
      */
     protected $cachePrefix = '';
 
     /**
-     * @var ConfigInterface[] $joinList
+     * @var ConfigInterface[] $joinList List of joined config.
      */
     protected $joinList = array();
 
@@ -76,15 +96,13 @@ abstract class ConfigAbstract implements ConfigInterface
      *
      * @param  array $config
      * @param  array $global
-     * @return self
+     * @return $this
      */
     abstract protected function init($config, $global);
 
     /**
      * Init config & validate it.
      *
-     * @param  array $config
-     * @param  array $global
      * @throws \Exception
      */
     public function __construct($config, $global)
@@ -203,10 +221,51 @@ abstract class ConfigAbstract implements ConfigInterface
         return $this->joinList;
     }
 
+
+    /**
+     * Get base namespace for "data" files for generated files.
+     *
+     * @return string
+     */
+    public function getBaseNamespaceForData()
+    {
+        return $this->baseNamespaceForData;
+    }
+
+    /**
+     * Get base namespace for "mapper" files for generated files.
+     *
+     * @return string
+     */
+    public function getBaseNamespaceForMapper()
+    {
+        return $this->baseNamespaceForMapper;
+    }
+
+    /**
+     * Get base path for "data" files for generated files.
+     *
+     * @return string
+     */
+    public function getBasePathForData()
+    {
+        return $this->basePathForData;
+    }
+
+    /**
+     * Get base path for "mapper" files for generated files.
+     *
+     * @return string
+     */
+    public function getBasePathForMapper()
+    {
+        return $this->basePathForMapper;
+    }
+
     /**
      * Check if config has required values.
      *
-     * @return self
+     * @return $this
      * @throws \Exception
      */
     protected function validate()
@@ -218,14 +277,6 @@ abstract class ConfigAbstract implements ConfigInterface
         if (empty($this->classname)) {
             throw new \Exception('Class name is empty!');
         }
-
-        if (empty($this->namespace)) {
-            throw new \Exception('Namespace is empty!');
-        }
-
-        /*if (empty($this->dbConfig)) {
-            throw new \Exception('Database config name is empty!');
-        }*/
 
         if (empty($this->dbTable)) {
             throw new \Exception('Database table name is empty!');

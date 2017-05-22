@@ -9,6 +9,9 @@
 
 namespace Eureka\Component\Orm\Console;
 
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
 use Eureka\Component\Container\Container;
 use Eureka\Component\Database\Database;
 use Eureka\Component\Orm\Builder;
@@ -47,10 +50,10 @@ class Generator extends Eurekon\Console
         Eurekon\Out::std('');
 
         $help = new Eurekon\Help('...', true);
-        $help->addArgument('', 'directory', 'Config directory to inspect for config file', true, true);
-        $help->addArgument('', 'namespace', 'Config namespace (default: global.database)', true, false);
-        $help->addArgument('', 'db', 'Database config name', true, false);
-        $help->addArgument('', 'item', 'Config name in config file to generate.', true, false);
+        $help->addArgument('', 'db-namespace', 'Config namespace (default: global.database)', true, false);
+        $help->addArgument('', 'db-name', 'Database config name', true, false);
+        $help->addArgument('', 'config-dir', 'Config directory to inspect for config file', true, true);
+        $help->addArgument('', 'config-item', 'Config name in config file to generate.', true, false);
 
         $help->display();
     }
@@ -62,18 +65,13 @@ class Generator extends Eurekon\Console
      */
     public function run()
     {
-        $argument        = Eurekon\Argument::getInstance();
-        $directory       = (string) $argument->get('directory');
-        $configName      = (string) $argument->get('item');
-        $configNamespace = (string) $argument->get('namespace', null, 'global.database');
-        $dbName          = (string) $argument->get('db');
+        $argument    = Eurekon\Argument::getInstance();
+        $directory   = (string) $argument->get('config-dir');
+        $configName  = (string) $argument->get('config-item');
+        $dbName      = (string) $argument->get('db-name');
+        $dbNamespace = (string) $argument->get('db-namespace', null, 'global.database');
 
-        //~ Init db connection
-        $container  = Container::getInstance();
-        $config  = $container->get('config');
-        Database::getInstance()->setConfig($config->get($configNamespace));
-
-        $directory = realpath(trim(rtrim($directory, '\\')));
+        $directory = realpath(trim(rtrim($directory, '/')));
         $file      = $directory . DIRECTORY_SEPARATOR . 'orm.yml';
 
         if (!is_readable($file)) {
@@ -84,17 +82,16 @@ class Generator extends Eurekon\Console
         $data = $yaml->load($file);
 
         $directory = $directory . DIRECTORY_SEPARATOR . $data['orm']['directory'];
-        $namespace = $data['orm']['namespace'];
 
-        if (!is_dir($directory) && !mkdir($directory, 0764, true)) {
+        if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
             throw new \RuntimeException('Cannot created output directory! (dir:' . $directory . ')');
         }
 
         $configs = $this->findConfigs($file, $data, $configName, true);
 
+        $parametersConnection = Container::getInstance()->get('config')->get($dbNamespace);
         $builder = new Builder();
-        $builder->setDatabase(Database::get($dbName));
-        $builder->setNamespace($namespace);
+        $builder->setDatabase(DriverManager::getConnection($parametersConnection['mqserver'], new Configuration()));
         $builder->setDirectory($directory);
         $builder->build($configs);
     }
@@ -179,7 +176,8 @@ class Generator extends Eurekon\Console
         $patterns = array(
             'constants' => array(
                 '`EKA_[A-Z_]+`',
-            ), 'php'    => array(
+            ),
+            'php'       => array(
                 '__DIR__',
             ),
         );
@@ -226,6 +224,9 @@ class Generator extends Eurekon\Console
         } elseif (is_array($config)) {
 
             foreach ($config as $key => $conf) {
+                if (empty($conf)) {
+                    continue;
+                }
                 $config[$key] = $this->replace($currentFile, $conf);
             }
         }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2010-2016 Romain Cottard
+ * Copyright (c) Romain Cottard
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,16 +9,18 @@
 
 namespace Eureka\Component\Orm\DataMapper;
 
+use PDO;
+use Doctrine\DBAL\Connection as ConnectionInterface;
+
 use Eureka\Component\Cache\CacheWrapperAbstract as Cache;
 use Eureka\Component\Database\ExceptionNoData;
-use Eureka\Component\Dependency\Container;
 
 /**
  * DataMapper Mapper abstract class.
  *
  * @author  Romain Cottard
  */
-abstract class MapperAbstract
+abstract class AbstractMapper
 {
     /**
      * @var string $dataClass Name of class use to instance DataMapper Data class.
@@ -26,7 +28,7 @@ abstract class MapperAbstract
     protected $dataClass = '';
 
     /**
-     * @var Cache $cache Cache instance. Not connected if cache is not used.
+     * @var CacheInterface $cache Cache instance. Not connected if cache is not used.
      */
     protected $cache = null;
 
@@ -41,9 +43,9 @@ abstract class MapperAbstract
     protected $isCacheEnabled = false;
 
     /**
-     * @var string $cacheConfig Name of config cache to use.
+     * @var string $cacheName Name of config cache to use.
      */
-    protected $cacheConfig = '';
+    protected $cacheName = '';
 
     /**
      * @var string $table Table name.
@@ -76,6 +78,11 @@ abstract class MapperAbstract
     protected $lastId = 0;
 
     /**
+     * @var DataInterface $data Data instance.
+     */
+    protected $data = null;
+
+    /**
      * @var array $wheres List of where restriction for current query
      */
     protected $wheres = array();
@@ -91,9 +98,14 @@ abstract class MapperAbstract
     protected $binds = array();
 
     /**
+     * @var array $groupBy List of groupBy for current query
+     */
+    protected $groupBy = array();
+
+    /**
      * @var array $having List of having restriction for current query
      */
-    protected $havings = array();
+    protected $having = array();
 
     /**
      * @var array $order List of order by restriction for current query
@@ -116,18 +128,55 @@ abstract class MapperAbstract
     protected $ignoreNotMappedFields = false;
 
     /**
-     * @var string $databaseConfig Database config name.
-     */
-    protected $databaseConfig = '';
-
-    /**
-     * MapperAbstract constructor.
+     * AbstractMapper constructor.
      *
-     * @param  \PDO $db
+     * @param  ConnectionInterface $db
      */
-    public function __construct(\PDO $db)
+    public function __construct(ConnectionInterface $db)
     {
         $this->db = $db;
+    }
+
+    /**
+     * Enable cache usage.
+     *
+     * @return static
+     */
+    public function enableCache()
+    {
+        $this->isCacheEnabled = true;
+
+        return $this;
+    }
+
+    /**
+     * Disable cache usage.
+     *
+     * @return static
+     */
+    public function disableCache()
+    {
+        $this->isCacheEnabled = false;
+
+        return $this;
+    }
+
+    /**
+     * Set cache instance & enable cache if it is specified.
+     *
+     * @param  CacheInterface $cache
+     * @param  bool           $enableCache
+     * @return static
+     */
+    public function setCacheInstance(CacheInterface $cache, $enableCache = false)
+    {
+        if ($enableCache) {
+            $this->isCacheEnabled = true;
+        }
+
+        $this->cache = $cache;
+
+        return $this;
     }
 
     /**
@@ -143,7 +192,7 @@ abstract class MapperAbstract
     /**
      * Return fields for current table.
      *
-     * @return array
+     * @return string
      */
     public function getTable()
     {
@@ -151,23 +200,19 @@ abstract class MapperAbstract
     }
 
     /**
-     * Create new instance of extended DataAbstract class & return it.
+     * Create new instance of extended DataInterface class & return it.
      *
      * @param  \stdClass $row
      * @param  bool      $exists
-     * @return DataAbstract
+     * @return mixed
      * @throws \LogicException
      */
     public function newDataInstance(\stdClass $row = null, $exists = false)
     {
-        //~ Get dependency container & attach database object if necessary
-        $container = Container::getInstance();
-        $container->attach($this->getDatabaseConfig(), $this->db, Container::DATABASE);
+        $data = new $this->dataClass($this->db);
 
-        $data = new $this->dataClass($container);
-
-        if (!($data instanceof DataAbstract)) {
-            throw new \LogicException('Data object not instance of DataAbstract class!');
+        if (!($data instanceof DataInterface)) {
+            throw new \LogicException('Data object not instance of DataInterface class!');
         }
 
         if ($row instanceof \stdClass) {
@@ -187,9 +232,10 @@ abstract class MapperAbstract
      * @param  string $field Field name
      * @param  array  $values List of values (integer)
      * @param  string $whereConcat Concat type with other where elements
-     * @return self
+     * @param  bool   $not Whether the wondition should be NOT IN instead of IN
+     * @return $this
      */
-    public function addIn($field, $values, $whereConcat = 'AND')
+    public function addIn($field, $values, $whereConcat = 'AND', $not = false)
     {
         if (!is_array($values)) {
             return $this;
@@ -210,7 +256,7 @@ abstract class MapperAbstract
             $index++;
         }
 
-        $this->wheres[] = $field . ' IN (' . implode(',', $fields) . ')';
+        $this->wheres[] = $field . ($not ? ' NOT' : '') . ' IN (' . implode(',', $fields) . ')';
 
         return $this;
     }
@@ -220,11 +266,44 @@ abstract class MapperAbstract
      *
      * @param  string $order
      * @param  string $dir
-     * @return self
+     * @return $this
      */
     public function addOrder($order, $dir = 'ASC')
     {
         $this->orders[] = $order . ' ' . $dir;
+
+        return $this;
+    }
+
+    /**
+     * Add groupBy clause.
+     *
+     * @param  string $field
+     * @return $this
+     */
+    public function addGroupBy($field)
+    {
+        $this->groupBy[] = $field;
+
+        return $this;
+    }
+
+    /**
+     * Add having clause.
+     *
+     * @param  string         $field
+     * @param  string|integer $value
+     * @param  string         $sign
+     * @param  string         $having_concat
+     * @return $this
+     */
+    public function addHaving($field, $value, $sign = '=', $having_concat = 'AND')
+    {
+
+        $field_having = (0 < count($this->having) ? ' ' . $having_concat . ' ' . $field : $field);
+
+        $this->having[]                        = $field_having . ' ' . $sign . ' :' . strtolower($field);
+        $this->binds[':' . strtolower($field)] = $value;
 
         return $this;
     }
@@ -235,8 +314,8 @@ abstract class MapperAbstract
      * @param  string         $field
      * @param  string|integer $value
      * @param  string         $sign
-     * @param  string         $whereConcat
-     * @return self
+     * @param  string         $where_concat
+     * @return $this
      */
     public function addWhere($field, $value, $sign = '=', $whereConcat = 'AND')
     {
@@ -263,11 +342,35 @@ abstract class MapperAbstract
     }
 
     /**
+     * Add where clause.
+     *
+     * @param  string         $field
+     * @param  string|integer $value
+     * @param  string         $sign
+     * @param  string         $where_concat
+     * @return $this
+     */
+    public function addWhereRaw($field, $value, $fieldBind, $whereConcat = 'AND')
+    {
+        $fieldWhere = (0 < count($this->wheres) ? ' ' . $whereConcat . ' ' . $field : $field);
+
+
+        if (isset($this->binds[$fieldBind])) {
+            throw \Exception('Binded field already exists! (field: ' . $fieldBind . ')');
+        }
+
+        $this->wheres[]          = $fieldWhere;
+        $this->binds[$fieldBind] = $value;
+
+        return $this;
+    }
+
+    /**
      * Set limit & offset.
      *
-     * @param  int $limit
-     * @param  int $offset
-     * @return self
+     * @param int $limit
+     * @param int $offset
+     * @return $this
      */
     public function setLimit($limit, $offset = null)
     {
@@ -281,7 +384,7 @@ abstract class MapperAbstract
      * Set bind
      *
      * @param  array $binds Binded values
-     * @return self
+     * @return $this
      */
     public function bind(array $binds)
     {
@@ -293,17 +396,19 @@ abstract class MapperAbstract
     /**
      * Clear query params
      *
-     * @return self
+     * @return $this
      */
     public function clear()
     {
         $this->wheres  = array();
         $this->sets    = array();
-        $this->havings = array();
+        $this->groupBy = array();
+        $this->having  = array();
         $this->orders  = array();
         $this->binds   = array();
         $this->limit   = null;
         $this->offset  = null;
+        $this->data    = null;
 
         return $this;
     }
@@ -343,11 +448,11 @@ abstract class MapperAbstract
     /**
      * Build field list to update (only field with different value from db)
      *
-     * @param  DataAbstract $data
+     * @param  DataInterface $data
      * @param  bool         $forceCheck If force check (do not force for insert query)
      * @return string
      */
-    public function getQueryFieldsSet(DataAbstract $data, $forceCheck = true)
+    public function getQueryFieldsSet(DataInterface $data, $forceCheck = true)
     {
         //~ List of fields to update.
         $queryFields = array();
@@ -376,10 +481,10 @@ abstract class MapperAbstract
     /**
      * Build field list to update (only field with different value from db)
      *
-     * @param  DataAbstract $data
+     * @param  DataInterface $data
      * @return string
      */
-    public function getQueryFieldsOnDuplicateUpdate(DataAbstract $data)
+    public function getQueryFieldsOnDuplicateUpdate(DataInterface $data)
     {
         if (!$data->isUpdated()) {
             return '';
@@ -438,6 +543,35 @@ abstract class MapperAbstract
     }
 
     /**
+     * Get GroupBy clause.
+     *
+     * @return string
+     */
+    public function getQueryGroupBy()
+    {
+        return (0 < count($this->groupBy) ? 'GROUP BY ' . implode(', ', $this->groupBy) : '');
+    }
+
+    /**
+     * Get Having clause.
+     *
+     * @return string
+     */
+    public function getQueryHaving()
+    {
+        $return = '';
+
+        if (0 < count($this->having)) {
+            $return = 'HAVING ';
+            foreach ($this->having as $having) {
+                $return .= $having . ' ';
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Get Where clause.
      *
      * @return string
@@ -454,6 +588,26 @@ abstract class MapperAbstract
         }
 
         return $return;
+    }
+
+    /**
+     * Get the higher value for the primary key
+     *
+     * @return mixed
+     * @throws LogicException
+     */
+    public function getMaxId()
+    {
+        if (count($this->primaryKeys) > 1) {
+            throw new LogicException(__METHOD__ . '|Cannot use getMaxId() method for table with multiple primary keys !');
+        }
+
+        $field = reset($this->primaryKeys);
+
+        $statement = $this->db->prepare('SELECT MAX(' . $field . ') AS ' . $field . ' FROM ' . $this->getTable());
+        $statement->execute();
+
+        return $statement->fetch(PDO::FETCH_OBJ)->{$field};
     }
 
     /**
@@ -503,7 +657,7 @@ abstract class MapperAbstract
      * Fetch rows for specified query.
      *
      * @param  string $query
-     * @return array Array of model_base object for query.
+     * @return DataInterface[] Array of DataInterface object for query.
      */
     public function query($query)
     {
@@ -514,7 +668,7 @@ abstract class MapperAbstract
 
         $collection = array();
 
-        while (false !== ($row = $statement->fetchObject())) {
+        while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
             $collection[] = $this->newDataInstance($row, true);
         }
 
@@ -525,7 +679,7 @@ abstract class MapperAbstract
      * Fetch rows for specified query.
      *
      * @param  string $query
-     * @return \stdClass[] Array of model_base object for query.
+     * @return \stdClass[] Array of stdClass object for query.
      */
     public function queryRows($query)
     {
@@ -536,7 +690,7 @@ abstract class MapperAbstract
 
         $collection = array();
 
-        while (false !== ($row = $statement->fetchObject())) {
+        while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
             $collection[] = $row;
         }
 
@@ -546,11 +700,11 @@ abstract class MapperAbstract
     /**
      * Delete data from database.
      *
-     * @param  DataAbstract $data
-     * @return self
+     * @param  DataInterface $data
+     * @return $this
      * @throws \LogicException
      */
-    public function delete(DataAbstract $data)
+    public function delete(DataInterface $data)
     {
         foreach ($this->primaryKeys as $key) {
             $this->addWhere($key, $this->getDataValue($data, $key));
@@ -595,12 +749,12 @@ abstract class MapperAbstract
     /**
      * Insert active row (or update row if it possible).
      *
-     * @param  DataAbstract $data
+     * @param  DataInterface $data
      * @param  boolean      $forceUpdate If true, add on duplicate update clause to the insert query.
      * @return boolean State of insert
      * @throws \LogicException
      */
-    public function insert(DataAbstract $data, $forceUpdate = false)
+    public function insert(DataInterface $data, $forceUpdate = false)
     {
         if ($data->exists() && !$data->isUpdated()) {
             return false;
@@ -654,11 +808,11 @@ abstract class MapperAbstract
     /**
      * Update data into database
      *
-     * @param  $data
+     * @param  DataInterface $data
      * @return bool
      * @throws \LogicException
      */
-    public function update(DataAbstract $data)
+    public function update(DataInterface $data)
     {
         if (!$data->isUpdated()) {
             return false;
@@ -766,7 +920,7 @@ abstract class MapperAbstract
 
         $collection = array();
 
-        while (false !== ($row = $statement->fetchObject())) {
+        while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
             $collection[] = $this->newDataInstance($row, true);
         }
 
@@ -795,20 +949,22 @@ abstract class MapperAbstract
         }
 
         //~ Create new object, set data & save it in cache
-        return $this->newDataInstance($statement->fetchObject(), true);
+        return $this->newDataInstance($statement->fetch(PDO::FETCH_OBJ), true);
     }
 
     /**
      * Delete cache
      *
-     * @param  DataAbstract $data
-     * @return self
+     * @param  DataInterface $data
+     * @return $this
      */
-    protected function deleteCache(DataAbstract $data)
+    private function deleteCache(DataInterface $data)
     {
-        if ($this->isCacheEnabled) {
-            $this->cache->remove($data->getCacheKey());
+        if (!$this->isCacheEnabled) {
+            return $this;
         }
+
+        $this->cache->remove($data->getCacheKey());
 
         return $this;
     }
@@ -816,10 +972,10 @@ abstract class MapperAbstract
     /**
      * Get Data object from cache if is enabled.
      *
-     * @param  DataAbstract $data
-     * @return bool|DataAbstract
+     * @param  DataInterface $data
+     * @return bool|DataInterface
      */
-    protected function getCache(DataAbstract $data)
+    private function getCache(DataInterface $data)
     {
         if (!$this->isCacheEnabled) {
             return false;
@@ -831,10 +987,10 @@ abstract class MapperAbstract
     /**
      * Set data into cache if enabled.
      *
-     * @param  DataAbstract $data
-     * @return self
+     * @param  DataInterface $data
+     * @return $this
      */
-    protected function setCache(DataAbstract $data)
+    private function setCache(DataInterface $data)
     {
         if (!$this->isCacheEnabled) {
             return $this;
@@ -848,12 +1004,12 @@ abstract class MapperAbstract
     /**
      * Check if data value is updated or not
      *
-     * @param  DataAbstract $data
+     * @param  DataInterface $data
      * @param  string       $field
      * @return bool
      * @throws \DomainException
      */
-    protected function isDataUpdated($data, $field)
+    private function isDataUpdated($data, $field)
     {
         if (!isset($this->dataNamesMap[$field]['property'])) {
             throw new \DomainException('Field have not mapping with Data instance (field: ' . $field . ')');
@@ -865,14 +1021,14 @@ abstract class MapperAbstract
     }
 
     /**
-     * Get value from DataAbstract instance based on field value
+     * Get value from DataInterface instance based on field value
      *
-     * @param  DataAbstract $data
+     * @param  DataInterface $data
      * @param  string       $field
      * @return mixed
      * @throws \DomainException
      */
-    protected function getDataValue($data, $field)
+    private function getDataValue($data, $field)
     {
         if (!isset($this->dataNamesMap[$field]['get'])) {
             throw new \DomainException('Field have not mapping with Data instance (field: ' . $field . ')');
@@ -884,15 +1040,15 @@ abstract class MapperAbstract
     }
 
     /**
-     * Set value into DataAbstract instance based on field value
+     * Set value into DataInterface instance based on field value
      *
-     * @param  DataAbstract $data
+     * @param  DataInterface $data
      * @param  string       $field
      * @param  mixed        $value
      * @return mixed
      * @throws \DomainException
      */
-    protected function setDataValue($data, $field, $value)
+    private function setDataValue($data, $field, $value)
     {
         if (!isset($this->dataNamesMap[$field]['set'])) {
 
@@ -945,12 +1101,74 @@ abstract class MapperAbstract
     }
 
     /**
-     * Get database config name.
+     * Apply the callback Function to each row, as a Data instance.
+     * Where condition can be add before calling this method and will be applied to filter the data.
+     *
+     * @param  callable $callback Function to apply to each row. Must take a Data instance as unique parameter.
+     * @param  string   $key Primary key to iterate on.
+     * @param  int      $start First index; default 0.
+     * @param  int      $end Last index, -1 picks the max; default -1.
+     * @return void
+     * @throws UnexpectedValueException
+     */
+    public function apply(callable $callback, $key, $start = 0, $end = -1, $batchSize = 10000)
+    {
+        if (!in_array($key, $this->primaryKeys)) {
+            throw new UnexpectedValueException(__METHOD__ . ' | The key must be a primary key.');
+        }
+
+        $statement = $this->db->prepare('SELECT MIN(' . $key . ') AS MIN, MAX(' . $key . ') AS MAX FROM ' . $this->getTable());
+        $statement->execute();
+
+        $bounds = $statement->fetch(PDO::FETCH_OBJ);
+
+        $minIndex          = max($start, $bounds->MIN);
+        $maxIndex          = $end < 0 ? $bounds->MAX : min($end, $bounds->MAX);
+        $currentBatchIndex = $minIndex;
+
+        $wheresCopy = [];
+        if (!empty($this->wheres)) {
+            $wheresCopy = $this->wheres; // Keep a copy of the current WHERE statements, to apply them to each batch.
+        }
+
+        while ($currentBatchIndex <= $maxIndex) {
+
+            $this->wheres = $wheresCopy; // Apply initial WHERE statements.
+            $this->addWhere($key, $currentBatchIndex, '>=')->addWhere($key, $currentBatchIndex + $batchSize, '<');
+
+            $batch = $this->query('SELECT ' . $this->getQueryFields() . ' FROM ' . $this->getTable() . ' ' . $this->getQueryWhere());
+
+            foreach ($batch as $item) {
+                call_user_func($callback, $item);
+            }
+
+            $currentBatchIndex += $batchSize;
+        }
+    }
+
+    /**
+     * Return a map of names (set, get and property) for a db field
+     *
+     * @param  string $field
+     * @return array
+     * @throws OutOfRangeException
+     */
+    public function getNamesMap($field)
+    {
+        if (!isset($this->dataNamesMap[$field])) {
+            throw new OutOfRangeException('Specified field does not exist in data names map');
+        }
+
+        return $this->dataNamesMap[$field];
+    }
+
+    /**
+     * Return the primary keys
      *
      * @return string
      */
-    protected function getDatabaseConfig()
+    public function getPrimaryKeys()
     {
-        return $this->databaseConfig;
+        return $this->primaryKeys;
     }
 }

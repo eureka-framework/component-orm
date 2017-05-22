@@ -14,16 +14,16 @@ namespace Eureka\Component\Orm\Config;
  *
  * @author  Romain Cottard
  */
-class Config extends ConfigAbstract
+class Config extends AbstractConfig
 {
     /**
      * Initialize config.
      *
      * @param  array $config
      * @param  array $global
-     * @return self
+     * @return $this
      */
-    public function init($config, $global)
+    protected function init($config, $global)
     {
         //~ Comment
         $this->author  = $global['comment']['author'];
@@ -32,6 +32,14 @@ class Config extends ConfigAbstract
         //~ Class
         $this->classname = $config['class']['classname'];
         $this->namespace = $config['class']['namespace'];
+
+        //~ Namespace
+        $this->baseNamespaceForData   = $config['namespace']['data'];
+        $this->baseNamespaceForMapper = $config['namespace']['mapper'];
+
+        //~ Path
+        $this->basePathForData   = $config['path']['data'];
+        $this->basePathForMapper = $config['path']['mapper'];
 
         //~ Cache
         $this->cacheName   = $config['cache']['name'];

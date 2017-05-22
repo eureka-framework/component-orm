@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2010-2016 Romain Cottard
+ * Copyright (c) Romain Cottard
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -29,6 +29,34 @@ interface ConfigInterface
      * @return string
      */
     public function getVersion();
+
+    /**
+     * Get base namespace for "data" files for generated files.
+     *
+     * @return string
+     */
+    public function getBaseNamespaceForData();
+
+    /**
+     * Get base namespace for "mapper" files for generated files.
+     *
+     * @return string
+     */
+    public function getBaseNamespaceForMapper();
+
+    /**
+     * Get base path for "data" files for generated files.
+     *
+     * @return string
+     */
+    public function getBasePathForData();
+
+    /**
+     * Get base path for "mapper" files for generated files.
+     *
+     * @return string
+     */
+    public function getBasePathForMapper();
 
     /**
      * Get namespace for generated files.
