@@ -91,7 +91,7 @@ class Generator extends Eurekon\Console
 
         $parametersConnection = Container::getInstance()->get('config')->get($dbNamespace);
         $builder = new Builder();
-        $builder->setDatabase(DriverManager::getConnection($parametersConnection['mqserver'], new Configuration()));
+        $builder->setDatabase(DriverManager::getConnection($parametersConnection[$dbName], new Configuration()));
         $builder->setDirectory($directory);
         $builder->build($configs);
     }
