@@ -161,6 +161,11 @@ class Generator extends Eurekon\Console
                 $data     = $yaml->load($filename);
             }
 
+            //~ If config name setted, use config value instead of key index name.
+            if (isset($joinConfig['config'])) {
+                $joinName = $joinConfig['config'];
+            }
+
             $joinConfig['class'] = $this->findConfigs($filename, $data, $joinName);
         }
 

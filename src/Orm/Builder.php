@@ -159,7 +159,7 @@ class Builder
 
         $this->columns = array();
         while (false !== ($column = $statement->fetchObject())) {
-            $this->columns[] = new Column($column, $this->config->getDbPrefix());
+            $this->columns[$column->Field] = new Column($column, $this->config->getDbPrefix());
         }
     }
 
@@ -285,6 +285,7 @@ class Builder
         foreach ($this->config->getAllJoin() as $name => $join) {
 
             $config = $join['class'];
+            $configName = !empty($join['name']) ? $join['name'] : null;
 
             if (!($config instanceof ConfigInterface)) {
                 throw new \LogicException('Joined class is not an instance of ConfigInterface!');
@@ -293,7 +294,7 @@ class Builder
             $class = $config->getClassname();
 
             if ('one' === $join['type']) {
-                $joinMethod = $this->buildDataJoinsOne($config, $join['keys']);
+                $joinMethod = $this->buildDataJoinsOne($config, $join['keys'], $configName);
             } else {
                 $joinMethod = $this->buildDataJoinsMany($config, $join['keys']);
             }
@@ -313,10 +314,11 @@ class Builder
      *
      * @param  ConfigInterface $config
      * @param  array $joinKeys
+     * @param  string|null $configName
      * @return string
      * @throws \LogicException
      */
-    protected function buildDataJoinsOne(ConfigInterface $config, array $joinKeys)
+    protected function buildDataJoinsOne(ConfigInterface $config, array $joinKeys, $configName)
     {
         //~ Search for keys
         $keys = '';
@@ -326,15 +328,22 @@ class Builder
                 continue;
             }
 
+            if (!is_numeric($joinKeys[$column->getName()])) {
+                $columnAlias = $this->columns[$joinKeys[$column->getName()]];
+            } else {
+                $columnAlias = $column;
+            }
+
             $keys .= '
-                \''  . $column->getName() . '\' => $this->' . $column->getMethodNameGet() . '(),';
+                \''  . $column->getName() . '\' => $this->' . $columnAlias->getMethodNameGet() . '(),';
         }
 
         if (empty($keys)) {
             throw new \LogicException('Empty keys list for Mapper::findByKeys() method !');
         }
+        $configName = (!empty($configName) ? $configName : $config->getClassname());
 
-        $propertyCacheName = 'joinOneCache' . $config->getClassname();
+        $propertyCacheName = 'joinOneCache' . $configName;
         $this->vars['properties'] .= '
 
     /**
@@ -350,7 +359,7 @@ class Builder
      * @param  bool $isForceReload
      * @return ' . $config->getClassname() . '
      */
-    public function get' . $config->getClassname() . '($isForceReload = false)
+    public function get' . $configName . '($isForceReload = false)
     {
         if ($isForceReload || null === $this->' . $propertyCacheName . ') {
             $mapper = new ' . $config->getClassname() . 'Mapper($this->dependencyContainer->getDatabase(\'' . $config->getDbConfig() . '\'));
