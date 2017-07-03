@@ -945,6 +945,37 @@ abstract class MapperAbstract
     }
 
     /**
+     * Get insert query.
+     *
+     * @param  Image
+     * @return string
+     */
+    public function getQueryInsert(DataAbstract $data)
+    {
+        //~ Reset binded fields
+        $this->binds = array();
+
+        $querySet = $this->getQueryFieldsSet($data, false);
+        if (empty($querySet)) {
+            throw new \LogicException(__METHOD__ . '|Set clause cannot be empty !');
+        } else {
+            $querySet = ' ' . $querySet;
+        }
+
+        foreach ($this->binds as $key => &$val) {
+            if (null === $val) {
+                $val = 'NULL';
+            } else {
+                $val = '"' . $val . '"';
+            }
+        }
+
+        $query = 'INSERT INTO ' . $this->getTable() . $querySet;
+
+        return (string) str_replace(array_keys($this->binds), array_values($this->binds), $query);
+    }
+
+    /**
      * Get database config name.
      *
      * @return string
