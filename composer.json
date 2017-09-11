@@ -14,7 +14,7 @@
 
   "autoload": {
     "psr-4": {
-      "Eureka\\Component\\Orm\\": "./src/Orm/"
+      "Eureka\\Component\\Orm\\": "./src/"
     }
   },
 
@@ -24,7 +24,9 @@
     "eureka/component-container": "^1.0",
     "eureka/component-database": "^1.0",
     "eureka/component-dependency": "^1.0",
-    "eureka/component-yaml": "^1.0"
+    "eureka/component-yaml": "^1.0",
+
+    "doctrine/dbal": "^2.5"
   }
 
 }
