@@ -185,9 +185,9 @@ abstract class AbstractData implements DataInterface
     protected function getConnection($config)
     {
         if (!isset(self::$connections[$config])) {
-            self::$connections[$config] = new Connection(Container::getInstance()
-                ->get('global.database')
-                ->getConnection($config));
+            self::$connections[$config] = Container::getInstance()
+                ->get('database')
+                ->getConnection($config);
         }
 
         return self::$connections[$config];

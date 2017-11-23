@@ -12,6 +12,7 @@ namespace Eureka\Component\Orm\DataMapper;
 use Eureka\Component\Cache\CacheWrapperAbstract as Cache;
 use Eureka\Component\Database\ExceptionNoData;
 use Eureka\Component\Database\Connection;
+use Eureka\Component\Orm\Exception;
 
 /**
  * DataMapper Mapper abstract class.
@@ -193,8 +194,8 @@ abstract class AbstractMapper
      */
     public function addIn($field, $values, $whereConcat = 'AND', $not = false)
     {
-        if (!is_array($values)) {
-            return $this;
+        if (!is_array($values) || empty($values)) {
+            throw new Exception\EmptyInValuesException();
         }
 
         $field = (0 < count($this->wheres) ? ' ' . $whereConcat . ' ' . $field : $field);
@@ -202,8 +203,9 @@ abstract class AbstractMapper
         //~ Bind values (more safety)
         $index  = 1;
         $fields = array();
+        $prefix = ':' . $field . '_';
         foreach ($values as $value) {
-            $name = ':value_' . $index;
+            $name = $prefix . $index;
 
             $fields[]           = $name;
             $this->binds[$name] = (string) $value;
@@ -211,7 +213,7 @@ abstract class AbstractMapper
             $index++;
         }
 
-        $this->wheres[] = $field . ($not ? ' NOT' : '') . ' IN (' . implode(',', $fields) . ')';
+        $this->wheres[] = '`' . $field . '`' . ($not ? ' NOT' : '') . ' IN (' . implode(',', $fields) . ')';
 
         return $this;
     }
@@ -338,6 +340,35 @@ abstract class AbstractMapper
     public function getLastId()
     {
         return $this->lastId;
+    }
+
+    /**
+     *
+     * @param  \Eureka\Component\Orm\DataMapper\DataInterface $data
+     * @return string
+     */
+    public function getQueryInsert(DataInterface $data)
+    {
+        //~ List of fields to update.
+        $queryFields = array();
+
+        //~ Check for updated fields.
+        foreach ($this->fields as $field) {
+            $queryFields[] = $field . ' = ' . $this->connection->quote($this->getDataValue($data, $field));
+        }
+
+        $querySet = '';
+        if (!empty($queryFields)) {
+            $querySet = 'SET ' . implode(', ', $queryFields);
+        }
+
+        if (empty($querySet)) {
+            throw new \LogicException(__METHOD__ . '|Set clause cannot be empty !');
+        } else {
+            $querySet = ' ' . $querySet;
+        }
+
+        return $query = 'INSERT INTO ' . $this->getTable() . $querySet;
     }
 
     /**

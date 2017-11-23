@@ -66,7 +66,6 @@ class Generator extends Eurekon\Console
 
         $directory  = realpath(trim(rtrim($directory, '/')));
         $configName = trim($configName);
-        //$filter     = !empty($configName) ? $configName . '.yml' : '*.yml';
 
         $files = glob($directory . DIRECTORY_SEPARATOR . '*.yml');
 
@@ -85,21 +84,18 @@ class Generator extends Eurekon\Console
 
             $data = $this->replace($file, $data);
 
-            foreach ($data['path'] as $path) {
-                if (!is_dir($path) && !mkdir($path, 0755, true)) {
-                    throw new \RuntimeException('Cannot created output directory! (dir:' . $path . ')');
-                }
-            }
-
             $configs['configs'][basename($file, '.yml')] = $data;
         }
+
+        $this->replaceReferences($configs);
+
         $configs = $this->findConfigs($configs, $configName);
 
         $database = Database::getInstance();
         $database->setConfig(Container::getInstance()->get('config')->get($dbNamespace));
 
         (new Builder())->setDatabase($database->getConnection($dbName))
-            ->setRootDirectory('/home/romain/moon/dev/allinwedding')
+            ->setRootDirectory(Container::getInstance()->get('config')->get('global.app.root'))
             ->build($configs);
     }
 
@@ -116,6 +112,13 @@ class Generator extends Eurekon\Console
         $configs = [];
 
         foreach ($data['configs'] as $name => $configValues) {
+
+            foreach ($configValues['path'] as $path) {
+                if (!is_dir($path) && !mkdir($path, 0755, true)) {
+                    throw new \RuntimeException('Cannot created output directory! (dir:' . $path . ')');
+                }
+            }
+
             $configs[$name]    = new Config($configValues); //~ Final configs, can be updated
             $baseConfig[$name] = new Config($configValues); //~ Use for join, no update on those instances
         }
@@ -214,5 +217,38 @@ class Generator extends Eurekon\Console
         }
 
         return $config;
+    }
+
+
+    /**
+     * Replace references values in all configurations.
+     *
+     * @param  array $config
+     * @return void
+     */
+    private function replaceReferences(array &$config)
+    {
+        foreach ($config as $key => &$value) {
+            if (is_array($value)) {
+                $this->replaceReferences($value);
+                continue;
+            }
+
+            //~ Not string, skip
+            if (!is_string($value)) {
+                continue;
+            }
+
+            //~ Value not %my.reference.config%, skip
+            if (!(bool) preg_match('`%(.*?)%`', $value, $matches)) {
+                continue;
+            }
+
+            $referenceValue = Container::getInstance()->get('config')->get($matches[1]);
+
+            if ($referenceValue !== null) {
+                $value = preg_replace('`(%.*?%)`', $referenceValue, $value);
+            }
+        }
     }
 }
