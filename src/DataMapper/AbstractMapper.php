@@ -198,8 +198,6 @@ abstract class AbstractMapper
             throw new Exception\EmptyInValuesException();
         }
 
-        $field = (0 < count($this->wheres) ? ' ' . $whereConcat . ' ' . $field : $field);
-
         //~ Bind values (more safety)
         $index  = 1;
         $fields = array();
@@ -213,7 +211,9 @@ abstract class AbstractMapper
             $index++;
         }
 
-        $this->wheres[] = '`' . $field . '`' . ($not ? ' NOT' : '') . ' IN (' . implode(',', $fields) . ')';
+        $field = (0 < count($this->wheres) ? ' ' . $whereConcat . ' ' : '') . '`' . $field . '`';
+
+        $this->wheres[] = $field . ($not ? ' NOT' : '') . ' IN (' . implode(',', $fields) . ')';
 
         return $this;
     }
@@ -344,31 +344,78 @@ abstract class AbstractMapper
 
     /**
      *
-     * @param  \Eureka\Component\Orm\DataMapper\DataInterface $data
+     * @param  \Eureka\Component\Orm\DataMapper\AbstractData $data
      * @return string
      */
-    public function getQueryInsert(DataInterface $data)
+    public function getQueryInsert(AbstractData $data)
     {
         //~ List of fields to update.
         $queryFields = array();
 
         //~ Check for updated fields.
         foreach ($this->fields as $field) {
-            $queryFields[] = $field . ' = ' . $this->connection->quote($this->getDataValue($data, $field));
+
+            #~ Skip auto increment keys
+            try {
+                $map = $this->getNamesMap($field);
+
+                if ($data->hasAutoIncrement() && $map['property'] === 'id') {
+                    continue;
+                }
+            } catch (\OutOfRangeException $exception) {
+                continue;
+            }
+
+            $queryFields[] = '`' . $field . '` = ' . $this->connection->quote($this->getDataValue($data, $field));
         }
 
-        $querySet = '';
-        if (!empty($queryFields)) {
-            $querySet = 'SET ' . implode(', ', $queryFields);
-        }
-
-        if (empty($querySet)) {
+        if (empty($queryFields)) {
             throw new \LogicException(__METHOD__ . '|Set clause cannot be empty !');
-        } else {
-            $querySet = ' ' . $querySet;
         }
+
+        $querySet = ' SET ' . implode(', ', $queryFields);
 
         return $query = 'INSERT INTO ' . $this->getTable() . $querySet;
+    }
+
+    /**
+     *
+     * @param  \Eureka\Component\Orm\DataMapper\DataInterface $data
+     * @return string
+     */
+    public function getQueryUpdate(DataInterface $data)
+    {
+        //~ List of fields to update.
+        $queryFields = array();
+        $primaryKeys = $this->getPrimaryKeys();
+
+        //~ Check for updated fields.
+        foreach ($this->fields as $field) {
+            if (in_array($field, $primaryKeys)) {
+                continue;
+            }
+            $queryFields[] = '`' . $field . '` = ' . $this->connection->quote($this->getDataValue($data, $field));
+        }
+
+        if (empty($queryFields)) {
+            throw new \LogicException(__METHOD__ . '|Set clause cannot be empty !');
+        }
+
+        $querySet = ' SET ' . implode(', ', $queryFields);
+
+        //~ Check for keys
+        $queryFields = [];
+        foreach ($primaryKeys as $key) {
+            $queryFields[] = '`' . $key . '` = ' . $this->connection->quote($this->getDataValue($data, $key));
+        }
+
+        if (empty($queryFields)) {
+            throw new \LogicException('No primary(ies) key(s) defined for an update');
+        }
+
+        $queryWhere = ' WHERE ' . implode(' AND ', $queryFields);
+
+        return $query = 'UPDATE ' . $this->getTable() . $querySet . $queryWhere;
     }
 
     /**
@@ -1134,12 +1181,12 @@ abstract class AbstractMapper
      *
      * @param  string $field
      * @return array
-     * @throws OutOfRangeException
+     * @throws \OutOfRangeException
      */
     public function getNamesMap($field)
     {
         if (!isset($this->dataNamesMap[$field])) {
-            throw new OutOfRangeException('Specified field does not exist in data names map');
+            throw new \OutOfRangeException('Specified field does not exist in data names map');
         }
 
         return $this->dataNamesMap[$field];
@@ -1148,7 +1195,7 @@ abstract class AbstractMapper
     /**
      * Return the primary keys
      *
-     * @return string
+     * @return string[]
      */
     public function getPrimaryKeys()
     {

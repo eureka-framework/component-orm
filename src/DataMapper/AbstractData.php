@@ -180,7 +180,8 @@ abstract class AbstractData implements DataInterface
 
     /**
      * @param  string $config
-     * @return DatabaseInterface
+     * @return Connection
+     * @throws \Eureka\Component\Container\Exception\NotFoundException
      */
     protected function getConnection($config)
     {
@@ -199,6 +200,7 @@ abstract class AbstractData implements DataInterface
      * in code.
      *
      * @return $this
+     * @throws \Eureka\Component\Container\Exception\NotFoundException
      */
     protected function initMappers()
     {
@@ -224,12 +226,12 @@ abstract class AbstractData implements DataInterface
      */
     public function toArray()
     {
-        static $exludedProperties = ['db', 'hasAutoIncrement', 'exists', 'updated'];
+        static $excludedProperties = ['db', 'hasAutoIncrement', 'exists', 'updated'];
 
         $array = [];
 
         foreach ($this as $name => $value) {
-            if (in_array($name, $exludedProperties)) {
+            if (in_array($name, $excludedProperties)) {
                 continue;
             }
 
