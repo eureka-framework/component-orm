@@ -9,8 +9,6 @@
 
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Orm\Type;
-
 /**
  * Sql column data class
  *
@@ -21,8 +19,8 @@ class Column
     /** @var string $name Column name */
     protected $name = '';
 
-    /** @var string $dbPrefix Column prefix */
-    protected $dbPrefix = '';
+    /** @var string[] $dbPrefixes Column prefix */
+    protected $dbPrefixes = [];
 
     /** @var mixed $default Default value. */
     protected $default = null;
@@ -46,12 +44,12 @@ class Column
      * Column constructor.
      *
      * @param \stdClass $column
-     * @param string $dbPrefix
+     * @param string[]|string $dbPrefixes
      */
-    public function __construct(\stdClass $column, $dbPrefix = '')
+    public function __construct(\stdClass $column, $dbPrefixes = [])
     {
         $this->setData($column);
-        $this->dbPrefix = $dbPrefix;
+        $this->dbPrefixes = is_string($dbPrefixes) ? [$dbPrefixes] : $dbPrefixes;
     }
 
     /**
@@ -151,9 +149,14 @@ class Column
      */
     public function getName($withoutPrefix = false)
     {
+        if (!$withoutPrefix) {
+            return $this->name;
+        }
         $name = $this->name;
-        if ($withoutPrefix && stripos($name, $this->dbPrefix) === 0) {
-            $name = substr($name, strlen($this->dbPrefix));
+        foreach ($this->dbPrefixes as $dbPrefixes) {
+            if (stripos($name, $dbPrefixes . '_') === 0) {
+                return substr($name, strlen($dbPrefixes));
+            }
         }
 
         return $name;
@@ -389,7 +392,7 @@ class Column
      */
     protected function setDefault($default)
     {
-        if ($this->isNullable() && $default === null || ($default === 'CURRENT_TIMESTAMP' && $this->getType() instanceof TypeTimestamp)) {
+        if ($this->isNullable() && $default === null || ($default === 'CURRENT_TIMESTAMP' && $this->getType() instanceof Type\TypeTimestamp)) {
             $this->default = 'null';
 
             return $this;

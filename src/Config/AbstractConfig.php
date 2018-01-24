@@ -12,7 +12,7 @@ namespace Eureka\Component\Orm\Config;
 /**
  * Abstract Data Mapper config class for db/table orm generator.
  *
- * @author  Romain Cottard
+ * @author Romain Cottard
  */
 abstract class AbstractConfig implements ConfigInterface
 {
@@ -22,7 +22,7 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var string $author Comment author name <email> */
     protected $author = '';
 
-    /** @var string $copyright Comment copyright entity name.s */
+    /** @var string $copyright Header file copyright */
     protected $copyright = '';
 
     /** @var string $classname Base class name of generated classes. */
@@ -48,9 +48,6 @@ abstract class AbstractConfig implements ConfigInterface
 
     /** @var string $dbPrefix Table prefix to remove from method name. */
     protected $dbPrefix = '';
-
-    /** @var string $cacheName Cache name config. */
-    protected $cacheName = '';
 
     /** @var string $cachePrefix Cache name prefix. */
     protected $cachePrefix = '';
@@ -89,23 +86,13 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get Header file author.
+     * Get Header file copyright.
      *
      * @return string
      */
     public function getCopyright()
     {
         return $this->copyright;
-    }
-
-    /**
-     * Get Header file version
-     *
-     * @return string
-     */
-    public function getVersion()
-    {
-        return $this->version;
     }
 
     /**
@@ -159,23 +146,13 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get cache name to use.
-     *
-     * @return string
-     */
-    public function getCacheName()
-    {
-        return $this->cacheName;
-    }
-
-    /**
      * Get cache prefix for main data key.
      *
      * @return string
      */
     public function getCachePrefix()
     {
-        return $this->cachePrefix;
+        return strtr(strtolower($this->cachePrefix), '_', '.');
     }
 
     /**
@@ -232,48 +209,48 @@ abstract class AbstractConfig implements ConfigInterface
      * Check if config has required values.
      *
      * @return $this
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     protected function validate()
     {
         if (empty($this->author)) {
-            throw new \Exception('Author is empty!');
+            throw new \InvalidArgumentException('Author is empty!');
+        }
+
+        if (empty($this->copyright)) {
+            throw new \InvalidArgumentException('Copyright is empty!');
         }
 
         if (empty($this->classname)) {
-            throw new \Exception('Class name is empty!');
+            throw new \InvalidArgumentException('Class name is empty!');
         }
 
         if (empty($this->dbConfig)) {
-            throw new \Exception('Database config name is empty!');
+            throw new \InvalidArgumentException('Database config name is empty!');
         }
 
         if (empty($this->dbTable)) {
-            throw new \Exception('Database table name is empty!');
+            throw new \InvalidArgumentException('Database table name is empty!');
         }
 
-        /*if (empty($this->cacheName)) {
-            throw new \Exception('Cache name is empty!');
-        }*/
-
         if (empty($this->cachePrefix)) {
-            throw new \Exception('Cache prefix is empty!');
+            throw new \InvalidArgumentException('Cache prefix is empty!');
         }
 
         if (empty($this->baseNamespaceForData)) {
-            throw new \Exception('Data namespace is empty!');
+            throw new \InvalidArgumentException('Data namespace is empty!');
         }
 
         if (empty($this->baseNamespaceForMapper)) {
-            throw new \Exception('Mapper namespace is empty!');
+            throw new \InvalidArgumentException('Mapper namespace is empty!');
         }
 
         if (empty($this->basePathForData)) {
-            throw new \Exception('Data path is empty!');
+            throw new \InvalidArgumentException('Data path is empty!');
         }
 
         if (empty($this->basePathForMapper)) {
-            throw new \Exception('Mapper path is empty!');
+            throw new \InvalidArgumentException('Mapper path is empty!');
         }
 
         return $this;

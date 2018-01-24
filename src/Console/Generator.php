@@ -11,9 +11,8 @@ namespace Eureka\Component\Orm\Console;
 
 use Eureka\Component\Container\Container;
 use Eureka\Component\Database\Database;
-use Eureka\Component\Orm\Builder;
+use Eureka\Component\Orm\Generator as GeneratorService;
 use Eureka\Component\Orm\Config\Config;
-use Eureka\Component\Config\Config as Conf;
 use Eureka\Component\Yaml\Yaml;
 use Eureka\Eurekon;
 
@@ -42,7 +41,7 @@ class Generator extends Eurekon\Console
         Eurekon\Out::std($style->color('fg', Eurekon\Style::COLOR_GREEN)->get());
         Eurekon\Out::std('');
 
-        $help = new Eurekon\Help('...', true);
+        $help = new Eurekon\Help('...');
         $help->addArgument('', 'db-namespace', 'Config namespace (default: global.database)', true, false);
         $help->addArgument('', 'db-name', 'Database config name', true, false);
         $help->addArgument('', 'config-dir', 'Config directory to inspect for config file', true, true);
@@ -55,6 +54,7 @@ class Generator extends Eurekon\Console
      * Run method.
      *
      * @return void
+     * @throws \Exception
      */
     public function run()
     {
@@ -94,7 +94,7 @@ class Generator extends Eurekon\Console
         $database = Database::getInstance();
         $database->setConfig(Container::getInstance()->get('config')->get($dbNamespace));
 
-        (new Builder())->setDatabase($database->getConnection($dbName))
+        (new GeneratorService())->setConnection($database->getConnection($dbName))
             ->setRootDirectory(Container::getInstance()->get('config')->get('global.app.root'))
             ->build($configs);
     }
@@ -110,6 +110,7 @@ class Generator extends Eurekon\Console
     {
         /** @var Config[] $configs */
         $configs = [];
+        $baseConfig = [];
 
         foreach ($data['configs'] as $name => $configValues) {
 
@@ -225,6 +226,7 @@ class Generator extends Eurekon\Console
      *
      * @param  array $config
      * @return void
+     * @throws \Eureka\Component\Container\Exception\NotFoundException
      */
     private function replaceReferences(array &$config)
     {

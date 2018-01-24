@@ -12,7 +12,7 @@ namespace Eureka\Component\Orm\Config;
 /**
  * Data Mapper config interface for db/table orm generator.
  *
- * @author  Romain Cottard
+ * @author Romain Cottard
  */
 interface ConfigInterface
 {
@@ -24,18 +24,11 @@ interface ConfigInterface
     public function getAuthor();
 
     /**
-     * Get Header file copyright entity name.
+     * Get Header file copyright
      *
      * @return string
      */
     public function getCopyright();
-
-    /**
-     * Get Header file version
-     *
-     * @return string
-     */
-    public function getVersion();
 
     /**
      * Get base namespace for "data" files for generated files.
@@ -99,13 +92,6 @@ interface ConfigInterface
      * @return bool
      */
     public function hasCache();
-
-    /**
-     * Get cache name to use.
-     *
-     * @return string
-     */
-    public function getCacheName();
 
     /**
      * Get cache prefix for main data key.

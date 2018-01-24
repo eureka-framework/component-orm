@@ -15,7 +15,7 @@ use Eureka\Component\Database\Connection;
 /**
  * DataMapper Data abstract class.
  *
- * @author  Romain Cottard
+ * @author Romain Cottard
  */
 abstract class AbstractData implements DataInterface
 {
@@ -53,12 +53,6 @@ abstract class AbstractData implements DataInterface
      */
     public function setAutoIncrementId($id)
     {
-        $id = (int) $id;
-
-        if ($id <= 0) {
-            throw new \UnderflowException('Auto-incremented ID must be greater than 0!');
-        }
-
         return $this;
     }
 
@@ -135,8 +129,6 @@ abstract class AbstractData implements DataInterface
 
     /**
      * Empties the join* fields
-     *
-     * @return void
      */
     public function resetLazyLoadedData()
     {
@@ -219,25 +211,4 @@ abstract class AbstractData implements DataInterface
         return $this;
     }
 
-    /**
-     * Get object as array.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        static $excludedProperties = ['db', 'hasAutoIncrement', 'exists', 'updated'];
-
-        $array = [];
-
-        foreach ($this as $name => $value) {
-            if (in_array($name, $excludedProperties)) {
-                continue;
-            }
-
-            $array[$name] = $value;
-        }
-
-        return $array;
-    }
 }

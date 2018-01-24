@@ -20,7 +20,6 @@ class Config extends AbstractConfig
      * Initialize config.
      *
      * @param  array $config
-     * @param  array $global
      * @return $this
      */
     protected function init($config)

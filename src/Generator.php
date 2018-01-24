@@ -9,17 +9,14 @@
 
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Database\Database;
 use Eureka\Component\Database\Connection;
-use \LogicException;
-use \RuntimeException;
 
 /**
  * Class to generate model classes. Better way to manipulate table !
  *
  * @author Romain Cottard
  */
-class Builder
+class Generator
 {
     /** @var Config\ConfigInterface $config ORM configuration object. */
     protected $config = null;
@@ -34,7 +31,10 @@ class Builder
     protected $verbose = true;
 
     /** @var string $rootDir */
-    protected $rootDir = __DIR__ . '/../../../';
+    protected $rootDir = __DIR__ . '/../../..';
+
+    /** @var Connection $connection */
+    protected $connection = null;
 
     /**
      * Set verbose mode
@@ -65,12 +65,12 @@ class Builder
     /**
      * Set database connection.
      *
-     * @param  Connection $db
+     * @param  Connection $connection
      * @return $this
      */
-    public function setDatabase(Connection $db)
+    public function setConnection(Connection $connection)
     {
-        $this->db = $db;
+        $this->connection = $connection;
 
         return $this;
     }
@@ -124,7 +124,7 @@ class Builder
      */
     protected function loadColumns()
     {
-        $statement = $this->db->query('SHOW FULL COLUMNS FROM ' . $this->config->getDbTable());
+        $statement = $this->connection->query('SHOW FULL COLUMNS FROM ' . $this->config->getDbTable());
 
         $this->columns = [];
         while (false !== ($column = $statement->fetch(Connection::FETCH_OBJ))) {
@@ -210,7 +210,7 @@ class Builder
             }
         }
 
-        $key = "'" . $this->config->getCachePrefix() . "_data_' . " . implode(" . '_' . ", $keys);
+        $key = "'orm." . $this->config->getCachePrefix() . ".' . " . implode(" . '.' . ", $keys);
 
         $this->vars['cache_key'] = '
     /**
@@ -246,7 +246,7 @@ class Builder
      * Build join getters
      *
      * @return void
-     * @throws LogicException
+     * @throws \LogicException
      */
     protected function buildDataJoins()
     {
@@ -259,32 +259,32 @@ class Builder
             $config = $join['instance'];
 
             if (!($config instanceof Config\ConfigInterface)) {
-                throw new LogicException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')');
+                throw new \LogicException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')');
             }
 
             $class = $config->getClassname();
             $name  = (!empty($join['name']) ? $join['name'] : $class);
 
-            if ('one' === $join['type']) {
-                $joinMethod                           = $this->buildDataJoinsOne($config, $name, $join['keys']);
+            if ('one' === $join['join']) {
+                $joinMethod = $this->buildDataJoinsOne($config, $name, $join['keys']);
                 $joinsMappers['get' . ucfirst($name)] = [
                     'config' => $config->getDbConfig(),
                     'class'  => '\\' . $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper::class',
                 ];
             } else {
-                $joinMethod                              = $this->buildDataJoinsMany($config, $name, $join['keys']);
+                $joinMethod = $this->buildDataJoinsMany($config, $name, $join['keys']);
                 $joinsMappers['getAll' . ucfirst($name)] = [
                     'config' => $config->getDbConfig(),
                     'class'  => '\\' . $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper::class',
                 ];
             }
-            $joins[$join['type']][] = $joinMethod;
+            $joins[$join['join']][] = $joinMethod;
         }
 
         $joinMappersProperty = '';
         foreach ($joinsMappers as $joinsMapperKey => $joinsMapperData) {
-            $joinMapperConfig    = $joinsMapperData['config'];
-            $joinMapperClass     = $joinsMapperData['class'];
+            $joinMapperConfig = $joinsMapperData['config'];
+            $joinMapperClass  = $joinsMapperData['class'];
             $joinMappersProperty .= "\n        '${joinsMapperKey}' => ['config' => '${joinMapperConfig}', 'class' => ${joinMapperClass}],";
         }
 
@@ -304,7 +304,7 @@ class Builder
      * @param  string $name
      * @param  array $joinKeys
      * @return string
-     * @throws LogicException
+     * @throws \LogicException
      */
     protected function buildDataJoinsOne(Config\ConfigInterface $config, $name, array $joinKeys)
     {
@@ -325,7 +325,7 @@ class Builder
         }
 
         if (empty($keys)) {
-            throw new LogicException('Empty keys list for Mapper::findByKeys() method !');
+            throw new \LogicException('Empty keys list for Mapper::findByKeys() method !');
         }
 
         $propertyCacheName        = 'joinOneCache' . ucfirst($name);
@@ -334,7 +334,7 @@ class Builder
         $this->vars['properties'] .= '
 
     /** @var ' . $dataClassName . ' $' . $propertyCacheName . ' Cache property for ' . $propertyCacheName . ' */
-     protected $' . $propertyCacheName . ' = null;';
+    protected $' . $propertyCacheName . ' = null;';
 
         //~ Generate method
         return '
@@ -381,7 +381,7 @@ class Builder
      * @param  string $name Config name.
      * @param  array $joinKeys List of joined configs
      * @return string
-     * @throws LogicException
+     * @throws \LogicException
      */
     protected function buildDataJoinsMany(Config\ConfigInterface $config, $name, array $joinKeys)
     {
@@ -402,7 +402,7 @@ class Builder
         }
 
         if (empty($keys)) {
-            throw new LogicException('Empty keys list for join all method !');
+            throw new \LogicException('Empty keys list for join all method !');
         }
 
         $propertyCacheName        = 'joinManyCache' . ucfirst($name);
@@ -460,22 +460,10 @@ class Builder
 
         $this->display('  > build    [  0%]: field...        ' . PHP_EOL);
         $this->buildMapperFields();
-        $this->display('  > build    [ 25%]: primary keys... ' . PHP_EOL);
+        $this->display('  > build    [ 50%]: primary keys... ' . PHP_EOL);
         $this->buildMapperPrimaryKeys();
-        $this->display('  > build    [ 50%]: cache...        ' . PHP_EOL);
-        $this->buildMapperCache();
         $this->display('  > build    [100%]: done !          ' . PHP_EOL);
         $this->display(PHP_EOL);
-    }
-
-    /**
-     * Build cache var
-     *
-     * @return void
-     */
-    protected function buildMapperCache()
-    {
-        $this->vars['cache_name'] = (string) $this->config->getCacheName();
     }
 
     /**
@@ -544,16 +532,16 @@ class Builder
      * Generate main class model.
      *
      * @return void
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     protected function generateDataFiles()
     {
-        $dir = $this->rootDir . '/' . $this->config->getBasePathForData();
+        $dir = $this->rootDir . '/' . $this->config->getBasePathForData() . '/';
 
         $dirAbstract = $dir . '/Abstracts';
 
         if (!is_dir($dirAbstract) && false === mkdir($dirAbstract, 0755, true)) {
-            throw new RuntimeException('Cannot create directory: ' . $dir);
+            throw new \RuntimeException('Cannot create directory: ' . $dir);
         }
 
         $this->generateDataFileAbstract($dirAbstract);
@@ -565,14 +553,14 @@ class Builder
      *
      * @param  string $dir Directory for class
      * @return void
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     protected function generateDataFileAbstract($dir)
     {
         $file = $dir . '/Abstract' . $this->config->getClassname() . '.php';
 
         if (!is_readable($file) && false === file_put_contents($file, '')) {
-            throw new RuntimeException('Cannot create empty class file: ' . $file);
+            throw new \RuntimeException('Cannot create empty class file: ' . $file);
         }
 
         $namespace = $this->config->getBaseNamespaceForData() . '\\Abstracts';
@@ -588,7 +576,8 @@ class Builder
 
 namespace ' . $namespace . ';
 
-use Eureka\Component\Orm\DataMapper\AbstractData;' . (strlen($this->vars['joins_use']) ? '
+use ' . __NAMESPACE__ . '\DataMapper\AbstractData;
+use ' . __NAMESPACE__ . '\Exception\UndefinedMapperException;' . (strlen($this->vars['joins_use']) ? '
 ' : '') . $this->vars['joins_use'] . '
 
 /**
@@ -597,7 +586,7 @@ use Eureka\Component\Orm\DataMapper\AbstractData;' . (strlen($this->vars['joins_
  * THIS FILE IS OVERWRITTEN WHEN THE ORM SCRIPT GENERATOR IS RUN.
  * You can add you specific code in child class: ' . $this->config->getClassname() . '
  *
- * @author  ' . $this->config->getAuthor() . '
+ * @author ' . $this->config->getAuthor() . '
  */
 abstract class Abstract' . $this->config->getClassname() . ' extends AbstractData
 {' . $this->vars['properties'] . '
@@ -609,7 +598,7 @@ abstract class Abstract' . $this->config->getClassname() . ' extends AbstractDat
         $content = str_replace("\r\n", "\n", $content);
 
         if (false === file_put_contents($file, $content)) {
-            throw new RuntimeException('Unable to write file content! (file: ' . $file . ')');
+            throw new \RuntimeException('Unable to write file content! (file: ' . $file . ')');
         }
     }
 
@@ -629,7 +618,7 @@ abstract class Abstract' . $this->config->getClassname() . ' extends AbstractDat
         }
 
         if (!is_readable($file) && false === file_put_contents($file, '')) {
-            throw new RuntimeException('Cannot create empty class file: ' . $file);
+            throw new \RuntimeException('Cannot create empty class file: ' . $file);
         }
 
         $namespace = $this->config->getBaseNamespaceForData();
@@ -650,14 +639,14 @@ namespace ' . $namespace . ';
 /**
  * DataMapper Data class for table "' . $this->config->getDbTable() . '"
  *
- * @author  ' . $this->config->getAuthor() . '
+ * @author ' . $this->config->getAuthor() . '
  */
 class ' . $this->config->getClassname() . ' extends ' . $extends . '
 {
 }
 ';
         if (false === file_put_contents($file, $content)) {
-            throw new RuntimeException('Unable to write file content! (file: ' . $file . ')');
+            throw new \RuntimeException('Unable to write file content! (file: ' . $file . ')');
         }
     }
 
@@ -665,7 +654,7 @@ class ' . $this->config->getClassname() . ' extends ' . $extends . '
      * Generate main class model.
      *
      * @return void
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     protected function generateMapperFiles()
     {
@@ -674,7 +663,7 @@ class ' . $this->config->getClassname() . ' extends ' . $extends . '
         $dirAbstract = $dir . '/Abstracts';
 
         if (!is_dir($dirAbstract) && false === mkdir($dirAbstract, 0755, true)) {
-            throw new RuntimeException('Cannot create directory: ' . $dir);
+            throw new \RuntimeException('Cannot create directory: ' . $dir);
         }
 
         $this->generateMapperFileAbstract($dirAbstract);
@@ -686,14 +675,14 @@ class ' . $this->config->getClassname() . ' extends ' . $extends . '
      *
      * @param  string $dir Directory for class
      * @return void
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     protected function generateMapperFileAbstract($dir)
     {
         $file = $dir . '/Abstract' . $this->config->getClassname() . 'Mapper.php';
 
         if (!is_readable($file) && false === file_put_contents($file, '')) {
-            throw new RuntimeException('Cannot create empty class file: ' . $file);
+            throw new \RuntimeException('Cannot create empty class file: ' . $file);
         }
 
         $namespace = $this->config->getBaseNamespaceForMapper() . '\\Abstracts';
@@ -709,17 +698,17 @@ class ' . $this->config->getClassname() . ' extends ' . $extends . '
 
 namespace ' . $namespace . ';
 
-use Eureka\Component\Orm\DataMapper\AbstractMapper;
+use ' . __NAMESPACE__ . '\DataMapper\AbstractMapper;
 use ' . $this->config->getBaseNamespaceForData() . '\\' . $this->config->getClassname() . ';
 
 /**
  * Abstract ' . $this->config->getClassname() . ' mapper class.
  *
  * /!\ AUTO GENERATED FILE. DO NOT EDIT THIS FILE.
- * THIS FILE IS OVERWRITTEN WHEN THE ORM SCRIPT GENERATOR IS RAN.
+ * THIS FILE IS OVERWRITTEN WHEN THE ORM SCRIPT GENERATOR IS RUN.
  * You can add you specific code in child class: ' . $this->config->getClassname() . '
  *
- * @author  ' . $this->config->getAuthor() . '
+ * @author ' . $this->config->getAuthor() . '
  */
 abstract class Abstract' . $this->config->getClassname() . 'Mapper extends AbstractMapper
 {
@@ -744,9 +733,6 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
 ' . $this->vars['data_names_map'] . '
     ];
 
-    /** @var string $cacheName Name of cache config to use. */
-    protected $cacheName = \'' . $this->config->getCacheName() . '\';
-
     /** @var bool $isCacheEnabled If cache is enable or not by default. */
     protected $isCacheEnabled = ' . var_export($this->config->hasCache(), true) . ';
 
@@ -762,14 +748,14 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
     }
 
     /**
-     * Get first row corresponding of the primary keys.
+     * Get first row corresponding of the keys.
      *
-     * @param  string[] $primaryKeys
+     * @param  string[] $keys
      * @return ' . $this->config->getClassname() . '
      */
-    public function findByKeys($primaryKeys)
+    public function findByKeys(array $keys)
     {
-        return parent::findByKeys($primaryKeys);
+        return parent::findByKeys($keys);
     }
 
     /**
@@ -817,7 +803,7 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
 }
 ';
         if (false === file_put_contents($file, $content)) {
-            throw new RuntimeException('Unable to write file content! (file: ' . $file . ')');
+            throw new \RuntimeException('Unable to write file content! (file: ' . $file . ')');
         }
     }
 
@@ -826,7 +812,7 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
      *
      * @param  string $dir Directory for class
      * @return void
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     protected function generateMapperFile($dir)
     {
@@ -837,7 +823,7 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
         }
 
         if (!is_readable($file) && false === file_put_contents($file, '')) {
-            throw new RuntimeException('Cannot create empty class file: ' . $file);
+            throw new \RuntimeException('Cannot create empty class file: ' . $file);
         }
 
         $namespace = $this->config->getBaseNamespaceForMapper();
@@ -858,14 +844,14 @@ namespace ' . $namespace . ';
 /**
  * DataMapper Mapper class for table "' . $this->config->getDbTable() . '"
  *
- * @author  ' . $this->config->getAuthor() . '
+ * @author ' . $this->config->getAuthor() . '
  */
 class ' . $this->config->getClassname() . 'Mapper extends ' . $extends . '
 {
 }
 ';
         if (false === file_put_contents($file, $content)) {
-            throw new RuntimeException('Unable to write file content! (file: ' . $file . ')');
+            throw new \RuntimeException('Unable to write file content! (file: ' . $file . ')');
         }
     }
 
