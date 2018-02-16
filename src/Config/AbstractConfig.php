@@ -43,6 +43,9 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var string $dbConfig Database config name. */
     protected $dbConfig = '';
 
+    /** @var string $dbService Database service name. */
+    protected $dbService = '';
+
     /** @var string $dbTable Table name */
     protected $dbTable = '';
 
@@ -53,7 +56,7 @@ abstract class AbstractConfig implements ConfigInterface
     protected $cachePrefix = '';
 
     /** @var ConfigInterface[] $joinList List of joined config. */
-    protected $joinList = array();
+    protected $joinList = [];
 
     /**
      * Initialize config.
@@ -76,9 +79,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get Header file author.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getAuthor()
     {
@@ -86,9 +87,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get Header file copyright.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getCopyright()
     {
@@ -96,9 +95,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get classname for the generated files
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getClassname()
     {
@@ -106,9 +103,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get database config name (catalog, catalog_import...)
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getDbConfig()
     {
@@ -116,9 +111,15 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get database table to generate.
-     *
-     * @return string
+     * {@inheritdoc}
+     */
+    public function getDbService()
+    {
+        return $this->dbService;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getDbTable()
     {
@@ -126,9 +127,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get database table prefix.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getDbPrefix()
     {
@@ -136,9 +135,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Return true if cache is active, false in otherwise.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasCache()
     {
@@ -146,9 +143,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get cache prefix for main data key.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getCachePrefix()
     {
@@ -156,9 +151,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get Config object(s) for "joined" tables
-     *
-     * @return ConfigInterface[]
+     * {@inheritdoc}
      */
     public function getAllJoin()
     {
@@ -166,9 +159,17 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get base namespace for "data" files for generated files.
-     *
-     * @return string
+     * {@inheritdoc}
+     */
+    public function setJoinList($joinList)
+    {
+        $this->joinList = $joinList;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getBaseNamespaceForData()
     {
@@ -176,9 +177,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get base namespace for "mapper" files for generated files.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getBaseNamespaceForMapper()
     {
@@ -186,9 +185,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get base path for "data" files for generated files.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getBasePathForData()
     {
@@ -196,9 +193,7 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get base path for "mapper" files for generated files.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getBasePathForMapper()
     {
@@ -225,8 +220,8 @@ abstract class AbstractConfig implements ConfigInterface
             throw new \InvalidArgumentException('Class name is empty!');
         }
 
-        if (empty($this->dbConfig)) {
-            throw new \InvalidArgumentException('Database config name is empty!');
+        if (empty($this->dbConfig) && empty($this->dbService)) {
+            throw new \InvalidArgumentException('Database config & service name are empty!');
         }
 
         if (empty($this->dbTable)) {
@@ -254,14 +249,5 @@ abstract class AbstractConfig implements ConfigInterface
         }
 
         return $this;
-    }
-
-    /**
-     * @param  Config[] $joinList
-     * @return void
-     */
-    public function setJoinList($joinList)
-    {
-        $this->joinList = $joinList;
     }
 }

@@ -11,7 +11,7 @@ namespace Eureka\Component\Orm\Console;
 
 use Eureka\Component\Container\Container;
 use Eureka\Component\Database\Database;
-use Eureka\Component\Orm\Generator as GeneratorService;
+use Eureka\Component\Orm\Generator\Generator as GeneratorService;
 use Eureka\Component\Orm\Config\Config;
 use Eureka\Component\Yaml\Yaml;
 use Eureka\Eurekon;
@@ -62,7 +62,7 @@ class Generator extends Eurekon\Console
         $directory   = (string) $argument->get('config-dir');
         $configName  = (string) $argument->get('config-item');
         $dbName      = (string) $argument->get('db-name');
-        $dbNamespace = (string) $argument->get('db-namespace', null, 'global.database');
+        $dbNamespace = (string) $argument->get('db-namespace', null, 'app.database');
 
         $directory  = realpath(trim(rtrim($directory, '/')));
         $configName = trim($configName);
@@ -95,7 +95,7 @@ class Generator extends Eurekon\Console
         $database->setConfig(Container::getInstance()->get('config')->get($dbNamespace));
 
         (new GeneratorService())->setConnection($database->getConnection($dbName))
-            ->setRootDirectory(Container::getInstance()->get('config')->get('global.app.root'))
+            ->setRootDirectory(Container::getInstance()->get('config')->get('kernel.root'))
             ->build($configs);
     }
 
@@ -105,6 +105,7 @@ class Generator extends Eurekon\Console
      * @param array $data
      * @param string $configName Filter on name
      * @return array|Config
+     * @throws \Exception
      */
     protected function findConfigs(array $data, $configName = '')
     {

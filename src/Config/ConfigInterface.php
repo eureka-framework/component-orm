@@ -80,6 +80,13 @@ interface ConfigInterface
     public function getDbTable();
 
     /**
+     * Get database service name.
+     *
+     * @return string
+     */
+    public function getDbService();
+
+    /**
      * Get database table prefix.
      *
      * @return string
@@ -106,4 +113,10 @@ interface ConfigInterface
      * @return ConfigInterface[]
      */
     public function getAllJoin();
+
+    /**
+     * @param  \Eureka\Component\Orm\Config\ConfigInterface[] $joinList
+     * @return $this
+     */
+    public function setJoinList($joinList);
 }

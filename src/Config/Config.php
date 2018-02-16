@@ -40,13 +40,14 @@ class Config extends AbstractConfig
         $this->basePathForMapper = $config['path']['mapper'];
 
         //~ Cache
-        $this->cacheName   = '';//$config['cache']['name'];
+        //$this->cacheName   = '';//$config['cache']['name'];
         $this->cachePrefix = $config['cache']['prefix'];
 
         //~ Db
-        $this->dbTable  = $config['database']['table'];
-        $this->dbPrefix = $config['database']['prefix'];
-        $this->dbConfig = $config['database']['config'];
+        $this->dbTable   = $config['database']['table'];
+        $this->dbPrefix  = $config['database']['prefix'];
+        $this->dbConfig  = !empty($config['database']['config']) ? $config['database']['config'] : '';
+        $this->dbService = !empty($config['database']['service']) ? $config['database']['service'] : '';
 
         //~ Joins
         $this->joinList = (!empty($config['joins']) ? $config['joins'] : []);
