@@ -9,41 +9,39 @@
 
 namespace Eureka\Component\Orm\Console;
 
-use Eureka\Component\Container\Container;
-use Eureka\Component\Database\Database;
 use Eureka\Component\Orm\Generator\Generator as GeneratorService;
 use Eureka\Component\Orm\Config\Config;
 use Eureka\Component\Yaml\Yaml;
 use Eureka\Eurekon;
 
 /**
- * Console Abstraction class.
- * Must be parent class for every console script class.
+ * Orm generator class.
  *
  * @author  Romain Cottard
  */
-class Generator extends Eurekon\Console
+class Generator extends Eurekon\AbstractScript
 {
-    /** @var boolean $executable Set to true to set class as an executable script */
-    protected $executable = true;
-
-    /** @var boolean $executable Console script description. */
-    protected $description = 'Orm generator';
+    /**
+     * Generator constructor.
+     */
+    public function __construct()
+    {
+        $this->setDescription('Orm generator script');
+        $this->setExecutable();
+    }
 
     /**
-     * Help method.
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function help()
     {
-        $style = new Eurekon\Style(' *** RUN - HELP ***');
-        Eurekon\Out::std($style->color('fg', Eurekon\Style::COLOR_GREEN)->get());
-        Eurekon\Out::std('');
+        $style = new Eurekon\Style\Style(' *** RUN - HELP ***');
+        Eurekon\IO\Out::std($style->color('fg', Eurekon\Style\Color::GREEN)->get());
+        Eurekon\IO\Out::std('');
 
         $help = new Eurekon\Help('...');
-        $help->addArgument('', 'db-namespace', 'Config namespace (default: global.database)', true, false);
-        $help->addArgument('', 'db-name', 'Database config name', true, false);
+        $help->addArgument('', 'service-name', 'Database connection service end name', true, false);
+        $help->addArgument('', 'service-prefix', 'Service prefix name (default: "database.connection.")', true, false);
         $help->addArgument('', 'config-dir', 'Config directory to inspect for config file', true, true);
         $help->addArgument('', 'config-item', 'Config name in config file to generate.', true, false);
 
@@ -51,18 +49,15 @@ class Generator extends Eurekon\Console
     }
 
     /**
-     * Run method.
-     *
-     * @return void
-     * @throws \Exception
+     * {@inheritdoc}
      */
     public function run()
     {
-        $argument    = Eurekon\Argument::getInstance();
-        $directory   = (string) $argument->get('config-dir');
-        $configName  = (string) $argument->get('config-item');
-        $dbName      = (string) $argument->get('db-name');
-        $dbNamespace = (string) $argument->get('db-namespace', null, 'app.database');
+        $argument      = Eurekon\Argument\Argument::getInstance();
+        $directory     = (string) $argument->get('config-dir');
+        $configName    = (string) $argument->get('config-item');
+        $serviceName   = (string) $argument->get('service-name');
+        $servicePrefix = (string) $argument->get('service-prefix', null, 'database.connection.');
 
         $directory  = realpath(trim(rtrim($directory, '/')));
         $configName = trim($configName);
@@ -81,7 +76,6 @@ class Generator extends Eurekon\Console
 
             $yaml = new Yaml();
             $data = $yaml->load($file);
-
             $data = $this->replace($file, $data);
 
             $configs['configs'][basename($file, '.yml')] = $data;
@@ -91,11 +85,10 @@ class Generator extends Eurekon\Console
 
         $configs = $this->findConfigs($configs, $configName);
 
-        $database = Database::getInstance();
-        $database->setConfig(Container::getInstance()->get('config')->get($dbNamespace));
+        $connection = $this->getContainer()->get($servicePrefix . $serviceName);
 
-        (new GeneratorService())->setConnection($database->getConnection($dbName))
-            ->setRootDirectory(Container::getInstance()->get('config')->get('kernel.root'))
+        (new GeneratorService())->setConnection($connection)
+            ->setRootDirectory($this->getConfig()->get('kernel.root'))
             ->build($configs);
     }
 
@@ -110,7 +103,7 @@ class Generator extends Eurekon\Console
     protected function findConfigs(array $data, $configName = '')
     {
         /** @var Config[] $configs */
-        $configs = [];
+        $configs    = [];
         $baseConfig = [];
 
         foreach ($data['configs'] as $name => $configValues) {
@@ -227,7 +220,8 @@ class Generator extends Eurekon\Console
      *
      * @param  array $config
      * @return void
-     * @throws \Eureka\Component\Container\Exception\NotFoundException
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     private function replaceReferences(array &$config)
     {
@@ -247,7 +241,7 @@ class Generator extends Eurekon\Console
                 continue;
             }
 
-            $referenceValue = Container::getInstance()->get('config')->get($matches[1]);
+            $referenceValue = $this->getConfig()->get($matches[1]);
 
             if ($referenceValue !== null) {
                 $value = preg_replace('`(%.*?%)`', $referenceValue, $value);
