@@ -10,7 +10,6 @@
 namespace Eureka\Component\Orm\Script;
 
 use Eureka\Component\Config\Config;
-use Eureka\Component\Database\Database;
 use Eureka\Component\Orm\Generator\Generator as GeneratorService;
 use Eureka\Component\Orm\Config\Config as OrmConfig;
 use Eureka\Eurekon;
@@ -39,10 +38,8 @@ class Generator extends Eurekon\AbstractScript
     {
         $help = new Eurekon\Help('...');
         $help->addArgument('', 'config-dir', 'Config directory to inspect for config file', true, true);
-        $help->addArgument('', 'package-namespace', 'Package namespace prefix for parameters.', true, true);
-        $help->addArgument('', 'db-namespace', 'Config namespace (default: app.database)', true, false);
-        $help->addArgument('', 'db-name', 'Database config name (default: common)', true, false);
         $help->addArgument('', 'config-item', 'Config name in config file to generate.', true, false);
+        $help->addArgument('', 'db-service', 'Database service name (default: database.connection.common)', true, false);
 
         $help->display();
     }
@@ -55,24 +52,21 @@ class Generator extends Eurekon\AbstractScript
         $argument      = Eurekon\Argument\Argument::getInstance();
         $directory     = (string) $argument->get('config-dir');
         $configName    = (string) $argument->get('config-item');
-        $pkgNamespace  = (string) $argument->get('package-namespace', 'app');
-        $dbServiceName = (string) $argument->get('db-name', null, 'database.connection.common');
-        $dbNamespace   = (string) $argument->get('db-namespace', null, 'app.database');
+        $dbServiceName = (string) $argument->get('db-service', null, 'database.connection.common');
 
         $directory  = realpath(trim(rtrim($directory, '/')));
         $configName = trim($configName);
 
+        /** @var Config $config */
         $config = clone $this->getConfig();
         $config->loadYamlFromDirectory($directory . '/orm', 'orm.', null, false);
 
-        //*
         $configs  = $this->findConfigs($config, $configName);
 
         (new GeneratorService())->setConnection($this->getContainer()->get($dbServiceName))
-            ->setRootDirectory('')//$this->getConfig()->get('kernel.root'))
+            ->setRootDirectory('')
             ->build($configs)
         ;
-        // */
     }
 
     /**
