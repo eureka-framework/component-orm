@@ -9,7 +9,6 @@
 
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Container\Container;
 use Eureka\Component\Database\Connection;
 
 /**
@@ -62,8 +61,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * AbstractEntity constructor.
      *
-     * @param Connection $connection
-     * @param Conn
+     * @param \Eureka\Component\Orm\MapperInterface[]
      */
     public function __construct($mappers = [])
     {
