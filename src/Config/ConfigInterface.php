@@ -45,6 +45,13 @@ interface ConfigInterface
     public function getBaseNamespaceForMapper();
 
     /**
+     * Get base namespace for "repository" files for generated files.
+     *
+     * @return string
+     */
+    public function getBaseNamespaceForRepository();
+
+    /**
      * Get base path for "data" files for generated files.
      *
      * @return string
@@ -57,6 +64,13 @@ interface ConfigInterface
      * @return string
      */
     public function getBasePathForMapper();
+
+    /**
+     * Get base path for "repository" files for generated files.
+     *
+     * @return string
+     */
+    public function getBasePathForRepository();
 
     /**
      * Get classname for the generated files

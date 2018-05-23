@@ -12,8 +12,8 @@ namespace Eureka\Component\Orm;
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Exception\EntityNotExistsException;
 use Eureka\Component\Orm\Exception\InsertFailedException;
-use Eureka\Component\Orm\Exception\InvalidQueryException;
 use Eureka\Component\Orm\Exception\OrmException;
+use Eureka\Component\Orm\Query;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -59,44 +59,14 @@ abstract class AbstractMapper implements RepositoryInterface
     /** @var int $lastId Auto increment id of the last insert query. */
     protected $lastId = 0;
 
-    /** @var EntityInterface $data Data instance. */
-    protected $data = null;
-
-    /** @var string[] $wheres List of where restriction for current query */
-    protected $wheres = [];
-
-    /** @var string[] $sets List of sets clause for current query */
-    protected $sets = [];
-
-    /** @var array $binds List of binding values */
-    protected $binds = [];
-
-    /** @var string[] $groupBy List of groupBy for current query */
-    protected $groupBy = [];
-
-    /** @var string[] $having List of having restriction for current query */
-    protected $having = [];
-
-    /** @var string[] $order List of order by restriction for current query */
-    protected $orders = [];
-
-    /** @var int $limit Max limit for current query. */
-    protected $limit = null;
-
-    /** @var int $offset Start fetch result position for current query */
-    protected $offset = null;
-
     /** @var bool If true, does not throw an exception for not mapped fields (ie : COUNT()) in setDataValue */
     protected $ignoreNotMappedFields = false;
 
-    /** @var int $totalNumberOfRows Total number of row for the last query (only available if db::hasCountRows() is true) */
-    protected $totalNumberOfRows = 0;
+    /** @var int $rowCount The number of rows affected by the last SQL statement */
+    protected $rowCount = 0;
 
     /** @var bool $cacheSkipMissingItemQuery If skip query after select from cache (when has no missing item) */
     protected $cacheSkipMissingItemQuery = false;
-
-    /** @var string|null Precise if list returned by query() or select() is indexed by the value of one of the columns */
-    protected $listIndexedByField = null;
 
     /**
      * AbstractMapper constructor.
@@ -118,8 +88,7 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * @param  AbstractMapper[] $mappers
-     * @return $this
+     * {@inheritdoc}
      */
     public function addMappers($mappers)
     {
@@ -129,9 +98,7 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Enable cache usage on read (always active for writing when $cache is defined).
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function enableCacheOnRead()
     {
@@ -141,9 +108,7 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Disable cache usage on read (always active for writing when $cache is defined).
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function disableCacheOnRead()
     {
@@ -153,9 +118,27 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Return fields for current table.
-     *
-     * @return string[]
+     * {@inheritdoc}
+     */
+    public function enableIgnoreNotMappedFields()
+    {
+        $this->ignoreNotMappedFields = true;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function disableIgnoreNotMappedFields()
+    {
+        $this->ignoreNotMappedFields = false;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getFields()
     {
@@ -163,9 +146,27 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Return fields for current table.
-     *
-     * @return string
+     * {@inheritdoc}
+     */
+    public function getPrimaryKeys()
+    {
+        return $this->primaryKeys;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getNamesMap($field)
+    {
+        if (!isset($this->dataNamesMap[$field])) {
+            throw new \OutOfRangeException('Specified field does not exist in data names map');
+        }
+
+        return $this->dataNamesMap[$field];
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getTable()
     {
@@ -173,12 +174,7 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Create new instance of extended EntityInterface class & return it.
-     *
-     * @param  \stdClass $row
-     * @param  bool $exists
-     * @return EntityInterface
-     * @throws \LogicException
+     * {@inheritdoc}
      */
     public function newEntity(\stdClass $row = null, $exists = false)
     {
@@ -200,186 +196,7 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Add In list item.
-     *
-     * @param  string $field Field name
-     * @param  array $values List of values (integer)
-     * @param  string $whereConcat Concat type with other where elements
-     * @param  bool $not Whether the condition should be NOT IN instead of IN
-     * @return $this
-     * @throws InvalidQueryException
-     */
-    public function addIn($field, $values, $whereConcat = 'AND', $not = false)
-    {
-        if (!is_array($values) || count($values) === 0) {
-            throw new InvalidQueryException('Values for addIn must be an array, and non empty!');
-        }
-
-        $field = (0 < count($this->wheres) ? ' ' . $whereConcat . ' ' . $field : $field);
-
-        //~ Bind values (more safety)
-        $fields = [];
-        foreach ($values as $value) {
-            $name = ':value_' . uniqid();
-
-            $fields[]           = $name;
-            $this->binds[$name] = (string) $value;
-        }
-
-        $this->wheres[] = $field . ($not ? ' NOT' : '') . ' IN (' . implode(',', $fields) . ')';
-
-        return $this;
-    }
-
-    /**
-     * Add order clause.
-     *
-     * @param  string $order
-     * @param  string $dir
-     * @return $this
-     */
-    public function addOrder($order, $dir = 'ASC')
-    {
-        $this->orders[] = $order . ' ' . $dir;
-
-        return $this;
-    }
-
-    /**
-     * Add groupBy clause.
-     *
-     * @param  string $field
-     * @return $this
-     */
-    public function addGroupBy($field)
-    {
-        $this->groupBy[] = $field;
-
-        return $this;
-    }
-
-    /**
-     * Add having clause.
-     *
-     * @param  string $field
-     * @param  string|int $value
-     * @param  string $sign
-     * @param  string $havingConcat
-     * @return $this
-     */
-    public function addHaving($field, $value, $sign = '=', $havingConcat = 'AND')
-    {
-        $fieldHaving = (0 < count($this->having) ? ' ' . $havingConcat . ' ' . $field : $field);
-
-        $this->having[]                        = $fieldHaving . ' ' . $sign . ' :' . strtolower($field);
-        $this->binds[':' . strtolower($field)] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Add where clause.
-     *
-     * @param  string $field
-     * @param  string|int $value
-     * @param  string $sign
-     * @param  string $whereConcat
-     * @return $this
-     */
-    public function addWhere($field, $value, $sign = '=', $whereConcat = 'AND')
-    {
-        $suffix     = uniqid();
-        $fieldWhere = (0 < count($this->wheres) ? ' ' . $whereConcat . ' ' . $field : $field);
-
-        $this->wheres[]                                  = $fieldWhere . ' ' . $sign . ' :' . strtolower($field) . $suffix;
-        $this->binds[':' . strtolower($field) . $suffix] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Add where clause.
-     *
-     * @param  string[] $keys
-     * @param  string $sign
-     * @param  string $whereConcat
-     * @return $this
-     */
-    public function addWhereKeysOr($keys, $sign = '=', $whereConcat = 'OR')
-    {
-        $suffix = uniqid();
-        $wheres = [];
-
-        foreach ($keys as $key => $value) {
-            $field     = strtolower($key);
-            $fieldBind = ':' . $field . '_' . $suffix;
-
-            $this->binds[$fieldBind] = $value;
-
-            $wheres[] = $field . ' ' . $sign . ' ' . $fieldBind;
-        }
-
-        $fieldWhere = ' (' . implode(' AND ', $wheres) . ') ';
-        $fieldWhere = (0 < count($this->wheres) ? ' ' . $whereConcat . ' ' . $fieldWhere : $fieldWhere);
-
-        $this->wheres[] = $fieldWhere;
-
-        return $this;
-    }
-
-    /**
-     * Set limit & offset.
-     *
-     * @param  int $limit
-     * @param  int $offset
-     * @return $this
-     */
-    public function setLimit($limit, $offset = null)
-    {
-        $this->limit  = (int) $limit;
-        $this->offset = $offset;
-
-        return $this;
-    }
-
-    /**
-     * Set bind
-     *
-     * @param  array $binds Binded values
-     * @return $this
-     */
-    public function bind(array $binds)
-    {
-        $this->binds = $binds;
-
-        return $this;
-    }
-
-    /**
-     * Clear query params
-     *
-     * @return $this
-     */
-    public function clear()
-    {
-        $this->wheres  = [];
-        $this->sets    = [];
-        $this->groupBy = [];
-        $this->having  = [];
-        $this->orders  = [];
-        $this->binds   = [];
-        $this->limit   = null;
-        $this->offset  = null;
-        $this->data    = null;
-        $this->listIndexedByField = null;
-
-        return $this;
-    }
-
-    /**
-     * Return autoincrement id of the last insert query.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function getLastId()
     {
@@ -387,255 +204,7 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     *
-     * @param  EntityInterface $data
-     * @return string
-     */
-    public function getQueryInsert(EntityInterface $data)
-    {
-        //~ List of fields to update.
-        $queryFields = array();
-
-        //~ Check for updated fields.
-        foreach ($this->fields as $field) {
-
-            #~ Skip auto increment keys
-            try {
-                $map = $this->getNamesMap($field);
-
-                if ($data->hasAutoIncrement() && $map['property'] === 'id') {
-                    continue;
-                }
-            } catch (\OutOfRangeException $exception) {
-                continue;
-            }
-
-            $queryFields[] = '`' . $field . '` = ' . $this->connection->quote($this->getDataValue($data, $field));
-        }
-
-        if (empty($queryFields)) {
-            throw new \LogicException(__METHOD__ . '|Set clause cannot be empty !');
-        }
-
-        $querySet = ' SET ' . implode(', ', $queryFields);
-
-        return $query = 'INSERT INTO ' . $this->getTable() . $querySet;
-    }
-
-    /**
-     *
-     * @param  EntityInterface $data
-     * @return string
-     */
-    public function getQueryUpdate(EntityInterface $data)
-    {
-        //~ List of fields to update.
-        $queryFields = array();
-        $primaryKeys = $this->getPrimaryKeys();
-
-        //~ Check for updated fields.
-        foreach ($this->fields as $field) {
-            if (in_array($field, $primaryKeys)) {
-                continue;
-            }
-            $queryFields[] = '`' . $field . '` = ' . $this->connection->quote($this->getDataValue($data, $field));
-        }
-
-        if (empty($queryFields)) {
-            throw new \LogicException(__METHOD__ . '|Set clause cannot be empty !');
-        }
-
-        $querySet = ' SET ' . implode(', ', $queryFields);
-
-        //~ Check for keys
-        $queryFields = [];
-        foreach ($primaryKeys as $key) {
-            $queryFields[] = '`' . $key . '` = ' . $this->connection->quote($this->getDataValue($data, $key));
-        }
-
-        if (empty($queryFields)) {
-            throw new \LogicException('No primary(ies) key(s) defined for an update');
-        }
-
-        $queryWhere = ' WHERE ' . implode(' AND ', $queryFields);
-
-        return $query = 'UPDATE ' . $this->getTable() . $querySet . $queryWhere;
-    }
-
-    /**
-     * Get fields to select
-     *
-     * @param  bool $isPrefixed Add table prefix in list of field
-     * @param  bool $onlyPrimaryKeys Get only primary key(s) field(s)
-     * @return string
-     */
-    public function getQueryFields($isPrefixed = false, $onlyPrimaryKeys = false)
-    {
-        $fields = $onlyPrimaryKeys ? $this->getPrimaryKeys() : $this->getFields();
-
-        if ($isPrefixed) {
-            $table          = $this->getTable();
-            $fields         = [];
-            $fieldsToPrefix = $onlyPrimaryKeys ? $this->getPrimaryKeys() : $this->getFields();
-
-            foreach ($fieldsToPrefix as $field) {
-                $fields[] = $table . '.' . $field;
-            }
-        }
-
-        return implode(', ', $fields);
-    }
-
-    /**
-     * Build field list to update (only field with different value from db)
-     *
-     * @param  EntityInterface $data
-     * @param  bool $forceCheck If force check (do not force for insert query)
-     * @return string
-     */
-    public function getQueryFieldsSet(EntityInterface $data, $forceCheck = true)
-    {
-        //~ List of fields to update.
-        $queryFields = [];
-
-        //~ Check for updated fields.
-        foreach ($this->fields as $field) {
-
-            //~ Skip fields that are not updated
-            if ($forceCheck && !$this->isDataUpdated($data, $field)) {
-                continue;
-            }
-
-            $queryFields[] = $field . ' = :' . strtolower($field);
-
-            $this->binds[':' . strtolower($field)] = $this->getDataValue($data, $field);
-        }
-
-        $set = '';
-        if (!empty($queryFields)) {
-            $set = 'SET ' . implode(', ', $queryFields);
-        }
-
-        return $set;
-    }
-
-    /**
-     * Build field list to update (only field with different value from db)
-     *
-     * @param  EntityInterface $data
-     * @return string
-     */
-    public function getQueryFieldsOnDuplicateUpdate(EntityInterface $data)
-    {
-        if (!$data->isUpdated()) {
-            return '';
-        }
-
-        //~ List of fields to update.
-        $queryFields = [];
-
-        //~ Check for updated fields.
-        foreach ($this->fields as $field) {
-
-            //~ Skip fields that are not updated
-            if (!$this->isDataUpdated($data, $field)) {
-                continue;
-            }
-
-            $queryFields[] = $field . ' = :' . strtolower($field);
-
-            $this->binds[':' . strtolower($field)] = $this->getDataValue($data, $field);
-        }
-
-        $onDuplicateUpdate = '';
-        if (!empty($queryFields)) {
-            $onDuplicateUpdate = 'ON DUPLICATE KEY UPDATE ' . implode(', ', $queryFields);
-        };
-
-        return $onDuplicateUpdate;
-    }
-
-    /**
-     * Get limit clause.
-     *
-     * @return string
-     */
-    public function getQueryLimit()
-    {
-        if ($this->limit !== null && $this->offset !== null) {
-            return 'LIMIT ' . $this->offset . ', ' . $this->limit;
-        } else {
-            if (null !== $this->limit) {
-                return 'LIMIT ' . $this->limit;
-            } else {
-                return '';
-            }
-        }
-    }
-
-    /**
-     * Get OrderBy clause.
-     *
-     * @return string
-     */
-    public function getQueryOrderBy()
-    {
-        return (0 < count($this->orders) ? 'ORDER BY ' . implode(',', $this->orders) : '');
-    }
-
-    /**
-     * Get GroupBy clause.
-     *
-     * @return string
-     */
-    public function getQueryGroupBy()
-    {
-        return (0 < count($this->groupBy) ? 'GROUP BY ' . implode(', ', $this->groupBy) : '');
-    }
-
-    /**
-     * Get Having clause.
-     *
-     * @return string
-     */
-    public function getQueryHaving()
-    {
-        $return = '';
-
-        if (0 < count($this->having)) {
-            $return = 'HAVING ';
-            foreach ($this->having as $having) {
-                $return .= $having . ' ';
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Get Where clause.
-     *
-     * @return string
-     */
-    public function getQueryWhere()
-    {
-        $return = '';
-
-        if (0 < count($this->wheres)) {
-            $return = 'WHERE ';
-            foreach ($this->wheres as $where) {
-                $return .= $where . ' ';
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Get the higher value for the primary key
-     *
-     * @return mixed
-     * @throws \LogicException
+     * {@inheritdoc}
      */
     public function getMaxId()
     {
@@ -652,59 +221,33 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Get total number of rows from the last query.
-     *
-     * @return int
+     * {@inheritdoc}
      */
-    public function getTotalNumberOfRows()
+    public function rowCount()
     {
-        return $this->totalNumberOfRows;
+        return $this->rowCount;
     }
 
     /**
-     * Count number of results for query.
-     *
-     * @param string $field
-     * @return integer
-     * @throws \DomainException
+     * {@inheritdoc}
      */
-    public function count($field = '*')
+    public function count(Query\QueryBuilder $queryBuilder, $field = '*')
     {
-        if ($field !== '*' && !in_array($field, $this->getFields())) {
-            throw new \DomainException(__METHOD__ . '|Field is not allowed ! (field: ' . $field . ')');
-        }
+        $statement = $this->connection->prepare($queryBuilder->getQueryCount($field));
+        $statement->execute($queryBuilder->getBind());
 
-        $query = 'SELECT COUNT(' . $field . ') AS NB_RESULTS FROM ' . $this->getTable() . ' ' . $this->getQueryWhere();
-
-        $statement = $this->connection->prepare($query);
-        $statement->execute($this->binds);
-
-        $this->clear();
+        $queryBuilder->clear();
 
         return (int) $statement->fetchColumn(0);
     }
 
     /**
-     * Check if value row exists in database..
-     *
-     * @param  string|array $fields
-     * @param  mixed|null $value
-     * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function rowExists($fields, $value = null)
+    public function rowExists(Query\SelectBuilder $queryBuilder)
     {
-        if ($value !== null) {
-            $fields = [$fields => $value];
-        }
-
-        foreach ($fields as $field => $value) {
-            $this->addWhere($field, $value);
-        }
-
         try {
-            $this->selectOne();
+            $this->selectOne($queryBuilder);
 
             return true;
         } catch (EntityNotExistsException $exception) {
@@ -713,23 +256,17 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Fetch rows for specified query.
-     * /!\ Smart Cache cannot used here !
-     *
-     * @param  string $query
-     * @return EntityInterface[] Array of model base object for query.
-     * @throws OrmException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function query($query)
+    public function query(Query\QueryBuilderInterface $queryBuilder)
     {
-        $indexedBy = $this->getListIndexedByField();
-        $statement = $this->connection->prepare($query);
-        $statement->execute($this->binds);
+        $indexedBy = $queryBuilder->getListIndexedByField();
+        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        $statement->execute($queryBuilder->getBind());
 
         $collection = [];
 
-        $this->clear();
+        $queryBuilder->clear();
 
         $id = 0;
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
@@ -745,20 +282,14 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Fetch rows for specified query.
-     * Return "raw" result set.
-     * /!\ Smart Cache cannot used here !
-     *
-     * @param  string $query
-     * @return \stdClass[] List of row from db query.
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function queryRows($query)
+    public function queryRows(Query\QueryBuilderInterface $queryBuilder)
     {
-        $statement = $this->connection->prepare($query);
-        $statement->execute($this->binds);
+        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        $statement->execute($queryBuilder->getBind());
 
-        $this->clear();
+        $queryBuilder->clear();
 
         $collection = array();
 
@@ -770,89 +301,41 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Delete data from database.
-     *
-     * @param  EntityInterface $entity
-     * @return bool
-     * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
     public function delete(EntityInterface $entity)
     {
-        foreach ($this->primaryKeys as $key) {
-            $this->addWhere($key, $this->getDataValue($entity, $key));
-        }
+        $queryBuilder = $this->getQueryBuilder(Query\Factory::TYPE_DELETE, $entity);
 
-        $where = $this->getQueryWhere();
-
-        if (empty($where)) {
-            throw new \LogicException(__METHOD__ . '| Where restriction is empty for current DELETE query !');
-        }
-
-        $query = 'DELETE FROM ' . $this->getTable() . ' ' . $this->getQueryWhere();
-
-        $statement = $this->connection->prepare($query);
-        $result    = $statement->execute($this->binds);
+        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        $result    = $statement->execute($queryBuilder->getBind());
 
         //~ Reset some data
         $entity->setExists(false);
         $entity->resetUpdated();
 
         //~ Clear
-        $this->clear();
+        $queryBuilder->clear();
         $this->deleteCache($entity);
 
         return (bool) $result;
     }
 
     /**
-     * Insert active row (or update row if it possible).
-     *
-     * @param  EntityInterface $data
-     * @param  bool $forceUpdate If true, add on duplicate update clause to the insert query.
-     * @param  bool $forceIgnore If true, add IGNORE on insert query to avoid SQL errors if duplicate
-     * @return bool State of insert
-     * @throws InsertFailedException
-     * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function insert(EntityInterface $data, $forceUpdate = false, $forceIgnore = false)
+    public function insert(EntityInterface $entity, $onDuplicateUpdate = false, $onDuplicateIgnore = false)
     {
-        if ($data->exists() && !$data->isUpdated()) {
+        if ($entity->exists() && !$entity->isUpdated()) {
             return false;
         }
 
-        //~ Reset binded fields
-        $this->binds = [];
+        $queryBuilder = $this->getQueryBuilder(Query\Factory::TYPE_INSERT, $entity);
 
-        $querySet = $this->getQueryFieldsSet($data, false);
-        if (empty($querySet)) {
-            throw new \LogicException(__METHOD__ . '|Set clause cannot be empty !');
-        } else {
-            $querySet = ' ' . $querySet;
-        }
+        $statement = $this->connection->prepare($queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore));
+        $statement->execute($queryBuilder->getBind());
 
-        $queryDuplicateUpdate = '';
-
-        $queryIgnore = $forceIgnore ? ' IGNORE ' : ' ';
-
-        if ($forceUpdate || $data->exists()) {
-            $queryDuplicateUpdate = $this->getQueryFieldsOnDuplicateUpdate($data);
-
-            if (empty($queryDuplicateUpdate)) {
-                throw new \LogicException(__METHOD__ . '|ON DUPLICATE UPDATE clause cannot be empty !');
-            }
-
-            $queryDuplicateUpdate = ' ' . $queryDuplicateUpdate;
-        }
-
-        $query     = 'INSERT ' . $queryIgnore . 'INTO ' . $this->getTable() . $querySet . $queryDuplicateUpdate;
-        $statement = $this->connection->prepare($query);
-        $statement->execute($this->binds);
-
-		if ($forceIgnore && $statement->rowCount() === 0) {
+		if ($onDuplicateIgnore && $statement->rowCount() === 0) {
             throw new InsertFailedException(__METHOD__ . 'INSERT IGNORE could not insert (duplicate key or error)');
         }
 
@@ -861,93 +344,58 @@ abstract class AbstractMapper implements RepositoryInterface
         if ($lastInsertId > 0) {
             $this->lastId = $lastInsertId;
 
-            $data->setAutoIncrementId($this->getLastId());
+            $entity->setAutoIncrementId($this->getLastId());
         }
 
         //~ Reset some data
-        $data->setExists(true);
-        $data->resetUpdated();
+        $entity->setExists(true);
+        $entity->resetUpdated();
 
         //~ Clear
-        $this->clear();
-        $this->deleteCache($data);
+        $queryBuilder->clear();
+        $this->deleteCache($entity);
 
         return true;
     }
 
     /**
-     * Update data into database
-     *
-     * @param  EntityInterface $data
-     * @return bool
-     * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function update(EntityInterface $data)
+    public function update(EntityInterface $entity)
     {
-        if (!$data->isUpdated()) {
+        if (!$entity->isUpdated()) {
             return false;
         }
 
-        //~ Reset bound fields
-        $this->binds = [];
+        $queryBuilder = $this->getQueryBuilder(Query\Factory::TYPE_UPDATE, $entity);
 
-        foreach ($this->getPrimaryKeys() as $key) {
-            $this->addWhere($key, $this->getDataValue($data, $key));
-        }
-
-        $set = $this->getQueryFieldsSet($data);
-        if (empty($set)) {
-            return false;
-        }
-
-        $where = $this->getQueryWhere();
-        if (empty($where)) {
-            throw new \LogicException(__METHOD__ . '|Where clause is empty!');
-        }
-
-        $query     = 'UPDATE ' . $this->getTable() . ' ' . $set . ' ' . $where;
-        $statement = $this->connection->prepare($query);
-        $result    = $statement->execute($this->binds);
+        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        $result    = $statement->execute($queryBuilder->getBind());
 
         //~ Reset some data
-        $data->resetUpdated();
+        $entity->resetUpdated();
 
         //~ Clear
-        $this->clear();
-        $this->deleteCache($data);
+        $queryBuilder->clear();
+        $this->deleteCache($entity);
 
         return $result;
     }
 
     /**
-     * Either insert or update an entity
-     *
-     * @param EntityInterface|EntityInterface $data
-     * @param  bool $forceIgnore If true, add IGNORE to the insert query.
-     * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function persist(EntityInterface $data, $forceIgnore = false)
+    public function persist(EntityInterface $entity, $onDuplicateUpdate = false, $onDuplicateIgnore = false)
     {
-        if ($data->exists()) {
-            return $this->update($data);
+        if ($entity->exists()) {
+            return $this->update($entity);
         } else {
-            return $this->insert($data, false, $forceIgnore);
+            return $this->insert($entity, $onDuplicateUpdate, $onDuplicateIgnore);
         }
     }
 
     /**
-     * Get first row corresponding of the primary keys.
-     *
-     * @param  integer $id
-     * @return EntityInterface
-     * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Exception
+     * {@inheritdoc}
      */
     public function findById($id)
     {
@@ -962,53 +410,39 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Get first row corresponding of the keys.
-     *
-     * @param  string[] $keys
-     * @return EntityInterface
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Exception
+     * {@inheritdoc}
      */
     public function findByKeys(array $keys)
     {
+        $queryBuilder = $this->getQueryBuilder(Query\Factory::TYPE_SELECT);
         foreach ($keys as $field => $value) {
-            $this->addWhere($field, $value);
+            $queryBuilder->addWhere($field, $value);
         }
 
-        return $this->selectOne();
+        return $this->selectOne($queryBuilder);
     }
 
     /**
-     * Get rows corresponding of the keys.
-     *
-     * @param  string[] $keys
-     * @return EntityInterface[] List of row
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
     public function findAllByKeys(array $keys)
     {
+        $queryBuilder = $this->getQueryBuilder(Query\Factory::TYPE_SELECT);
         foreach ($keys as $field => $value) {
-            $this->addWhere($field, $value);
+            $queryBuilder->addWhere($field, $value);
         }
 
-        return $this->select();
+        return $this->select($queryBuilder);
     }
 
     /**
-     * Select first rows corresponding to where clause.
-     *
-     * @return EntityInterface
-     * @throws EntityNotExistsException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function selectOne()
+    public function selectOne(Query\SelectBuilder $queryBuilder)
     {
-        $this->setLimit(1);
+        $queryBuilder->setLimit(1);
 
-        $collection = $this->select();
+        $collection = $this->select($queryBuilder);
 
         if (empty($collection)) {
             throw new EntityNotExistsException('No data for current selection', 0);
@@ -1018,36 +452,28 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Select all rows corresponding of where clause.
-     *
-     * @return EntityInterface[] List of row.
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function select()
+    public function select(Query\SelectBuilder $queryBuilder)
     {
         $collection = [];
 
         if ($this->isCacheEnabledOnRead) {
-            $collection = $this->selectFromCache();
+            $collection = $this->selectFromCache($queryBuilder);
         }
-
-        $calcFoundRows = (!$this->isCacheEnabledOnRead && $this->connection->hasCountRows()) ? 'SQL_CALC_FOUND_ROWS ' : '';
 
         if ($this->cacheSkipMissingItemQuery) {
             $this->cacheSkipMissingItemQuery = false;
-            $this->clear();
+            $queryBuilder->clear();
 
             return $collection;
         }
 
-        $query = 'SELECT ' . $calcFoundRows . $this->getQueryFields() . ' FROM ' . $this->getTable() . ' ' . $this->getQueryWhere() . ' ' . $this->getQueryGroupBy() . ' ' . $this->getQueryHaving() . ' ' . $this->getQueryOrderBy() . ' ' . $this->getQueryLimit();
-
         //~ Save total number of row from query
         //$this->totalNumberOfRows = $list->total;
 
-        $statement = $this->connection->prepare($query);
-        $statement->execute($this->binds);
+        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        $statement->execute($queryBuilder->getBind());
 
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
             $data = $this->newEntity($row, true);
@@ -1055,159 +481,98 @@ abstract class AbstractMapper implements RepositoryInterface
             $this->setCache($data);
         }
 
-        $this->clear();
+        $queryBuilder->clear();
 
         return $collection;
     }
 
     /**
-     * Try to get all entities from cache.
-     * Return list of entities (for found) / null (for not found in cache)
-     *
-     * @return EntityInterface[]
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    public function selectFromCache()
+    public function apply(callable $callback, Query\SelectBuilder $queryBuilder, $key, $start = 0, $end = -1, $batchSize = 10000)
     {
-        if (!$this->isCacheEnabledOnRead) {
-            return [];
+        if (!in_array($key, $this->primaryKeys)) {
+            throw new \UnexpectedValueException(__METHOD__ . ' | The key must be a primary key.');
         }
 
-        $primaryKeys = $this->getPrimaryKeys();
+        $statement = $this->connection->prepare('SELECT MIN(' . $key . ') AS MIN, MAX(' . $key . ') AS MAX FROM ' . $this->getTable());
+        $statement->execute();
 
-        if (count($primaryKeys) === 0) {
-            return [];
-        }
+        $bounds = $statement->fetch(Connection::FETCH_OBJ);
 
-        $calcFoundRows = $this->connection->hasCountRows() ? 'SQL_CALC_FOUND_ROWS ' : '';
+        $minIndex          = max($start, $bounds->MIN);
+        $maxIndex          = $end < 0 ? $bounds->MAX : min($end, $bounds->MAX);
+        $currentBatchIndex = $minIndex;
 
-        $query = 'SELECT ' . $calcFoundRows . $this->getQueryFields(false, true) . ' FROM ' . $this->getTable() . ' ' . $this->getQueryWhere() . ' ' . $this->getQueryGroupBy() . ' ' . $this->getQueryHaving() . ' ' . $this->getQueryOrderBy() . ' ' . $this->getQueryLimit();
+        while ($currentBatchIndex <= $maxIndex) {
+            $clonedQueryBuilder = clone $this->getQueryBuilder(Query\Factory::TYPE_SELECT);
+            $clonedQueryBuilder
+                ->addWhere($key, $currentBatchIndex, '>=')
+                ->addWhere($key, $currentBatchIndex + $batchSize, '<')
+            ;
 
-        try {
-            $statement = $this->connection->prepare($query);
-            $statement->execute($this->binds);
+            $batch = $this->query($clonedQueryBuilder);
 
-        } catch (\Exception $exception) {
-            $this->clear();
-            throw $exception;
-        }
-
-        //~ Save total number of row from query
-        //$this->totalNumberOfRows = $list->total;
-
-        //~ Force reset
-        $this->wheres  = [];
-        $this->binds   = [];
-        $this->having  = [];
-        $this->groupBy = [];
-
-        $collection = [];
-        $addIn      = [];
-        $values     = [];
-
-        $hasOnePrimaryKey = count($primaryKeys) === 1;
-
-
-        while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
-
-            $dataIdInstance = $this->newEntity($row, true);
-
-            //~ Pre-fill collection to keep the order
-            $collection[$dataIdInstance->getCacheKey()] = null;
-
-            $data = $this->getCache($dataIdInstance);
-            if ($data === null) {
-                $values = $this->getDataPrimaryKeysValues($dataIdInstance);
-                if ($hasOnePrimaryKey) {
-                    $addIn[] = current($values);
-                } else {
-                    $this->addWhereKeysOr($values);
-                }
-            } else {
-                $collection[$dataIdInstance->getCacheKey()] = $data;
+            foreach ($batch as $item) {
+                call_user_func($callback, $item);
             }
-        }
 
-        if (!empty($addIn) && !empty($values)) {
-            $this->addIn(key($values), $addIn);
+            $currentBatchIndex += $batchSize;
         }
-
-        //~ When retrieve all data from cache, skip missing cache item query.
-        if (count(array_filter($collection)) === count($list->data)) {
-            $this->cacheSkipMissingItemQuery = true;
-        }
-
-        return $collection;
     }
 
     /**
-     * Get Data object from cache if is enabled.
-     *
-     * @param  EntityInterface $data
-     * @return null|EntityInterface
-     * @throws \Psr\Cache\InvalidArgumentException
+     * {@inheritdoc}
      */
-    private function getCache(EntityInterface $data)
+    public function quote($value)
     {
-        if (!$this->isCacheEnabledOnRead) {
-            return null;
-        }
-
-        $cacheItem = $this->cache->getItem($data->getCacheKey());
-
-        return $cacheItem->get();
+        return $this->connection->quote($value);
     }
 
     /**
-     * Delete cache
-     *
-     * @param  EntityInterface $data
-     * @return $this
-     * @throws \Psr\Cache\InvalidArgumentException
+     * {@inheritdoc}
      */
-    protected function deleteCache(EntityInterface $data)
+    public function beginTransaction()
     {
-        if (! $this->cache instanceof CacheItemPoolInterface) {
-            return $this;
-        }
-
-        $this->cache->deleteItem($data->getCacheKey());
-
-        return $this;
+        $this->connection->beginTransaction();
     }
 
     /**
-     * Set data into cache if enabled.
-     *
-     * @param  EntityInterface $data
-     * @return $this
-     * @throws \Psr\Cache\InvalidArgumentException
+     * {@inheritdoc}
      */
-    private function setCache(EntityInterface $data)
+    public function commit()
     {
-        if (! $this->cache instanceof CacheItemPoolInterface) {
-            return $this;
-        }
-
-        $cacheItem = $this->cache->getItem($data->getCacheKey());
-
-        $cacheItem->set($data);
-
-        $this->cache->save($cacheItem);
-
-        return $this;
+        $this->connection->commit();
     }
 
     /**
-     * Check if data value is updated or not
-     *
-     * @param  EntityInterface $data
-     * @param  string $field
-     * @return bool
-     * @throws \DomainException
+     * {@inheritdoc}
      */
-    private function isDataUpdated($data, $field)
+    public function rollBack()
+    {
+        $this->connection->rollBack();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function inTransaction()
+    {
+        return $this->connection->inTransaction();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getQueryBuilder($type = Query\Factory::TYPE_SELECT, EntityInterface $entity = null)
+    {
+        return Query\Factory::getBuilder($type, $this, $entity);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isDataUpdated($data, $field)
     {
         if (!isset($this->dataNamesMap[$field]['property'])) {
             throw new \DomainException('Field have not mapping with Data instance (field: ' . $field . ')');
@@ -1219,14 +584,9 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Get value from EntityInterface instance based on field value
-     *
-     * @param  EntityInterface $data
-     * @param  string $field
-     * @return mixed
-     * @throws \DomainException
+     * {@inheritdoc}
      */
-    protected function getDataValue($data, $field)
+    public function getDataValue($data, $field)
     {
         if (!isset($this->dataNamesMap[$field]['get'])) {
             throw new \DomainException('Field have not mapping with Data instance (field: ' . $field . ')');
@@ -1282,145 +642,119 @@ abstract class AbstractMapper implements RepositoryInterface
     }
 
     /**
-     * Set value for ignoreNotMappedFields
+     * Try to get all entities from cache.
+     * Return list of entities (for found) / null (for not found in cache)
      *
-     * @param bool $value
-     * @return $this
+     * @param  Query\SelectBuilder $queryBuilder
+     * @return EntityInterface[]
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Exception
      */
-    public function setIgnoreNotMappedFields($value)
+    private function selectFromCache(Query\SelectBuilder $queryBuilder)
     {
-        $this->ignoreNotMappedFields = (bool) $value;
+        if (!$this->isCacheEnabledOnRead) {
+            return [];
+        }
+
+        $primaryKeys = $this->getPrimaryKeys();
+
+        if (count($primaryKeys) === 0) {
+            return [];
+        }
+
+        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        $statement->execute($queryBuilder->getBind());
+
+        $queryBuilder->clear(true);
+
+        //~ Save total number of row from query
+        $this->totalNumberOfRows = $statement->rowCount();
+
+        $hasOnePrimaryKey = count($primaryKeys) === 1;
+        $collection       = [];
+
+        while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
+
+            $entityIdInstance = $this->newEntity($row, true);
+
+            //~ Pre-fill collection to keep the order
+            $collection[$entityIdInstance->getCacheKey()] = null;
+
+            $entity = $this->getCache($entityIdInstance);
+            if ($entity === null) {
+                $this->cacheSkipMissingItemQuery = true;
+                $values = $this->getDataPrimaryKeysValues($entityIdInstance);
+                if ($hasOnePrimaryKey) {
+                    $addIn[] = current($values);
+                } else {
+                    $queryBuilder->addWhereKeysOr($values);
+                }
+            } else {
+                $collection[$entityIdInstance->getCacheKey()] = $entity;
+            }
+        }
+
+        if (!empty($addIn) && !empty($values)) {
+            $queryBuilder->addIn(key($values), $addIn);
+        }
+
+        return $collection;
+    }
+
+    /**
+     * Get Data object from cache if is enabled.
+     *
+     * @param  EntityInterface $data
+     * @return null|EntityInterface
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    private function getCache(EntityInterface $data)
+    {
+        if (!$this->isCacheEnabledOnRead) {
+            return null;
+        }
+
+        $cacheItem = $this->cache->getItem($data->getCacheKey());
+
+        return $cacheItem->get();
+    }
+
+    /**
+     * Delete cache
+     *
+     * @param  EntityInterface $data
+     * @return $this
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    private function deleteCache(EntityInterface $data)
+    {
+        if (! $this->cache instanceof CacheItemPoolInterface) {
+            return $this;
+        }
+
+        $this->cache->deleteItem($data->getCacheKey());
 
         return $this;
     }
 
     /**
-     * Apply the callback Function to each row, as a Data instance.
-     * Where condition can be add before calling this method and will be applied to filter the data.
+     * Set data into cache if enabled.
      *
-     * @param  callable $callback Function to apply to each row. Must take a Data instance as unique parameter.
-     * @param  string $key Primary key to iterate on.
-     * @param  int $start First index; default 0.
-     * @param  int $end Last index, -1 picks the max; default -1.
-     * @param  int $batchSize
-     * @return void
-     * @throws \UnexpectedValueException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Exception
-     */
-    public function apply(callable $callback, $key, $start = 0, $end = -1, $batchSize = 10000)
-    {
-        if (!in_array($key, $this->primaryKeys)) {
-            throw new \UnexpectedValueException(__METHOD__ . ' | The key must be a primary key.');
-        }
-
-        $statement = $this->connection->prepare('SELECT MIN(' . $key . ') AS MIN, MAX(' . $key . ') AS MAX FROM ' . $this->getTable());
-        $statement->execute();
-
-        $bounds = $statement->fetch(Connection::FETCH_OBJ);
-
-        $minIndex          = max($start, $bounds->MIN);
-        $maxIndex          = $end < 0 ? $bounds->MAX : min($end, $bounds->MAX);
-        $currentBatchIndex = $minIndex;
-
-        $wheresCopy = [];
-        if (!empty($this->wheres)) {
-            $wheresCopy = $this->wheres; // Keep a copy of the current WHERE statements, to apply them to each batch.
-        }
-
-        while ($currentBatchIndex <= $maxIndex) {
-            $this->wheres = $wheresCopy; // Apply initial WHERE statements.
-            $this->addWhere($key, $currentBatchIndex, '>=')->addWhere($key, $currentBatchIndex + $batchSize, '<');
-
-            $batch = $this->query('SELECT ' . $this->getQueryFields() . ' FROM ' . $this->getTable() . ' ' . $this->getQueryWhere());
-
-            foreach ($batch as $item) {
-                call_user_func($callback, $item);
-            }
-
-            $currentBatchIndex += $batchSize;
-        }
-    }
-
-    /**
-     * Return a map of names (set, get and property) for a db field
-     *
-     * @param  string $field
-     * @return string[]
-     * @throws \OutOfRangeException
-     */
-    public function getNamesMap($field)
-    {
-        if (!isset($this->dataNamesMap[$field])) {
-            throw new \OutOfRangeException('Specified field does not exist in data names map');
-        }
-
-        return $this->dataNamesMap[$field];
-    }
-
-    /**
-     * Return the primary keys
-     *
-     * @return string[]
-     */
-    public function getPrimaryKeys()
-    {
-        return $this->primaryKeys;
-    }
-
-    /**
-     * Start new transaction.
-     */
-    public function beginTransaction()
-    {
-        $this->connection->beginTransaction();
-    }
-
-    /**
-     * Commit transactions.
-     *
-     * @return void
-     */
-    public function commit()
-    {
-        $this->connection->commit();
-    }
-
-    /**
-     * Rollback transactions.
-     *
-     * @return void
-     */
-    public function rollBack()
-    {
-        $this->connection->rollBack();
-    }
-
-    /**
-     * Check if we are in transaction or not.
-     *
-     * @return bool
-     */
-    public function inTransaction()
-    {
-        return $this->connection->inTransaction();
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getListIndexedByField()
-    {
-        return $this->listIndexedByField;
-    }
-
-    /**
-     * @param null|string $listIndexedByField
+     * @param  EntityInterface $data
      * @return $this
+     * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function setListIndexedByField($listIndexedByField)
+    private function setCache(EntityInterface $data)
     {
-        $this->listIndexedByField = $listIndexedByField;
+        if (! $this->cache instanceof CacheItemPoolInterface) {
+            return $this;
+        }
+
+        $cacheItem = $this->cache->getItem($data->getCacheKey());
+
+        $cacheItem->set($data);
+
+        $this->cache->save($cacheItem);
 
         return $this;
     }

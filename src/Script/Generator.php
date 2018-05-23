@@ -40,12 +40,14 @@ class Generator extends Eurekon\AbstractScript
         $help->addArgument('', 'config-dir', 'Config directory to inspect for config file', true, true);
         $help->addArgument('', 'config-item', 'Config name in config file to generate.', true, false);
         $help->addArgument('', 'db-service', 'Database service name (default: database.connection.common)', true, false);
+        $help->addArgument('', 'with-repository', 'Also generate repository interfaces', false, false);
 
         $help->display();
     }
 
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
     public function run()
     {
@@ -64,6 +66,7 @@ class Generator extends Eurekon\AbstractScript
         $configs  = $this->findConfigs($config, $configName);
 
         (new GeneratorService())->setConnection($this->getContainer()->get($dbServiceName))
+            ->setHasRepository($argument->has('with-repository'))
             ->setRootDirectory('')
             ->build($configs)
         ;
@@ -109,6 +112,10 @@ class Generator extends Eurekon\AbstractScript
             $joins = $data[$name]['joins'];
 
             foreach ($joins as $key => $join) {
+                if (!isset($join['config'])) {
+                    throw new \RuntimeException('Invalid orm config file for "' . $name . '"');
+                }
+
                 if (!isset($baseConfig[$join['config']])) {
                     unset($joins[$key]);
                     continue;

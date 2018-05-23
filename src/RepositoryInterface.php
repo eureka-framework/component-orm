@@ -26,6 +26,16 @@ interface RepositoryInterface extends MapperInterface
     public function findById($id);
 
     /**
+     * Get rows corresponding of the keys.
+     *
+     * @param  string[] $keys
+     * @return EntityInterface[] List of row
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Exception
+     */
+    public function findAllByKeys(array $keys);
+
+    /**
      * Get first row corresponding of the primary keys.
      *
      * @param  string[] $primaryKeys
@@ -35,20 +45,52 @@ interface RepositoryInterface extends MapperInterface
     public function findByKeys(array $primaryKeys);
 
     /**
-     * Persist data in database.
+     * Either insert or update an entity
      *
      * @param  EntityInterface $entity
+     * @param  bool $onDuplicateUpdate If true, add on duplicate update clause to the insert query.
+     * @param  bool $onDuplicateIgnore If true, add IGNORE on insert query to avoid SQL errors if duplicate
      * @return bool
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Exception
      */
-    public function persist(EntityInterface $entity);
+    public function persist(EntityInterface $entity, $onDuplicateUpdate = false, $onDuplicateIgnore = false);
 
     /**
-     * Delete an entity in database.
+     * Delete data from database.
      *
      * @param  EntityInterface $entity
      * @return bool
+     * @throws \LogicException
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Exception
      */
     public function delete(EntityInterface $entity);
+
+    /**
+     * Insert active row (or update row if it possible).
+     *
+     * @param  EntityInterface $entity
+     * @param  bool $onDuplicateUpdate If true, add on duplicate update clause to the insert query.
+     * @param  bool $onDuplicateIgnore If true, add IGNORE on insert query to avoid SQL errors if duplicate
+     * @return bool State of insert
+     * @throws \Eureka\Component\Orm\Exception\InsertFailedException
+     * @throws \LogicException
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Exception
+     */
+    public function insert(EntityInterface $entity, $onDuplicateUpdate = false, $onDuplicateIgnore = false);
+
+    /**
+     * Update data into database
+     *
+     * @param  EntityInterface $entity
+     * @return bool
+     * @throws \LogicException
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Exception
+     */
+    public function update(EntityInterface $entity);
 
     /**
      * Create new instance of extended EntityInterface class & return it.

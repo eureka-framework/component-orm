@@ -34,11 +34,17 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var string $baseNamespaceForMapper */
     protected $baseNamespaceForMapper = '';
 
+    /** @var string $baseNamespaceForRepository */
+    protected $baseNamespaceForRepository = '';
+
     /** @var string $basePathForData */
     protected $basePathForData = '';
 
     /** @var string $basePathForMapper */
     protected $basePathForMapper = '';
+
+    /** @var string $basePathForMapper */
+    protected $basePathForRepository = '';
 
     /** @var string $dbConfig Database config name. */
     protected $dbConfig = '';
@@ -187,6 +193,14 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
+    public function getBaseNamespaceForRepository()
+    {
+        return $this->baseNamespaceForRepository;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getBasePathForData()
     {
         return trim($this->basePathForData, '/\\');
@@ -198,6 +212,14 @@ abstract class AbstractConfig implements ConfigInterface
     public function getBasePathForMapper()
     {
         return trim($this->basePathForMapper, '/\\');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBasePathForRepository()
+    {
+        return trim($this->basePathForRepository, '/\\');
     }
 
     /**

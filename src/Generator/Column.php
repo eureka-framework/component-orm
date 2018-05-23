@@ -339,6 +339,7 @@ class Column
      * @param  string $type
      * @param  string $comment
      * @return $this
+     * @throws \Exception
      */
     protected function setType($type, $comment)
     {

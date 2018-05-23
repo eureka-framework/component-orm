@@ -11,6 +11,11 @@ namespace Eureka\Component\Orm\Generator;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Config;
+use Eureka\Component\Orm\Enumerator\JoinRelation;
+use Eureka\Component\Orm\Enumerator\JoinType;
+use Eureka\Eurekon\IO\Out;
+use Eureka\Eurekon\Style\Color;
+use Eureka\Eurekon\Style\Style;
 
 /**
  * Class to generate model classes. Better way to manipulate table !
@@ -28,8 +33,11 @@ class Generator
     /** @var Column[] $columns List of columns to treat for current table. */
     protected $columns = [];
 
-    /** @var boolean $verbose Verbose active or not. */
+    /** @var bool $verbose Verbose active or not. */
     protected $verbose = true;
+
+    /** @var bool $hasRepository Generate repository interface or not. */
+    protected $hasRepository = false;
 
     /** @var string $rootDir */
     protected $rootDir = __DIR__ . '/../../..';
@@ -46,6 +54,19 @@ class Generator
     public function setVerbose($verbose)
     {
         $this->verbose = (bool) $verbose;
+
+        return $this;
+    }
+
+    /**
+     * Set if has repository mode
+     *
+     * @param  bool $hasRepository
+     * @return $this
+     */
+    public function setHasRepository($hasRepository)
+    {
+        $this->hasRepository = (bool) $hasRepository;
 
         return $this;
     }
@@ -140,7 +161,7 @@ class Generator
      */
     protected function buildDataClasses()
     {
-        $this->display(' * Build Data classes for table "' . $this->config->getDbTable() . '"' . PHP_EOL);
+        $this->displayTitle(' * Build Data classes for table "' . $this->config->getDbTable() . '"' . PHP_EOL);
         $this->display('  > build    [  0%]: properties...   ' . PHP_EOL);
         $this->buildDataProperties();
         $this->display('  > build    [ 25%]: getters...      ' . PHP_EOL);
@@ -287,20 +308,8 @@ class Generator
             $joins[$join['type']][] = $joinMethod;
         }
 
-        /*$joinMappersProperty = '';
-        foreach ($joinsMappers as $joinsMapperKey => $joinsMapperData) {
-            $joinMapperConfig = $joinsMapperData['config'];
-            $joinMapperClass  = $joinsMapperData['class'];
-            $joinMappersProperty .= "\n        '${joinsMapperKey}' => ['config' => '${joinMapperConfig}', 'class' => ${joinMapperClass}],";
-        }*/
-
         $this->vars['joins_use']  = implode("\n", $joinsUse);
         $this->vars['joins']      = implode("\n", $joins['one']) . implode("\n", $joins['many']);
-        /*$this->vars['properties'] .= '
-
-    // ** @var string[] $mapperClasses List of mapper classes for lazy loading joins. * /
-    protected $mapperClasses = [' . $joinMappersProperty . '
-    ];';*/
     }
 
     /**
@@ -369,14 +378,14 @@ class Generator
     }
 
     /**
-     * Set ' . $config->getClassname() . ' data object.
+     * Set ' . $config->getClassname() . ' entity instance.
      *
-     * @param ' . $dataClassName . ' $dataInstance
+     * @param ' . $dataClassName . ' $entity
      * @return $this
      */
-    public function set' . ucfirst($name) . '(' . $dataClassName . ' $dataInstance)
+    public function set' . ucfirst($name) . '(' . $dataClassName . ' $entity)
     {
-        $this->' . $propertyCacheName . ' = $dataInstance;
+        $this->' . $propertyCacheName . ' = $entity;
         return $this;
     }
 ';
@@ -406,7 +415,7 @@ class Generator
             }
 
             $keys .= '
-            $mapper->addWhere(\'' . $mappedBy . '\', $this->' . $column->getMethodNameGet() . '());';
+            $queryBuilder->addWhere(\'' . $mappedBy . '\', $this->' . $column->getMethodNameGet() . '());';
         }
 
         if (empty($keys)) {
@@ -438,8 +447,9 @@ class Generator
                 throw new \LogicException("Undefined mapper " . ' . $mapperClassName . '::class . "!");
             }
 
-            $mapper = $this->mappers[' . $mapperClassName . '::class];' . $keys . '
-            $this->' . $propertyCacheName . ' = $mapper->select();
+            $mapper       = $this->mappers[' . $mapperClassName . '::class];
+            $queryBuilder = $mapper->getQueryBuilder();' . $keys . '
+            $this->' . $propertyCacheName . ' = $mapper->select($queryBuilder);
         }
 
         return $this->' . $propertyCacheName . ';
@@ -448,12 +458,12 @@ class Generator
     /**
      * Set ' . $config->getClassname() . ' data objects.
      *
-     * @param ' . $dataClassName . '[] $dataArray
+     * @param ' . $dataClassName . '[] $entities
      * @return $this
      */
-    public function setAll' . ucfirst($name) . '(array $dataArray)
+    public function setAll' . ucfirst($name) . '(array $entities)
     {
-        $this->' . $propertyCacheName . ' = $dataArray;
+        $this->' . $propertyCacheName . ' = $entities;
         return $this;
     }
 ';
@@ -466,12 +476,14 @@ class Generator
      */
     protected function buildMapperClasses()
     {
-        $this->display(' * Build Mapper classes for table "' . $this->config->getDbTable() . '"' . PHP_EOL);
+        $this->displayTitle(' * Build Mapper classes for table "' . $this->config->getDbTable() . '"' . PHP_EOL);
 
         $this->display('  > build    [  0%]: field...        ' . PHP_EOL);
         $this->buildMapperFields();
-        $this->display('  > build    [ 50%]: primary keys... ' . PHP_EOL);
+        $this->display('  > build    [ 33%]: primary keys... ' . PHP_EOL);
         $this->buildMapperPrimaryKeys();
+        $this->display('  > build    [ 66%]: joined configs... ' . PHP_EOL);
+        $this->buildMapperJoinsConfig();
         $this->display('  > build    [100%]: done !          ' . PHP_EOL);
         $this->display(PHP_EOL);
     }
@@ -520,19 +532,56 @@ class Generator
     }
 
     /**
+     * Build joins config var
+     *
+     * @return void
+     */
+    protected function buildMapperJoinsConfig()
+    {
+        $joinsConfig = '';
+
+        foreach ($this->config->getAllJoin() as $name => $join) {
+            if (!isset($join['smart_join']) || (bool) $join['smart_join'] !== true) {
+                continue;
+            }
+
+            $config = $join['instance'];
+
+            if (!($config instanceof Config\ConfigInterface)) {
+                throw new \LogicException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')');
+            }
+
+            $joinsConfig .= "
+        '${name}' => [
+            'mapper'   => \\" . $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . "Mapper::class,
+            'type'     => '" . (!empty($join['type']) ? strtoupper($join['type']) : JoinType::INNER) . "',
+            'relation' => '" . (!empty($join['relation']) ? $join['relation'] : JoinRelation::ONE) . "',
+            'keys'     => [" . var_export(key($join['keys']), true) . " => " . var_export(current($join['keys']), true) . "],
+        ],";
+        }
+
+        $this->vars['db_joins_config'] = $joinsConfig;
+    }
+
+    /**
      * Generate classes
      *
      * @return void
      */
     protected function generateClasses()
     {
-        $this->display(' * Generate classes files for Data & Mapper ' . PHP_EOL);
+        $this->displayTitle(' * Generate classes files for Data & Mapper ' . PHP_EOL);
 
-        $this->display('  > generate [  0%]: Data File      ' . "\r");
+        $this->display('  > generate [  0%]: Entities Files       ' . "\r");
         $this->generateDataFiles();
 
-        $this->display('  > generate [ 50%]: Data File      ' . "\r");
+        $this->display('  > generate [ 33%]: Mappers Files         ' . "\r");
         $this->generateMapperFiles();
+
+        if ($this->hasRepository) {
+            $this->display('  > generate [ 66%]: Repository Files      ' . "\r");
+            $this->generateRepositoryFiles();
+        }
 
         $this->display('  > generate [100%]: done !    ' . "\r");
         $this->display(PHP_EOL . PHP_EOL);
@@ -646,12 +695,14 @@ abstract class Abstract' . $this->config->getClassname() . ' extends AbstractEnt
 
 namespace ' . $namespace . ';
 
+use ' . substr(__NAMESPACE__, 0, strrpos(__NAMESPACE__, '\\')) . '\EntityInterface;
+
 /**
  * DataMapper Data class for table "' . $this->config->getDbTable() . '"
  *
  * @author ' . $this->config->getAuthor() . '
  */
-class ' . $this->config->getClassname() . ' extends ' . $extends . '
+class ' . $this->config->getClassname() . ' extends ' . $extends . ' implements EntityInterface
 {
 }
 ';
@@ -678,6 +729,19 @@ class ' . $this->config->getClassname() . ' extends ' . $extends . '
 
         $this->generateMapperFileAbstract($dirAbstract);
         $this->generateMapperFile($dir);
+    }
+
+    /**
+     * Generate main class model.
+     *
+     * @return void
+     * @throws \RuntimeException
+     */
+    protected function generateRepositoryFiles()
+    {
+        $dir = $this->rootDir . '/' . $this->config->getBasePathForRepository();
+
+        $this->generateRepositoryFile($dir);
     }
 
     /**
@@ -743,89 +807,14 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
     protected $dataNamesMap = [
 ' . $this->vars['data_names_map'] . '
     ];
+    
+    /** @var string[][] $joinsConfig List of config for smart joins */
+    protected $joinsConfig = [
+' . $this->vars['db_joins_config'] . '
+    ];
 
     /** @var bool $isCacheEnabled If cache is enable or not by default. */
     protected $isCacheEnabled = ' . var_export($this->config->hasCache(), true) . ';
-
-    /**
-     * Get first row corresponding of the id.
-     *
-     * @param  int $id
-     * @return ' . $this->config->getClassname() . '
-     * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Exception
-     */
-    public function findById($id)
-    {
-        return parent::findById($id);
-    }
-
-    /**
-     * Get first row corresponding of the keys.
-     *
-     * @param  string[] $keys
-     * @return ' . $this->config->getClassname() . '
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Exception
-     */
-    public function findByKeys(array $keys)
-    {
-        return parent::findByKeys($keys);
-    }
-
-    /**
-     * Select all rows corresponding of where clause.
-     *
-     * @return ' . $this->config->getClassname() . '[] List of row.
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
-     */
-    public function select()
-    {
-        return parent::select();
-    }
-
-    /**
-     * Select first rows corresponding to where clause.
-     *
-     * @return ' . $this->config->getClassname() . '
-     * @throws \\' . $currentNamespace . '\Exception\EntityNotExistsException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Exception
-     */
-    public function selectOne()
-    {
-        return parent::selectOne();
-    }
-
-    /**
-     * Fetch rows for specified query.
-     *
-     * @param string $query
-     * @return ' . $this->config->getClassname() . '[] Array of model_base object for query.
-     * @throws \\' . $currentNamespace . '\Exception\OrmException
-     * @throws \Exception
-     */
-    public function query($query)
-    {
-        return parent::query($query);
-    }
-
-    /**
-     * Create new instance of extended AbstractEntity class & return it.
-     *
-     * @param  \stdClass $row
-     * @param  bool      $exists
-     * @return ' . $this->config->getClassname() . '
-     */
-    public function newEntity(\stdClass $row = null, $exists = false)
-    {
-        return parent::newEntity($row, $exists);
-    }
 }
 ';
         if (false === file_put_contents($file, $content)) {
@@ -852,9 +841,15 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
             throw new \RuntimeException('Cannot create empty class file: ' . $file);
         }
 
-        $namespace = $this->config->getBaseNamespaceForMapper();
-
-        $extends = 'Abstracts\\Abstract' . $this->config->getClassname() . 'Mapper';
+        $namespace  = $this->config->getBaseNamespaceForMapper();
+        $extends    = 'Abstracts\\Abstract' . $this->config->getClassname() . 'Mapper';
+        if ($this->hasRepository) {
+            $interface    = $this->config->getClassname() . 'RepositoryInterface';
+            $useNamespace = $this->config->getBaseNamespaceForRepository() . '\\' . $interface;
+        } else {
+            $interface    = 'RepositoryInterface';
+            $useNamespace = substr(__NAMESPACE__, 0, strrpos(__NAMESPACE__, '\\')) . '\\' . $interface;
+        }
 
         $content = '<?' . 'php
 
@@ -867,13 +862,108 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
 
 namespace ' . $namespace . ';
 
+use ' . $useNamespace . ';
+
 /**
  * DataMapper Mapper class for table "' . $this->config->getDbTable() . '"
  *
  * @author ' . $this->config->getAuthor() . '
  */
-class ' . $this->config->getClassname() . 'Mapper extends ' . $extends . '
+class ' . $this->config->getClassname() . 'Mapper extends ' . $extends . ' implements ' . $interface . '
 {
+}
+';
+        if (false === file_put_contents($file, $content)) {
+            throw new \RuntimeException('Unable to write file content! (file: ' . $file . ')');
+        }
+    }
+
+    /**
+     * Generate abstract file mapper class.
+     *
+     * @param  string $dir Directory for class
+     * @return void
+     * @throws \RuntimeException
+     */
+    protected function generateRepositoryFile($dir)
+    {
+        $file = $dir . '/' . $this->config->getClassname() . 'RepositoryInterface.php';
+
+        if (file_exists($file)) {
+            return;
+        }
+
+        if (!is_readable($file) && false === file_put_contents($file, '')) {
+            throw new \RuntimeException('Cannot create empty class file: ' . $file);
+        }
+
+        $namespace = $this->config->getBaseNamespaceForRepository();
+        $currentNamespace = substr(__NAMESPACE__, 0, strrpos(__NAMESPACE__,'\\'));
+
+        $content = '<?' . 'php
+
+/*
+ * Copyright (c) ' . $this->config->getCopyright() . '
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace ' . $namespace . ';
+
+use ' . $currentNamespace . '\Query\QueryBuilderInterface;
+use ' . $currentNamespace . '\Query\SelectBuilder;
+use ' . $currentNamespace . '\RepositoryInterface;
+use ' . $this->config->getBaseNamespaceForData() . '\\' . $this->config->getClassname() . ';
+
+/**
+ * ' . $this->config->getClassname() . ' repository interface.
+ *
+ * @author ' . $this->config->getAuthor() . '
+ */
+interface ' . $this->config->getClassname() . 'RepositoryInterface extends RepositoryInterface
+{
+    /**
+     * {@inheritdoc}
+     * @return ' . $this->config->getClassname() . '
+     */
+    public function findById($id);
+
+    /**
+     * {@inheritdoc}
+     * @return ' . $this->config->getClassname() . '
+     */
+    public function findByKeys(array $primaryKeys);
+
+    /**
+     * {@inheritdoc}
+     * @return ' . $this->config->getClassname() . '[]
+     */
+    public function findAllByKeys(array $keys);
+
+    /**
+     * {@inheritdoc}
+     * @return ' . $this->config->getClassname() . '
+     */
+    public function newEntity(\stdClass $row = null, $exists = false);
+    
+    /**
+     * {@inheritdoc}
+     * @return ' . $this->config->getClassname() . '[]
+     */
+    public function select(SelectBuilder $queryBuilder);
+
+    /**
+     * {@inheritdoc}
+     * @return ' . $this->config->getClassname() . '
+     */
+    public function selectOne(SelectBuilder $queryBuilder);
+
+    /**
+     * {@inheritdoc}
+     * @return ' . $this->config->getClassname() . '[]
+     */
+    public function query(QueryBuilderInterface $queryBuilder);
 }
 ';
         if (false === file_put_contents($file, $content)) {
@@ -889,7 +979,19 @@ class ' . $this->config->getClassname() . 'Mapper extends ' . $extends . '
     protected function display($text)
     {
         if ($this->verbose) {
-            echo $text;
+            Out::std($text, '');
+        }
+    }
+
+    /**
+     * Display text only if is verbose mode (not for phpunit)
+     *
+     * @param string $text
+     */
+    protected function displayTitle($text)
+    {
+        if ($this->verbose) {
+            Out::std((new Style($text))->colorForeground(Color::GREEN)->bold(), '');
         }
     }
 }

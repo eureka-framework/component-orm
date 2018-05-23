@@ -32,12 +32,14 @@ class Config extends AbstractConfig
         $this->classname = $config['class']['classname'];
 
         //~ Namespace
-        $this->baseNamespaceForData   = $config['namespace']['data'];
-        $this->baseNamespaceForMapper = $config['namespace']['mapper'];
+        $this->baseNamespaceForData       = $config['namespace']['data'];
+        $this->baseNamespaceForMapper     = $config['namespace']['mapper'];
+        $this->baseNamespaceForRepository = isset($config['namespace']['repository']) ? $config['namespace']['repository'] : null;
 
         //~ Path
-        $this->basePathForData   = $config['path']['data'];
-        $this->basePathForMapper = $config['path']['mapper'];
+        $this->basePathForData       = $config['path']['data'];
+        $this->basePathForMapper     = $config['path']['mapper'];
+        $this->basePathForRepository = isset($config['path']['repository']) ? $config['path']['repository'] : null;
 
         //~ Cache
         //$this->cacheName   = '';//$config['cache']['name'];
