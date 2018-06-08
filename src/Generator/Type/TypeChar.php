@@ -21,9 +21,10 @@ class TypeChar extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type       = 'string';
-        $this->castDb     = '(string)';
-        $this->castMethod = '(string)';
-        $this->emptyValue = "''";
+        $this->type           = 'string';
+        $this->castDb         = '(string)';
+        $this->castMethod     = '(string)';
+        $this->emptyValue     = "''";
+        $this->validatorClass = \Eureka\Component\Validation\Validator\StringValidator::class;
     }
 }

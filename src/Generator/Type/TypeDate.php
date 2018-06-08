@@ -21,9 +21,10 @@ class TypeDate extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type       = 'string';
-        $this->castDb     = '(string)';
-        $this->castMethod = '(string)';
-        $this->emptyValue = "'0000-00-00'";
+        $this->type           = 'string';
+        $this->castDb         = '(string)';
+        $this->castMethod     = '(string)';
+        $this->emptyValue     = "'0000-00-00'";
+        $this->validatorClass = \Eureka\Component\Validation\Validator\DateValidator::class;
     }
 }

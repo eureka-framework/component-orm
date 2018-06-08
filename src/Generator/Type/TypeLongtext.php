@@ -10,20 +10,21 @@
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
- * Mapping type for SMALLTEXT SQL values
+ * Mapping type for LONGTEXT SQL values
  *
  * @author Romain Cottard
  */
-class TypeSmalltext extends TypeAbstract
+class TypeLongtext extends TypeAbstract
 {
     /**
      * Class constructor.
      */
     public function __construct()
     {
-        $this->type       = 'string';
-        $this->castDb     = '(string)';
-        $this->castMethod = '(string)';
-        $this->emptyValue = "''";
+        $this->type           = 'string';
+        $this->castDb         = '(string)';
+        $this->castMethod     = '(string)';
+        $this->emptyValue     = "''";
+        $this->validatorClass = \Eureka\Component\Validation\Validator\StringValidator::class;
     }
 }

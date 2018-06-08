@@ -10,21 +10,21 @@
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
- * Mapping type for TINYINT SQL values
+ * Mapping type for TINYTEXT SQL values
  *
  * @author Romain Cottard
  */
-class TypeBool extends TypeAbstract
+class TypeTinytext extends TypeAbstract
 {
     /**
      * Class constructor.
      */
     public function __construct()
     {
-        $this->type           = 'bool';
-        $this->castDb         = '(int)';
-        $this->castMethod     = '(bool)';
-        $this->emptyValue     = 'false';
-        $this->validatorClass = \Eureka\Component\Validation\Validator\BooleanValidator::class;
+        $this->type           = 'string';
+        $this->castDb         = '(string)';
+        $this->castMethod     = '(string)';
+        $this->emptyValue     = "''";
+        $this->validatorClass = \Eureka\Component\Validation\Validator\StringValidator::class;
     }
 }

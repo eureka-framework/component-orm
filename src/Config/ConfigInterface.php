@@ -122,6 +122,13 @@ interface ConfigInterface
     public function getCachePrefix();
 
     /**
+     * Get validation config.
+     *
+     * @return array
+     */
+    public function getValidation();
+
+    /**
      * Get Config object(s) for "joined" tables
      *
      * @return ConfigInterface[]

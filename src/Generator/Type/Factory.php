@@ -32,14 +32,14 @@ class Factory
             throw new \Exception();
         }
 
-        $type    = (string) $matches[1];
-        $display = (int) $matches[2];
-        $other   = (string) $matches[3];
+        $type   = (string) $matches[1];
+        $length = (int) $matches[2];
+        $other  = (string) $matches[3];
 
         switch (strtolower($type)) {
             //~ Special case for tinyint used as boolean value.
             case 'tinyint':
-                $type = (($display === 1 || false !== strpos($sqlComment, 'ORMTYPE:bool')) ? new TypeBool() : new TypeTinyint());
+                $type = (($length === 1 || false !== strpos($sqlComment, 'ORMTYPE:bool')) ? new TypeBool() : new TypeTinyint());
                 break;
             //~ Other case
             default:
@@ -53,7 +53,7 @@ class Factory
                 break;
         }
 
-        $type->setDisplay($display);
+        $type->setLength($length);
 
         switch (strtolower($other)) {
             case 'unsigned':

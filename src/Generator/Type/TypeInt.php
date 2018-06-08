@@ -21,9 +21,10 @@ class TypeInt extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type       = 'int';
-        $this->castDb     = '(int)';
-        $this->castMethod = '(int)';
-        $this->emptyValue = '0';
+        $this->type           = 'int';
+        $this->castDb         = '(int)';
+        $this->castMethod     = '(int)';
+        $this->emptyValue     = '0';
+        $this->validatorClass = \Eureka\Component\Validation\Validator\IntegerValidator::class;
     }
 }

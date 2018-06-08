@@ -64,6 +64,9 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var ConfigInterface[] $joinList List of joined config. */
     protected $joinList = [];
 
+    /** @var array $validation Validation config. */
+    protected $validation = [];
+
     /**
      * Initialize config.
      *
@@ -154,6 +157,14 @@ abstract class AbstractConfig implements ConfigInterface
     public function getCachePrefix()
     {
         return strtr(strtolower($this->cachePrefix), '_', '.');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getValidation()
+    {
+        return $this->validation;
     }
 
     /**

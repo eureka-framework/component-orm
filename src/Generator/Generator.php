@@ -102,6 +102,7 @@ class Generator
      *
      * @param  Config\ConfigInterface[] $configs
      * @return $this
+     * @throws \Exception
      */
     public function build($configs)
     {
@@ -143,6 +144,7 @@ class Generator
      * Load columns data.
      *
      * @return void
+     * @throws \Exception
      */
     protected function loadColumns()
     {
@@ -150,7 +152,7 @@ class Generator
 
         $this->columns = [];
         while (false !== ($column = $statement->fetch(Connection::FETCH_OBJ))) {
-            $this->columns[] = new Column($column, $this->config->getDbPrefix());
+            $this->columns[] = new Column($column, $this->config->getDbPrefix(), $this->config->getValidation());
         }
     }
 
@@ -287,14 +289,15 @@ class Generator
             $class = $config->getClassname();
             $name  = (!empty($join['name']) ? $join['name'] : $class);
 
-            if ('one' === $join['type']) {
+            if ('one' === $join['relation']) {
                 $joinMethod = $this->buildDataJoinsOne($config, $name, $join['keys']);
                 $joinsMappers['get' . ucfirst($name)] = [
                     'config'  => $config->getDbConfig(),
                     'service' => $config->getDbService(),
                     'class'   => $config->getClassname() . 'Mapper::class',
                 ];
-                $joinsUse[] = 'use ' . $config->getBaseNamespaceForData() . '\\' . $config->getClassname() . ';';
+                $useData = $config->getBaseNamespaceForData() . '\\' . $config->getClassname();
+                $joinsUse[md5($useData)] = 'use ' . $useData . ';';
             } else {
                 $joinMethod = $this->buildDataJoinsMany($config, $name, $join['keys']);
                 $joinsMappers['getAll' . ucfirst($name)] = [
@@ -304,8 +307,9 @@ class Generator
                 ];
             }
 
-            $joinsUse[] = 'use ' . $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper;';
-            $joins[$join['type']][] = $joinMethod;
+            $useMapper = $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper';
+            $joinsUse[md5($useMapper)] = 'use ' . $useMapper . ';';
+            $joins[$join['relation']][] = $joinMethod;
         }
 
         $this->vars['joins_use']  = implode("\n", $joinsUse);
@@ -572,18 +576,18 @@ class Generator
     {
         $this->displayTitle(' * Generate classes files for Data & Mapper ' . PHP_EOL);
 
-        $this->display('  > generate [  0%]: Entities Files       ' . "\r");
+        $this->display('  > generate [  0%]: Entities Files       ' . PHP_EOL);
         $this->generateDataFiles();
 
-        $this->display('  > generate [ 33%]: Mappers Files         ' . "\r");
+        $this->display('  > generate [ 33%]: Mappers Files         ' . PHP_EOL);
         $this->generateMapperFiles();
 
         if ($this->hasRepository) {
-            $this->display('  > generate [ 66%]: Repository Files      ' . "\r");
+            $this->display('  > generate [ 66%]: Repository Files      ' . PHP_EOL);
             $this->generateRepositoryFiles();
         }
 
-        $this->display('  > generate [100%]: done !    ' . "\r");
+        $this->display('  > generate [100%]: done !                ' . PHP_EOL);
         $this->display(PHP_EOL . PHP_EOL);
     }
 

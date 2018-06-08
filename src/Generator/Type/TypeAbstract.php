@@ -28,8 +28,8 @@ abstract class TypeAbstract implements TypeInterface
     /** @var bool $isUnsigned If type is unsigned */
     protected $isUnsigned = false;
 
-    /** @var int $display Number of "characters" displayed. For number, number of digit "displayed". 0 for unlimited. */
-    protected $display = 0;
+    /** @var int $length Number of characters length (string). For numbers, number of digit "displayed". 0 for unlimited. */
+    protected $length = 0;
 
     /** @var string $other Other data. */
     protected $other = '';
@@ -37,10 +37,14 @@ abstract class TypeAbstract implements TypeInterface
     /** @var string $emptyValue String for empty value. */
     protected $emptyValue = '';
 
+    /** @var string $validatorClass Validator class */
+    protected $validatorClass = '';
+
+    /** @var array $validatorOptions Validator options */
+    protected $validatorOptions = [];
+
     /**
-     * Get cast db string ((int), (bool)...)
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getCastDb()
     {
@@ -48,9 +52,7 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * Get cast method string ((int), (bool)...)
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getCastMethod()
     {
@@ -58,9 +60,7 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * Get type string (int, bool...)
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getType()
     {
@@ -68,9 +68,7 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * Return empty value.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function getEmptyValue()
     {
@@ -78,9 +76,23 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * Get if type is unsigned.
-     *
-     * @return bool
+     * {@inheritdoc}
+     */
+    public function getLength()
+    {
+        return $this->length;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getValidatorClass()
+    {
+        return $this->validatorClass;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function isUnsigned()
     {
@@ -88,14 +100,14 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * Number of "characters" displayed. For number, number of digit "displayed".
+     * Number of characters length (string). For numbers, number of digit "displayed".
      *
-     * @param  int $display
+     * @param  int $length
      * @return $this
      */
-    public function setDisplay($display)
+    public function setLength($length)
     {
-        $this->display = (int) $display;
+        $this->length = (int) $length;
 
         return $this;
     }

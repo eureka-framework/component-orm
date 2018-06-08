@@ -10,6 +10,7 @@
 namespace Eureka\Component\Orm\Generator;
 
 use Eureka\Component\Orm\Generator\Type;
+use Eureka\Component\Validation\Validator\IntegerValidator;
 
 /**
  * Sql column data class
@@ -42,16 +43,31 @@ class Column
     /** @var Type\TypeInterface $type Type instance. */
     protected $type = null;
 
+    /** @var array $validation Validation config if provided. */
+    protected $validation = [];
+
+    /** @var bool $hasValidation */
+    protected $hasValidation = false;
+
+    /** @var bool $hasValidationAuto */
+    protected $hasValidationAuto = false;
+
     /**
      * Column constructor.
      *
      * @param \stdClass $column
      * @param string[]|string $dbPrefixes
+     * @param array $validation
+     * @throws \Exception
      */
-    public function __construct(\stdClass $column, $dbPrefixes = [])
+    public function __construct(\stdClass $column, $dbPrefixes = [], array $validation = [])
     {
         $this->setData($column);
         $this->dbPrefixes = is_string($dbPrefixes) ? [$dbPrefixes] : $dbPrefixes;
+        $this->validation = isset($validation['extended_validation'][$column->Field]) ? $validation['extended_validation'][$column->Field] : [];
+
+        $this->hasValidation     = (isset($validation['enabled']) && (bool) $validation['enabled']);
+        $this->hasValidationAuto = $this->hasValidation && (isset($validation['auto']) && (bool) $validation['auto']);
     }
 
     /**
@@ -95,12 +111,28 @@ class Column
     {
         $varname = '$' . $this->getPropertyName();
         $autoinc = '';
-        $cast    = $this->getType()->getCastMethod() . ' ';
+        $type    = $this->getType();
+        $cast    = $type->getCastMethod() . ' ';
 
-        if ($this->isNullable()) {
+        $validation = [];
+
+        if ($this->hasValidation && !empty($this->validation)) {
+            $validation[] = '$validator = new \\' . trim($this->validation['class'], '\\') . '();';
+            $validation[] = '$validator->validate(' . $varname . ', ' . $this->getValidatorOptions(false) . ');';
+        } elseif ($this->hasValidationAuto && !empty($type->getValidatorClass())) {
+            $validation[] = '$validator = new \\' . $type->getValidatorClass() . '();';
+            $validation[] = '$validator->validate(' . $varname . ', ' . $this->getValidatorOptions(true) . ');';
+        }
+
+        $glue = "\n\t\t";
+        if ($this->isNullable() && !empty($validation)) {
+            $forceCast = 'if (' . $varname . ' !== null) {
+            ' . $varname . ' = ' . $cast . $varname . ';' . (!empty($validation) ? "\n$glue\t" . implode("$glue\t", $validation) : '') . '
+        }';
+        } elseif ($this->isNullable()) {
             $forceCast = $varname . ' = (' . $varname . ' === null ? ' . $varname . ' : ' . $cast . $varname . ');';
         } else {
-            $forceCast = $varname . ' = ' . $cast . $varname . ';';
+            $forceCast = $varname . ' = ' . $cast . $varname . ';' . (!empty($validation) ? "\n$glue" . implode($glue, $validation) : '');
         }
 
         list($forceCheck, $exception) = $this->getCheck();
@@ -111,7 +143,7 @@ class Column
     /**
      * Overridden method setAutoIncrementId().
      *
-     * @param  ' . $this->getType()->getType() . ' ' . $varname . '
+     * @param  ' . $type->getType() . ' ' . $varname . '
      * @return $this
      */
     public function setAutoIncrementId(' . $varname . ')
@@ -125,12 +157,12 @@ class Column
     /**
      * Set value for field "' . $this->getName() . '"
      *
-     * @param  ' . $this->getType()->getType() . ' ' . $varname . '
+     * @param  ' . $type->getType() . ' ' . $varname . '
      * @return $this' . (!empty($exception) ? "\n     * @throws " . $exception : '') . '
      */
     public function ' . $this->getMethodNameSet() . '(' . $varname . ')
     {
-        ' . $forceCast . (!empty($forceCheck) ? "\n" . $forceCheck . "\n" : '') . '
+        ' . $forceCast . (!empty($forceCheck) ? "\n" . $forceCheck : '') . '
 
         if ($this->exists() && $this->' . $this->getPropertyName() . ' !== ' . $varname . ') {
             $this->updated[\'' . $this->getPropertyName() . '\'] = true;
@@ -178,14 +210,30 @@ class Column
      * Get default value for the column.
      *
      * @param  bool $forceReturn
+     * @param  bool $originalType
      * @return mixed
      */
-    public function getDefault($forceReturn = false)
+    public function getDefault($forceReturn = false, $originalType = false)
     {
         $default = $this->default;
 
         if ($forceReturn && $this->default === '') {
             $default = $this->getType()->getEmptyValue();
+        }
+
+        if ($originalType) {
+            switch ($default)
+            {
+                case 'true':
+                    $default = true;
+                    break;
+                case 'false':
+                    $default = false;
+                    break;
+                case 'null':
+                    $default = null;
+                    break;
+            }
         }
 
         return $default;
@@ -249,6 +297,7 @@ class Column
      *
      * @param  \stdClass $column
      * @return $this
+     * @throws \Exception
      */
     protected function setData(\stdClass $column)
     {
@@ -467,5 +516,110 @@ class Column
         }
 
         return $check;
+    }
+
+    /**
+     * @param  bool $auto
+     * @return string
+     */
+    protected function getValidatorOptions($auto = false)
+    {
+        if ($auto) {
+            $options = $this->getValidatorOptionsFromType($this->getType());
+        } else {
+            $options = !empty($this->validation['options']) ? $this->validation['options'] : [];
+        }
+
+        $return = [];
+        foreach ($options as $name => $value) {
+            $return[] = var_export($name, true ) . ' => ' . var_export($value, true);
+        }
+
+        return '[' . implode(', ', $return) . ']';
+    }
+
+    /**
+     * @param  Type\TypeInterface $type
+     * @return array
+     */
+    private function getValidatorOptionsFromType(Type\TypeInterface $type)
+    {
+        $options = [];
+
+        switch (get_class($type))
+        {
+            //~ Case Integers
+            case Type\TypeBigint::class:
+                $options = array_merge($options, $type->isUnsigned() ? IntegerValidator::BIGINT_UNSIGNED : IntegerValidator::BIGINT_SIGNED);
+                break;
+            case Type\TypeInt::class:
+                $options = array_merge($options, $type->isUnsigned() ? IntegerValidator::INT_UNSIGNED : IntegerValidator::INT_SIGNED);
+                break;
+            case Type\TypeMediumint::class:
+                $options = array_merge($options, $type->isUnsigned() ? IntegerValidator::MEDIUMINT_UNSIGNED : IntegerValidator::MEDIUMINT_SIGNED);
+                break;
+            case Type\TypeSmallint::class:
+                $options = array_merge($options, $type->isUnsigned() ? IntegerValidator::SMALLINT_UNSIGNED : IntegerValidator::SMALLINT_SIGNED);
+                break;
+            case Type\TypeTinyint::class:
+                $options = array_merge($options, $type->isUnsigned() ? IntegerValidator::TINYINT_UNSIGNED : IntegerValidator::TINYINT_SIGNED);
+                break;
+            //~ Case float
+            case Type\TypeFloat::class:
+            case Type\TypeDouble::class:
+            case Type\TypeDecimal::class:
+                $options = array_merge($options, $type->isUnsigned() ? ['min_range' => 0.0] : []);
+                break;
+            //~ Case Strings
+            case Type\TypeLongtext::class:
+                if (!$this->isNullable()) {
+                    $options['min_length'] = 1;
+                }
+
+                $options['max_length'] = 4294967295;
+                break;
+            case Type\TypeMediumtext::class:
+                if (!$this->isNullable()) {
+                    $options['min_length'] = 1;
+                }
+
+                $options['max_length'] = 16777215;
+                break;
+            case Type\TypeText::class:
+                if (!$this->isNullable()) {
+                    $options['min_length'] = 1;
+                }
+
+                $options['max_length'] = 65535;
+                break;
+            case Type\TypeTinytext::class:
+                if (!$this->isNullable()) {
+                    $options['min_length'] = 1;
+                }
+
+                $options['max_length'] = 255;
+                break;
+            case Type\TypeVarchar::class:
+            case Type\TypeChar::class:
+                if (!$this->isNullable()) {
+                    $options['min_length'] = 1;
+                }
+
+                $options['max_length'] = $type->getLength();
+                break;
+            //~ Case "boolean"
+            case Type\TypeBool::class:
+                //~ Case Date / Time
+            case Type\TypeDateTime::class:
+            case Type\TypeDate::class:
+            case Type\TypeTime::class:
+            case Type\TypeTimestamp::class:
+                //~ Default
+            default:
+                // Nothing to add
+                break;
+        }
+
+        return $options;
     }
 }

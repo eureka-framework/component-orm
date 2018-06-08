@@ -10,8 +10,8 @@
 namespace Eureka\Component\Orm\Script;
 
 use Eureka\Component\Config\Config;
-use Eureka\Component\Orm\Generator\Generator as GeneratorService;
 use Eureka\Component\Orm\Config\Config as OrmConfig;
+use Eureka\Component\Orm\Generator\Generator as GeneratorService;
 use Eureka\Eurekon;
 
 /**
@@ -63,7 +63,7 @@ class Generator extends Eurekon\AbstractScript
         $config = clone $this->getConfig();
         $config->loadYamlFromDirectory($directory . '/orm', 'orm.', null, false);
 
-        $configs  = $this->findConfigs($config, $configName);
+        $configs = $this->findConfigs($config, $configName);
 
         (new GeneratorService())->setConnection($this->getContainer()->get($dbServiceName))
             ->setHasRepository($argument->has('with-repository'))
@@ -108,7 +108,6 @@ class Generator extends Eurekon\AbstractScript
             if (empty($data[$name]['joins'])) {
                 continue;
             }
-
             $joins = $data[$name]['joins'];
 
             foreach ($joins as $key => $join) {
@@ -133,5 +132,4 @@ class Generator extends Eurekon\AbstractScript
 
         return $configs;
     }
-
 }

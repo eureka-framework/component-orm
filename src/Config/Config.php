@@ -51,6 +51,9 @@ class Config extends AbstractConfig
         $this->dbConfig  = !empty($config['database']['config']) ? $config['database']['config'] : '';
         $this->dbService = !empty($config['database']['service']) ? $config['database']['service'] : '';
 
+        //~ Validation
+        $this->validation = !empty($config['validation']) ? $config['validation'] : [];
+
         //~ Joins
         $this->joinList = (!empty($config['joins']) ? $config['joins'] : []);
 

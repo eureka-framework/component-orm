@@ -45,6 +45,20 @@ interface TypeInterface
     public function getEmptyValue();
 
     /**
+     * Get length of type
+     *
+     * @return int
+     */
+    public function getLength();
+
+    /**
+     * Get validator class name.
+     *
+     * @return string
+     */
+    public function getValidatorClass();
+
+    /**
      * If type is unsigned
      *
      * @return bool

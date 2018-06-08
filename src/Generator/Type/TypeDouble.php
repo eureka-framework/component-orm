@@ -21,9 +21,10 @@ class TypeDouble extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type       = 'float';
-        $this->castDb     = '(float)';
-        $this->castMethod = '(float)';
-        $this->emptyValue = '0.0';
+        $this->type           = 'float';
+        $this->castDb         = '(float)';
+        $this->castMethod     = '(float)';
+        $this->emptyValue     = '0.0';
+        $this->validatorClass = \Eureka\Component\Validation\Validator\FloatValidator::class;
     }
 }

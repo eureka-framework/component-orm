@@ -25,5 +25,6 @@ class TypeTime extends TypeAbstract
         $this->castDb     = '(string)';
         $this->castMethod = '(string)';
         $this->emptyValue = "'00:00:00'";
+        $this->validatorClass = \Eureka\Component\Validation\Validator\TimeValidator::class;
     }
 }
