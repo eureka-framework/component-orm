@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -37,8 +39,8 @@ abstract class TypeAbstract implements TypeInterface
     /** @var string $emptyValue String for empty value. */
     protected $emptyValue = '';
 
-    /** @var string $validatorClass Validator class */
-    protected $validatorClass = '';
+    /** @var string $validatorType Validator type|class */
+    protected $validatorType = '';
 
     /** @var array $validatorOptions Validator options */
     protected $validatorOptions = [];
@@ -46,7 +48,7 @@ abstract class TypeAbstract implements TypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getCastDb()
+    public function getCastDb(): string
     {
         return $this->castDb;
     }
@@ -54,7 +56,7 @@ abstract class TypeAbstract implements TypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getCastMethod()
+    public function getCastMethod(): string
     {
         return $this->castMethod;
     }
@@ -62,7 +64,7 @@ abstract class TypeAbstract implements TypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -70,7 +72,7 @@ abstract class TypeAbstract implements TypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getEmptyValue()
+    public function getEmptyValue(): string
     {
         return $this->emptyValue;
     }
@@ -78,7 +80,7 @@ abstract class TypeAbstract implements TypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getLength()
+    public function getLength(): int
     {
         return $this->length;
     }
@@ -86,15 +88,15 @@ abstract class TypeAbstract implements TypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getValidatorClass()
+    public function getValidatorType(): string
     {
-        return $this->validatorClass;
+        return $this->validatorType;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function isUnsigned()
+    public function isUnsigned(): bool
     {
         return $this->isUnsigned;
     }
@@ -105,7 +107,7 @@ abstract class TypeAbstract implements TypeInterface
      * @param  int $length
      * @return $this
      */
-    public function setLength($length)
+    public function setLength(int $length): TypeInterface
     {
         $this->length = (int) $length;
 
@@ -118,7 +120,7 @@ abstract class TypeAbstract implements TypeInterface
      * @param  bool $isUnsigned
      * @return $this
      */
-    public function setIsUnsigned($isUnsigned)
+    public function setIsUnsigned(bool $isUnsigned): TypeInterface
     {
         $this->isUnsigned = (bool) $isUnsigned;
 
@@ -131,7 +133,7 @@ abstract class TypeAbstract implements TypeInterface
      * @param  string $other
      * @return $this
      */
-    public function setOther($other)
+    public function setOther(string $other): TypeInterface
     {
         $this->other = $other;
 

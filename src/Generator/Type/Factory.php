@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -25,7 +27,7 @@ class Factory
      * @throws \RangeException
      * @throws \Exception
      */
-    public static function create($sqlType, $sqlComment)
+    public static function create(string $sqlType, string $sqlComment): TypeInterface
     {
         $matches = array();
         if (!(bool) preg_match('`([a-z]+)\(?([0-9]*)\)? ?(.*)`', $sqlType, $matches)) {
@@ -36,31 +38,25 @@ class Factory
         $length = (int) $matches[2];
         $other  = (string) $matches[3];
 
-        switch (strtolower($type)) {
+        if (strtolower($type) === 'tinyint') {
             //~ Special case for tinyint used as boolean value.
-            case 'tinyint':
-                $type = (($length === 1 || false !== strpos($sqlComment, 'ORMTYPE:bool')) ? new TypeBool() : new TypeTinyint());
-                break;
-            //~ Other case
-            default:
-                $classname = __NAMESPACE__ . '\Type' . ucfirst($type);
+            $type = (($length === 1 || false !== strpos($sqlComment, 'ORMTYPE:bool')) ? new TypeBool() : new TypeTinyint());
+        } else {
+            $classname = __NAMESPACE__ . '\Type' . ucfirst($type);
 
-                if (!class_exists($classname)) {
-                    throw new \RangeException('Sql type cannot be converted into php type! (type: ' . $type . ')');
-                }
+            if (!class_exists($classname)) {
+                throw new \RangeException('Sql type cannot be converted into php type! (type: ' . $type . ')');
+            }
 
-                $type = new $classname();
-                break;
+            $type = new $classname();
         }
 
         $type->setLength($length);
 
-        switch (strtolower($other)) {
-            case 'unsigned':
-                $type->setIsUnsigned(true);
-                break;
-            default:
-                $type->setOther($other);
+        if (strtolower($other) === 'unsigned') {
+            $type->setIsUnsigned(true);
+        } else {
+            $type->setOther($other);
         }
 
         return $type;

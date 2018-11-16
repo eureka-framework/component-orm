@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -21,10 +23,10 @@ class TypeTimestamp extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type           = 'string';
-        $this->castDb         = '(string)';
-        $this->castMethod     = '(string)';
-        $this->emptyValue     = "'0000-00-00 00:00:00'";
-        $this->validatorClass = \Eureka\Component\Validation\Validator\DateTimeValidator::class;
+        $this->type          = 'string';
+        $this->castDb        = '(string)';
+        $this->castMethod    = '(string)';
+        $this->emptyValue    = "'0000-00-00 00:00:00'";
+        $this->validatorType = 'datetime';
     }
 }

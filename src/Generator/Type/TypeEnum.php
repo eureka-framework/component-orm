@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -21,10 +23,10 @@ class TypeEnum extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type           = 'string';
-        $this->castDb         = '(string)';
-        $this->castMethod     = '(string)';
-        $this->emptyValue     = "''";
-        $this->validatorClass = \Eureka\Component\Validation\Validator\StringValidator::class;
+        $this->type          = 'string';
+        $this->castDb        = '(string)';
+        $this->castMethod    = '(string)';
+        $this->emptyValue    = "''";
+        $this->validatorType = 'string';
     }
 }

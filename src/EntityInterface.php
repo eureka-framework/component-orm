@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm;
 
 /**
@@ -19,7 +21,7 @@ interface EntityInterface
     /**
      * @return bool
      */
-    public function hasAutoIncrement();
+    public function hasAutoIncrement(): bool;
 
     /**
      * Set auto increment value.
@@ -28,21 +30,21 @@ interface EntityInterface
      * @param  int $id
      * @return $this
      */
-    public function setAutoIncrementId($id);
+    public function setAutoIncrementId(int $id): EntityInterface;
 
     /**
      * Return cache key for the current data instance.
      *
      * @return string
      */
-    public function getCacheKey();
+    public function getCacheKey(): string;
 
     /**
      * If the data set exists.
      *
      * @return bool
      */
-    public function exists();
+    public function exists(): bool;
 
     /**
      * If at least one data has been updated.
@@ -51,7 +53,7 @@ interface EntityInterface
      * @param  bool $exists
      * @return $this
      */
-    public function setExists($exists);
+    public function setExists(bool $exists): EntityInterface;
 
     /**
      * If at least one data has been updated.
@@ -60,12 +62,12 @@ interface EntityInterface
      * @param  string $property
      * @return bool
      */
-    public function isUpdated($property = null);
+    public function isUpdated(string $property = null);
 
     /**
      * Reset updated list of properties
      *
      * @return $this
      */
-    public function resetUpdated();
+    public function resetUpdated(): EntityInterface;
 }

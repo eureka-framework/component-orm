@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Config;
 
 /**
@@ -22,7 +24,7 @@ class Config extends AbstractConfig
      * @param  array $config
      * @return $this
      */
-    protected function init($config)
+    protected function init($config): ConfigInterface
     {
         //~ Comment
         $this->author    = $config['comment']['author'];

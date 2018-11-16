@@ -1,0 +1,23 @@
+<?php
+
+/*
+ * Copyright (c) {{ copyright }}
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use {{ useNamespace }};
+
+/**
+ * Mapper class for table "{{ dbTable }}"
+ *
+ * @author {{ author }}
+ */
+class {{ className }}Mapper extends {{ extends }} implements {{ implements }}
+{
+}

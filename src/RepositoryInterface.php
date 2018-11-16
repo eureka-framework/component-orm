@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm;
 
 /**
@@ -22,8 +24,10 @@ interface RepositoryInterface extends MapperInterface
      * @param  int $id
      * @return EntityInterface
      * @throws \LogicException
+     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function findById($id);
+    public function findById(int $id): EntityInterface;
 
     /**
      * Get rows corresponding of the keys.
@@ -31,9 +35,10 @@ interface RepositoryInterface extends MapperInterface
      * @param  string[] $keys
      * @return EntityInterface[] List of row
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Eureka\Component\Orm\Exception\OrmException
      * @throws \Exception
      */
-    public function findAllByKeys(array $keys);
+    public function findAllByKeys(array $keys): array;
 
     /**
      * Get first row corresponding of the primary keys.
@@ -41,8 +46,10 @@ interface RepositoryInterface extends MapperInterface
      * @param  string[] $primaryKeys
      * @return EntityInterface
      * @throws \UnexpectedValueException
+     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function findByKeys(array $primaryKeys);
+    public function findByKeys(array $primaryKeys): EntityInterface;
 
     /**
      * Either insert or update an entity
@@ -54,7 +61,7 @@ interface RepositoryInterface extends MapperInterface
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \Exception
      */
-    public function persist(EntityInterface $entity, $onDuplicateUpdate = false, $onDuplicateIgnore = false);
+    public function persist(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool;
 
     /**
      * Delete data from database.
@@ -65,7 +72,7 @@ interface RepositoryInterface extends MapperInterface
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \Exception
      */
-    public function delete(EntityInterface $entity);
+    public function delete(EntityInterface $entity): bool;
 
     /**
      * Insert active row (or update row if it possible).
@@ -79,7 +86,7 @@ interface RepositoryInterface extends MapperInterface
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \Exception
      */
-    public function insert(EntityInterface $entity, $onDuplicateUpdate = false, $onDuplicateIgnore = false);
+    public function insert(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool;
 
     /**
      * Update data into database
@@ -90,16 +97,5 @@ interface RepositoryInterface extends MapperInterface
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \Exception
      */
-    public function update(EntityInterface $entity);
-
-    /**
-     * Create new instance of extended EntityInterface class & return it.
-     *
-     * @param  \stdClass $row
-     * @param  bool $exists
-     * @return object
-     * @throws \LogicException
-     */
-    public function newEntity(\stdClass $row = null, $exists = false);
-
+    public function update(EntityInterface $entity): bool;
 }

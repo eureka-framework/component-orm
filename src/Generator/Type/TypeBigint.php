@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -25,6 +27,6 @@ class TypeBigint extends TypeAbstract
         $this->castDb         = '(int)';
         $this->castMethod     = '(int)';
         $this->emptyValue     = '0';
-        $this->validatorClass = \Eureka\Component\Validation\Validator\IntegerValidator::class;
+        $this->validatorType = 'integer';
     }
 }

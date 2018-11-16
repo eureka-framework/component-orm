@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -21,47 +23,47 @@ interface TypeInterface
      *
      * @return string
      */
-    public function getCastDb();
+    public function getCastDb(): string;
 
     /**
      * Get cast method string ((int), (bool)...)
      *
      * @return string
      */
-    public function getCastMethod();
+    public function getCastMethod(): string;
 
     /**
      * Get type string (int, bool...)
      *
      * @return string
      */
-    public function getType();
+    public function getType(): string;
 
     /**
      * Get empty value for this type.
      *
-     * @return bool
+     * @return string
      */
-    public function getEmptyValue();
+    public function getEmptyValue(): string;
 
     /**
      * Get length of type
      *
      * @return int
      */
-    public function getLength();
+    public function getLength(): int;
 
     /**
-     * Get validator class name.
+     * Get validator type|class name.
      *
      * @return string
      */
-    public function getValidatorClass();
+    public function getValidatorType(): string;
 
     /**
      * If type is unsigned
      *
      * @return bool
      */
-    public function isUnsigned();
+    public function isUnsigned(): bool;
 }

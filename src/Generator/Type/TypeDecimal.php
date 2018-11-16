@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -21,10 +23,10 @@ class TypeDecimal extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type           = 'float';
-        $this->castDb         = '(float)';
-        $this->castMethod     = '(float)';
-        $this->emptyValue     = '0.0';
-        $this->validatorClass = \Eureka\Component\Validation\Validator\FloatValidator::class;
+        $this->type          = 'float';
+        $this->castDb        = '(float)';
+        $this->castMethod    = '(float)';
+        $this->emptyValue    = '0.0';
+        $this->validatorType = 'float';
     }
 }

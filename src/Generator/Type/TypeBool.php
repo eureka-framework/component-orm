@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -21,10 +23,10 @@ class TypeBool extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type           = 'bool';
-        $this->castDb         = '(int)';
-        $this->castMethod     = '(bool)';
-        $this->emptyValue     = 'false';
-        $this->validatorClass = \Eureka\Component\Validation\Validator\BooleanValidator::class;
+        $this->type          = 'bool';
+        $this->castDb        = '(int)';
+        $this->castMethod    = '(bool)';
+        $this->emptyValue    = 'false';
+        $this->validatorType = 'boolean';
     }
 }

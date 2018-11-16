@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
@@ -21,10 +23,10 @@ class TypeTinyint extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type           = 'int';
-        $this->castDb         = '(int)';
-        $this->castMethod     = '(int)';
-        $this->emptyValue     = '0';
-        $this->validatorClass = \Eureka\Component\Validation\Validator\IntegerValidator::class;
+        $this->type          = 'int';
+        $this->castDb        = '(int)';
+        $this->castMethod    = '(int)';
+        $this->emptyValue    = '0';
+        $this->validatorType = 'integer';
     }
 }

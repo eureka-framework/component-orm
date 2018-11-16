@@ -7,9 +7,13 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm;
 
 use Eureka\Component\Database\Connection;
+use Eureka\Component\Validation\ValidatorInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * DataMapper Data abstract class.
@@ -36,6 +40,9 @@ abstract class AbstractEntity implements EntityInterface
     /** @var AbstractMapper[] mappers */
     protected $mappers = [];
 
+    /** @var null|\Psr\Container\ContainerInterface $validatorFactoryContainer */
+    protected $validatorFactoryContainer = null;
+
     /** @var Connection[] $connections */
     protected static $connections = [];
 
@@ -44,7 +51,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @return string
      */
-    abstract public function getCacheKey();
+    abstract public function getCacheKey(): string;
 
     /**
      * Set auto increment value.
@@ -53,7 +60,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param  integer $id
      * @return $this
      */
-    public function setAutoIncrementId($id)
+    public function setAutoIncrementId(int $id): EntityInterface
     {
         return $this;
     }
@@ -61,11 +68,13 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * AbstractEntity constructor.
      *
-     * @param \Eureka\Component\Orm\MapperInterface[]
+     * @param \Eureka\Component\Orm\RepositoryInterface[]
+     * @param \Psr\Container\ContainerInterface|null $validatorFactoryContainer
      */
-    public function __construct($mappers = [])
+    public function __construct($mappers = [], ContainerInterface $validatorFactoryContainer = null)
     {
         $this->setMappers($mappers);
+        $this->validatorFactoryContainer = $validatorFactoryContainer;
     }
 
     /**
@@ -73,7 +82,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @return bool
      */
-    public function hasAutoIncrement()
+    public function hasAutoIncrement(): bool
     {
         return $this->hasAutoIncrement;
     }
@@ -83,7 +92,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @return bool
      */
-    public function exists()
+    public function exists(): bool
     {
         return $this->exists;
     }
@@ -94,7 +103,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param  bool $exists
      * @return $this
      */
-    public function setExists($exists)
+    public function setExists(bool $exists): EntityInterface
     {
         $this->exists = (bool) $exists;
 
@@ -107,7 +116,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param  bool $isDeleted
      * @return $this
      */
-    public function setIsDelete($isDeleted)
+    public function setIsDelete(bool $isDeleted): EntityInterface
     {
         $this->isDeleted = (bool) $isDeleted;
 
@@ -119,7 +128,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @return bool
      */
-    public function isDelete()
+    public function isDelete(): bool
     {
         return $this->isDeleted;
     }
@@ -131,7 +140,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param  string $property
      * @return bool
      */
-    public function isUpdated($property = null)
+    public function isUpdated(string $property = null): bool
     {
         if (null === $property) {
             return (count($this->updated) > 0);
@@ -145,9 +154,9 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @return $this
      */
-    public function resetUpdated()
+    public function resetUpdated(): EntityInterface
     {
-        $this->updated = array();
+        $this->updated = [];
 
         return $this;
     }
@@ -155,7 +164,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Empties the join* fields
      */
-    public function resetLazyLoadedData()
+    public function resetLazyLoadedData(): void
     {
         $attributes = get_object_vars($this);
         foreach ($attributes as $attribute => $value) {
@@ -168,10 +177,10 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Add mapper for lazy loading joins.
      *
-     * @param  AbstractMapper $mapper
+     * @param  RepositoryInterface $mapper
      * @return $this
      */
-    public function addMapper(AbstractMapper $mapper)
+    public function addMapper(RepositoryInterface $mapper): EntityInterface
     {
         $this->mappers[get_class($mapper)] = $mapper;
 
@@ -181,10 +190,10 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Set mapper list for lazy loading joins.
      *
-     * @param  AbstractMapper[] $mappers
+     * @param  RepositoryInterface[] $mappers
      * @return $this
      */
-    public function setMappers(array $mappers)
+    public function setMappers(array $mappers): EntityInterface
     {
         $this->mappers = [];
 
@@ -193,5 +202,14 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @param  string $type
+     * @return \Eureka\Component\Validation\ValidatorInterface
+     */
+    protected function getValidator($type): ValidatorInterface
+    {
+        return $this->validatorFactoryContainer->get($type);
     }
 }

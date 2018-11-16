@@ -45,6 +45,9 @@ class Generator
     /** @var Connection $connection */
     protected $connection = null;
 
+    /** @var string $validatorsConfig */
+    protected $validatorsConfig = '';
+
     /**
      * Set verbose mode
      *
@@ -115,7 +118,10 @@ class Generator
             $this->buildDataClasses();
             $this->buildMapperClasses();
             $this->generateClasses();
+            $this->generateValidatorsConfig();
         }
+
+        $this->display($this->validatorsConfig . PHP_EOL);
 
         return $this;
     }
@@ -166,13 +172,15 @@ class Generator
         $this->displayTitle(' * Build Data classes for table "' . $this->config->getDbTable() . '"' . PHP_EOL);
         $this->display('  > build    [  0%]: properties...   ' . PHP_EOL);
         $this->buildDataProperties();
-        $this->display('  > build    [ 25%]: getters...      ' . PHP_EOL);
+        $this->display('  > build    [ 20%]: getters...      ' . PHP_EOL);
         $this->buildDataGetterCacheKey();
         $this->buildDataGetters();
-        $this->display('  > build    [ 50%]: setters...      ' . PHP_EOL);
+        $this->display('  > build    [ 40%]: setters...      ' . PHP_EOL);
         $this->buildDataSetters();
-        $this->display('  > build    [ 75%]: joins...        ' . PHP_EOL);
+        $this->display('  > build    [ 60%]: joins...        ' . PHP_EOL);
         $this->buildDataJoins();
+        $this->display(' > build     [ 80%]: validators...   ' . PHP_EOL);
+        $this->buildValidatorsConfig();
         $this->display('  > build    [100%]: done !          ' . PHP_EOL);
         $this->display(PHP_EOL);
     }
@@ -242,7 +250,7 @@ class Generator
      *
      * @return string
      */
-    public function getCacheKey()
+    public function getCacheKey(): string
     {
         return ' . $key . ';
     }';
@@ -257,13 +265,59 @@ class Generator
     {
         $setters = '';
 
-        $separator = "";
+        $separator = '';
         foreach ($this->columns as $column) {
             $setters   .= $separator . $column->getSetter();
             $separator = "\n";
         }
 
         $this->vars['setters'] = $setters;
+    }
+
+    /**
+     * @return void
+     */
+    protected function buildValidatorsConfig()
+    {
+        $validatorsConfig = '';
+        $entityToForm = $formToEntity = [];
+        foreach ($this->columns as $column) {
+            $validatorsConfig .= $column->getValidatorConfig();
+
+            $entityToForm[] = "        " . '$formEntity->' . $column->getSetterName() . '($this->' . $column->getGetterName() . '());';
+            $formToEntity[] = "        " . '$this->' . $column->getSetterName() . '($formEntity->' . $column->getGetterName() . '());';
+        }
+
+        $formGetterSetter = '
+    /**
+     * Get form entity container.
+     * 
+     * @param  void
+     * @return \Eureka\Component\Validation\Entity\FormEntity
+     */
+    public function getFormEntity()
+    {
+        $formEntity = $this->newEntityForm();
+' . implode("\n", $entityToForm) . '
+
+        return $formEntity;
+    }
+    
+    /**
+     * Hydrate entity with form entity values
+     * 
+     * @param  \Eureka\Component\Validation\Entity\FormEntity
+     * @return $this
+     */
+    public function hydrateFromFormEntity(FormEntity $formEntity)
+    {
+' . implode("\n", $formToEntity) . '
+
+        return $this;
+    }';
+
+        $this->vars['validators_form']   = $formGetterSetter;
+        $this->vars['validators_config'] = $validatorsConfig;
     }
 
     /**
@@ -504,17 +558,17 @@ class Generator
 
         foreach ($this->columns as $column) {
             $field        = $column->getName();
-            $fields[]     = "        '" . $field . "'";
+            $fields[]     = "            '" . $field . "'";
             $dataNamesMap .= "
-        '" . $field . "' => [
-            'get'      => '" . $column->getMethodNameGet() . "',
-            'set'      => '" . $column->getMethodNameSet() . "',
-            'property' => '" . $column->getPropertyName() . "',
-        ],";
+            '" . $field . "' => [
+                'get'      => '" . $column->getMethodNameGet() . "',
+                'set'      => '" . $column->getMethodNameSet() . "',
+                'property' => '" . $column->getPropertyName() . "',
+            ],";
         }
 
-        $this->vars['db_fields']      = implode(",\n", $fields);
-        $this->vars['data_names_map'] = $dataNamesMap;
+        $this->vars['db_fields']        = implode(",\n", $fields);
+        $this->vars['entity_names_map'] = $dataNamesMap;
     }
 
     /**
@@ -528,7 +582,7 @@ class Generator
 
         foreach ($this->columns as $column) {
             if ($column->isPrimaryKey()) {
-                $fields[] = "        '" . $column->getName() . "'";
+                $fields[] = "            '" . $column->getName() . "'";
             }
         }
 
@@ -556,12 +610,12 @@ class Generator
             }
 
             $joinsConfig .= "
-        '${name}' => [
-            'mapper'   => \\" . $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . "Mapper::class,
-            'type'     => '" . (!empty($join['type']) ? strtoupper($join['type']) : JoinType::INNER) . "',
-            'relation' => '" . (!empty($join['relation']) ? $join['relation'] : JoinRelation::ONE) . "',
-            'keys'     => [" . var_export(key($join['keys']), true) . " => " . var_export(current($join['keys']), true) . "],
-        ],";
+            '${name}' => [
+                'mapper'   => \\" . $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . "Mapper::class,
+                'type'     => '" . (!empty($join['type']) ? strtoupper($join['type']) : JoinType::INNER) . "',
+                'relation' => '" . (!empty($join['relation']) ? $join['relation'] : JoinRelation::ONE) . "',
+                'keys'     => [" . var_export(key($join['keys']), true) . " => " . var_export(current($join['keys']), true) . "],
+            ],";
         }
 
         $this->vars['db_joins_config'] = $joinsConfig;
@@ -589,6 +643,19 @@ class Generator
 
         $this->display('  > generate [100%]: done !                ' . PHP_EOL);
         $this->display(PHP_EOL . PHP_EOL);
+    }
+
+    /**
+     * @return void
+     */
+    protected function generateValidatorsConfig()
+    {
+        if (empty($this->vars['validators_config'])) {
+            return;
+        }
+
+        $this->validatorsConfig .= '
+  ' . strtolower($this->config->getDbTable()) . ':' . $this->vars['validators_config'];
     }
 
     /**
@@ -637,6 +704,8 @@ class Generator
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+ 
+declare(strict_types=1);
 
 namespace ' . $namespace . ';
 
@@ -656,6 +725,7 @@ abstract class Abstract' . $this->config->getClassname() . ' extends AbstractEnt
 ' . $this->vars['cache_key'] . '
 ' . $this->vars['getters'] . '
 ' . $this->vars['setters'] . '
+' . $this->vars['validators_form'] . '
 ' . $this->vars['joins'] . '}
 ';
         $content = str_replace("\r\n", "\n", $content);
@@ -696,6 +766,8 @@ abstract class Abstract' . $this->config->getClassname() . ' extends AbstractEnt
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace ' . $namespace . ';
 
@@ -775,6 +847,8 @@ class ' . $this->config->getClassname() . ' extends ' . $extends . ' implements 
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace ' . $namespace . ';
 
 use ' . $currentNamespace . '\AbstractMapper;
@@ -791,34 +865,30 @@ use ' . $this->config->getBaseNamespaceForData() . '\\' . $this->config->getClas
  */
 abstract class Abstract' . $this->config->getClassname() . 'Mapper extends AbstractMapper
 {
-    /** @var string $dataClass Name of class use to instance DataMapper Data class. */
-    protected $dataClass = ' . $this->config->getClassname() . '::class;
+    /**
+     * Initialize mapper with proper values for mapped table.
+     *
+     * @return $this
+     */
+    protected function initialize(): void
+    {
+        $this->setEntityClass(' . $this->config->getClassname() . '::class);
+        $this->setTable(\'' . $this->config->getDbTable() . '\');
 
-    /** @var string $table Table name */
-    protected $table = \'' . $this->config->getDbTable() . '\';
-
-    /** @var string[] $fields List of fields */
-    protected $fields = [
+        $this->setFields([
 ' . $this->vars['db_fields'] . '
-    ];
+        ]);
 
-    /** @var string[] $primaryKeys List of primary keys */
-    protected $primaryKeys = [
+        $this->setPrimaryKeys([
 ' . $this->vars['db_primary_keys'] . '
-    ];
+        ]);
 
-    /** @var string[] $dataNamesMap List of mapped names */
-    protected $dataNamesMap = [
-' . $this->vars['data_names_map'] . '
-    ];
-    
-    /** @var string[][] $joinsConfig List of config for smart joins */
-    protected $joinsConfig = [
-' . $this->vars['db_joins_config'] . '
-    ];
-
-    /** @var bool $isCacheEnabled If cache is enable or not by default. */
-    protected $isCacheEnabled = ' . var_export($this->config->hasCache(), true) . ';
+        $this->setNamesMap([' . $this->vars['entity_names_map'] . '
+        ]);
+        
+        $this->setJoinConfigs([' . $this->vars['db_joins_config'] . '
+        ]);
+    }
 }
 ';
         if (false === file_put_contents($file, $content)) {
@@ -863,6 +933,8 @@ abstract class Abstract' . $this->config->getClassname() . 'Mapper extends Abstr
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace ' . $namespace . ';
 
@@ -913,12 +985,11 @@ class ' . $this->config->getClassname() . 'Mapper extends ' . $extends . ' imple
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace ' . $namespace . ';
 
-use ' . $currentNamespace . '\Query\QueryBuilderInterface;
-use ' . $currentNamespace . '\Query\SelectBuilder;
 use ' . $currentNamespace . '\RepositoryInterface;
-use ' . $this->config->getBaseNamespaceForData() . '\\' . $this->config->getClassname() . ';
 
 /**
  * ' . $this->config->getClassname() . ' repository interface.
@@ -927,47 +998,6 @@ use ' . $this->config->getBaseNamespaceForData() . '\\' . $this->config->getClas
  */
 interface ' . $this->config->getClassname() . 'RepositoryInterface extends RepositoryInterface
 {
-    /**
-     * {@inheritdoc}
-     * @return ' . $this->config->getClassname() . '
-     */
-    public function findById($id);
-
-    /**
-     * {@inheritdoc}
-     * @return ' . $this->config->getClassname() . '
-     */
-    public function findByKeys(array $primaryKeys);
-
-    /**
-     * {@inheritdoc}
-     * @return ' . $this->config->getClassname() . '[]
-     */
-    public function findAllByKeys(array $keys);
-
-    /**
-     * {@inheritdoc}
-     * @return ' . $this->config->getClassname() . '
-     */
-    public function newEntity(\stdClass $row = null, $exists = false);
-    
-    /**
-     * {@inheritdoc}
-     * @return ' . $this->config->getClassname() . '[]
-     */
-    public function select(SelectBuilder $queryBuilder);
-
-    /**
-     * {@inheritdoc}
-     * @return ' . $this->config->getClassname() . '
-     */
-    public function selectOne(SelectBuilder $queryBuilder);
-
-    /**
-     * {@inheritdoc}
-     * @return ' . $this->config->getClassname() . '[]
-     */
-    public function query(QueryBuilderInterface $queryBuilder);
 }
 ';
         if (false === file_put_contents($file, $content)) {

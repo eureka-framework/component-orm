@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Config;
 
 /**
@@ -73,7 +75,7 @@ abstract class AbstractConfig implements ConfigInterface
      * @param  array $config
      * @return $this
      */
-    abstract protected function init($config);
+    abstract protected function init($config): ConfigInterface;
 
     /**
      * Init config & validate it.
@@ -81,7 +83,7 @@ abstract class AbstractConfig implements ConfigInterface
      * @param  array $config
      * @throws \Exception
      */
-    public function __construct($config)
+    public function __construct(array $config)
     {
         $this->init($config);
         $this->validate();
@@ -90,7 +92,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getAuthor()
+    public function getAuthor(): string
     {
         return $this->author;
     }
@@ -98,7 +100,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getCopyright()
+    public function getCopyright(): string
     {
         return $this->copyright;
     }
@@ -106,7 +108,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getClassname()
+    public function getClassname(): string
     {
         return $this->classname;
     }
@@ -114,7 +116,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getDbConfig()
+    public function getDbConfig(): string
     {
         return strtolower($this->dbConfig);
     }
@@ -122,7 +124,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getDbService()
+    public function getDbService(): string
     {
         return $this->dbService;
     }
@@ -130,7 +132,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getDbTable()
+    public function getDbTable(): string
     {
         return $this->dbTable;
     }
@@ -138,7 +140,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getDbPrefix()
+    public function getDbPrefix(): string
     {
         return $this->dbPrefix;
     }
@@ -146,7 +148,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function hasCache()
+    public function hasCache(): bool
     {
         return $this->hasCache;
     }
@@ -154,7 +156,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getCachePrefix()
+    public function getCachePrefix(): string
     {
         return strtr(strtolower($this->cachePrefix), '_', '.');
     }
@@ -162,7 +164,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getValidation()
+    public function getValidation(): array
     {
         return $this->validation;
     }
@@ -170,7 +172,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getAllJoin()
+    public function getAllJoin(): array
     {
         return $this->joinList;
     }
@@ -178,7 +180,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function setJoinList($joinList)
+    public function setJoinList(array $joinList): ConfigInterface
     {
         $this->joinList = $joinList;
 
@@ -188,7 +190,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getBaseNamespaceForData()
+    public function getBaseNamespaceForData(): string
     {
         return $this->baseNamespaceForData;
     }
@@ -196,7 +198,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getBaseNamespaceForMapper()
+    public function getBaseNamespaceForMapper(): string
     {
         return $this->baseNamespaceForMapper;
     }
@@ -204,7 +206,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getBaseNamespaceForRepository()
+    public function getBaseNamespaceForRepository(): string
     {
         return $this->baseNamespaceForRepository;
     }
@@ -212,7 +214,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getBasePathForData()
+    public function getBasePathForData(): string
     {
         return trim($this->basePathForData, '/\\');
     }
@@ -220,7 +222,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getBasePathForMapper()
+    public function getBasePathForMapper(): string
     {
         return trim($this->basePathForMapper, '/\\');
     }
@@ -228,7 +230,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getBasePathForRepository()
+    public function getBasePathForRepository(): string
     {
         return trim($this->basePathForRepository, '/\\');
     }
@@ -239,7 +241,7 @@ abstract class AbstractConfig implements ConfigInterface
      * @return $this
      * @throws \InvalidArgumentException
      */
-    protected function validate()
+    protected function validate(): ConfigInterface
     {
         if (empty($this->author)) {
             throw new \InvalidArgumentException('Author is empty!');

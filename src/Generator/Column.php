@@ -103,6 +103,22 @@ class Column
     }
 
     /**
+     * @return string
+     */
+    public function getGetterName()
+    {
+        return $this->getMethodNameGet();
+    }
+
+    /**
+     * @return string
+     */
+    public function getSetterName()
+    {
+        return $this->getMethodNameSet();
+    }
+
+    /**
      * Get method setter.
      *
      * @return string
@@ -114,20 +130,12 @@ class Column
         $type    = $this->getType();
         $cast    = $type->getCastMethod() . ' ';
 
-        $validation = [];
+        $validation = $this->getValidations($type, $varname);
 
-        if ($this->hasValidation && !empty($this->validation)) {
-            $validation[] = '$validator = new \\' . trim($this->validation['class'], '\\') . '();';
-            $validation[] = '$validator->validate(' . $varname . ', ' . $this->getValidatorOptions(false) . ');';
-        } elseif ($this->hasValidationAuto && !empty($type->getValidatorClass())) {
-            $validation[] = '$validator = new \\' . $type->getValidatorClass() . '();';
-            $validation[] = '$validator->validate(' . $varname . ', ' . $this->getValidatorOptions(true) . ');';
-        }
-
-        $glue = "\n\t\t";
+        $glue = "\n        ";
         if ($this->isNullable() && !empty($validation)) {
             $forceCast = 'if (' . $varname . ' !== null) {
-            ' . $varname . ' = ' . $cast . $varname . ';' . (!empty($validation) ? "\n$glue\t" . implode("$glue\t", $validation) : '') . '
+            ' . $varname . ' = ' . $cast . $varname . ';' . (!empty($validation) ? "\n$glue    " . implode("$glue    ", $validation) : '') . '
         }';
         } elseif ($this->isNullable()) {
             $forceCast = $varname . ' = (' . $varname . ' === null ? ' . $varname . ' : ' . $cast . $varname . ');';
@@ -146,7 +154,7 @@ class Column
      * @param  ' . $type->getType() . ' ' . $varname . '
      * @return $this
      */
-    public function setAutoIncrementId(' . $varname . ')
+    public function setAutoIncrementId(int ' . $varname . '): EntityInterface
     {
         return $this->' . $this->getMethodNameSet() . '(' . $varname . ');
     }
@@ -172,6 +180,42 @@ class Column
 
         return $this;
     }';
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidatorConfig()
+    {
+        $validation = [];
+
+        $type = $this->getType();
+
+        if (!empty($this->validation)) {
+            $validation['type']    = $this->validation['type'];
+            $validation['options'] = $this->getValidatorOptions(empty($this->validation['options']));
+        } elseif (!empty($type->getValidatorType())) {
+            $validation['type']    = $type->getValidatorType();
+            $validation['options'] = $this->getValidatorOptions(empty($this->validation['options']));
+        }
+
+        if (empty($validation)) {
+            return '';
+        }
+
+        $options = '[]';
+        if (!empty($validation['options'])) {
+            $options = '';
+            foreach($validation['options'] as $name => $value) {
+                $options .= '
+        ' . $name . ': '  . var_export($value, true);
+            }
+        }
+
+        return '
+    ' . $this->getName() . ':
+      type: \'' . $validation['type'] . '\'
+      options: ' . $options . "\n";
     }
 
     /**
@@ -520,14 +564,19 @@ class Column
 
     /**
      * @param  bool $auto
-     * @return string
+     * @param  bool $toString
+     * @return array|string
      */
-    protected function getValidatorOptions($auto = false)
+    protected function getValidatorOptions($auto = false, $toString = false)
     {
         if ($auto) {
             $options = $this->getValidatorOptionsFromType($this->getType());
         } else {
             $options = !empty($this->validation['options']) ? $this->validation['options'] : [];
+        }
+
+        if (!$toString) {
+            return $options;
         }
 
         $return = [];
@@ -536,6 +585,32 @@ class Column
         }
 
         return '[' . implode(', ', $return) . ']';
+    }
+
+    /**
+     * @param  \Eureka\Component\Orm\Generator\Type\TypeInterface $type
+     * @param  string $varname
+     * @return string[]
+     */
+    private function getValidations(Type\TypeInterface $type, $varname)
+    {
+        $validation = [];
+
+        if ($this->hasValidation && !empty($this->validation)) {
+            $validatorType = $this->validation['type'];
+        } elseif ($this->hasValidationAuto && !empty($type->getValidatorType())) {
+            $validatorType = $type->getValidatorType();
+        }
+
+        if (!empty($validatorType) && strpos($validatorType, '\\') !== false) {
+            $validation[] = '$validator = new \\' . trim($validatorType, '\\') . '();';
+            $validation[] = '$validator->validate(' . $varname . ', ' . $this->getValidatorOptions(empty($this->validation['options']), true) . ');';
+        } elseif (!empty($validatorType)) {
+            $validation[] = '$validator = $this->getValidator(\'' . $validatorType . '\');';
+            $validation[] = '$validator->validate(' . $varname . ', ' . $this->getValidatorOptions(empty($this->validation['options']), true) . ');';
+        }
+
+        return $validation;
     }
 
     /**
