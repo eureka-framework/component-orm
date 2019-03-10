@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
@@ -21,8 +19,16 @@ use Eureka\Component\Orm\RepositoryInterface;
  */
 trait ConnectionAwareTrait
 {
-    /** @var \Eureka\Component\Database\Connection $connection Connection instance */
+    /** @var Connection $connection Connection instance */
     protected $connection = null;
+
+    /**
+     * @return Connection
+     */
+    public function getConnection(): Connection
+    {
+        return $this->connection;
+    }
 
     /**
      * Quote parameter according to the connection.
@@ -77,7 +83,7 @@ trait ConnectionAwareTrait
 
     /**
      * @param \Eureka\Component\Database\Connection $connection
-     * @return $this
+     * @return RepositoryInterface
      */
     protected function setConnection(Connection $connection): RepositoryInterface
     {

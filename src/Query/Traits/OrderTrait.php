@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -8,6 +8,8 @@
  */
 
 namespace Eureka\Component\Orm\Query\Traits;
+
+use Eureka\Component\Orm\Query\QueryBuilderInterface;
 
 /**
  * Class OrderTrait
@@ -22,13 +24,13 @@ trait OrderTrait
     /**
      * Add order clause.
      *
-     * @param  string $order
+     * @param  string $field
      * @param  string $dir
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function addOrder($order, $dir = 'ASC')
+    public function addOrder(string $field, string $dir = 'ASC'): QueryBuilderInterface
     {
-        $this->orderList[] = $order . ' ' . $dir;
+        $this->orderList[] = $field . ' ' . $dir;
 
         return $this;
     }
@@ -38,15 +40,15 @@ trait OrderTrait
      *
      * @return string
      */
-    public function getQueryOrderBy()
+    public function getQueryOrderBy(): string
     {
         return (0 < count($this->orderList) ? 'ORDER BY ' . implode(',', $this->orderList) : '');
     }
 
     /**
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function resetOrder()
+    public function resetOrder(): QueryBuilderInterface
     {
         $this->orderList = [];
 

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Config;
 
@@ -33,11 +31,11 @@ interface ConfigInterface
     public function getCopyright(): string;
 
     /**
-     * Get base namespace for "data" files for generated files.
+     * Get base namespace for "entity" files for generated files.
      *
      * @return string
      */
-    public function getBaseNamespaceForData(): string;
+    public function getBaseNamespaceForEntity(): string;
 
     /**
      * Get base namespace for "mapper" files for generated files.
@@ -54,11 +52,11 @@ interface ConfigInterface
     public function getBaseNamespaceForRepository(): string;
 
     /**
-     * Get base path for "data" files for generated files.
+     * Get base path for "entity" files for generated files.
      *
      * @return string
      */
-    public function getBasePathForData(): string;
+    public function getBasePathForEntity(): string;
 
     /**
      * Get base path for "mapper" files for generated files.
@@ -82,25 +80,11 @@ interface ConfigInterface
     public function getClassname(): string;
 
     /**
-     * Get database config name (catalog, catalog_import...)
-     *
-     * @return string
-     */
-    public function getDbConfig(): string;
-
-    /**
      * Get database table to generate.
      *
      * @return string
      */
     public function getDbTable(): string;
-
-    /**
-     * Get database service name.
-     *
-     * @return string
-     */
-    public function getDbService(): string;
 
     /**
      * Get database table prefix.
@@ -133,7 +117,7 @@ interface ConfigInterface
     /**
      * Get Config object(s) for "joined" tables
      *
-     * @return ConfigInterface[]
+     * @return array
      */
     public function getAllJoin(): array;
 

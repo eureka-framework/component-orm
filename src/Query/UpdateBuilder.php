@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -9,6 +9,8 @@
 
 namespace Eureka\Component\Orm\Query;
 
+use Eureka\Component\Orm\Exception\EmptySetClauseException;
+use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Query\Traits;
 
 class UpdateBuilder extends AbstractQueryBuilder
@@ -16,9 +18,9 @@ class UpdateBuilder extends AbstractQueryBuilder
     use Traits\WhereTrait, Traits\FieldTrait, Traits\SetTrait;
 
     /**
-     * {@inheritdoc}
+     * @return QueryBuilderInterface
      */
-    public function clear()
+    public function clear(): QueryBuilderInterface
     {
         $this->resetBind();
         $this->resetField();
@@ -29,16 +31,18 @@ class UpdateBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
+     * @throws EmptySetClauseException
+     * @throws EmptyWhereClauseException
      */
-    public function getQuery()
+    public function getQuery(): string
     {
         //~ List of fields to update.
         $primaryKeys = $this->repository->getPrimaryKeys();
 
         //~ Check for updated fields.
         foreach ($this->repository->getFields() as $field) {
-            $value = $this->repository->getDataValue($this->entity, $field);
+            $value = $this->repository->getEntityValue($this->entity, $field);
 
             if (in_array($field, $primaryKeys)) {
                 $this->addWhere($field, $value);

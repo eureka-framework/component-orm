@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
@@ -28,7 +26,7 @@ trait EntityAwareTrait
     protected $ignoreNotMappedFields = false;
 
     /**
-     * @return $this
+     * @return RepositoryInterface
      */
     public function enableIgnoreNotMappedFields(): RepositoryInterface
     {
@@ -38,7 +36,7 @@ trait EntityAwareTrait
     }
 
     /**
-     * @return $this
+     * @return RepositoryInterface
      */
     public function disableIgnoreNotMappedFields(): RepositoryInterface
     {
@@ -49,7 +47,7 @@ trait EntityAwareTrait
 
     /**
      * @param  string $entityClass
-     * @return $this
+     * @return RepositoryInterface
      */
     public function setEntityClass(string $entityClass): RepositoryInterface
     {
@@ -61,11 +59,11 @@ trait EntityAwareTrait
     /**
      * @param  \stdClass|null $row
      * @param  bool $exists
-     * @return \Eureka\Component\Orm\EntityInterface
+     * @return EntityInterface
      */
     public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface
     {
-        $entity = new $this->entityClass($this->mappers, $this->validatorFactoryContainer);
+        $entity = new $this->entityClass($this, $this->getValidatorFactory());
 
         if (!($entity instanceof EntityInterface)) {
             throw new \LogicException('Data object not instance of EntityInterface class!');
@@ -83,13 +81,13 @@ trait EntityAwareTrait
     }
 
     /**
-     * @param  \Eureka\Component\Orm\EntityInterface $entity
+     * @param  EntityInterface $entity
      * @param  string $field
      * @return bool
      */
     public function isEntityUpdated(EntityInterface $entity, string $field): bool
     {
-        if (!isset($this->dataNamesMap[$field]['property'])) {
+        if (!isset($this->entityNamesMap[$field]['property'])) {
             throw new \DomainException('Cannot define field as updated: field have not mapping with Data instance (field: ' . $field . ')');
         }
 
@@ -99,13 +97,13 @@ trait EntityAwareTrait
     }
 
     /**
-     * @param  \Eureka\Component\Orm\EntityInterface $entity
+     * @param  EntityInterface $entity
      * @param  string $field
      * @return mixed
      */
     public function getEntityValue(EntityInterface $entity, string $field)
     {
-        if (!isset($this->dataNamesMap[$field]['get'])) {
+        if (!isset($this->entityNamesMap[$field]['get'])) {
             throw new \DomainException('Cannot get field value: field have no mapping with Data instance (field: ' . $field . ')');
         }
 

@@ -1,4 +1,4 @@
-<?php
+<?php  declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -9,10 +9,11 @@
 
 namespace Eureka\Component\Orm\Query;
 
+use Eureka\Component\Orm\Exception\EmptySetClauseException;
 use Eureka\Component\Orm\Query\Traits;
 
 /**
- * Class Insert
+ * Class InsertBuilder
  *
  * @author Romain Cottard
  */
@@ -21,9 +22,11 @@ class InsertBuilder extends AbstractQueryBuilder
     use Traits\WhereTrait, Traits\FieldTrait, Traits\SetTrait;
 
     /**
-     * {@inheritdoc}
+     * Clear query params
+     *
+     * @return QueryBuilderInterface
      */
-    public function clear()
+    public function clear(): QueryBuilderInterface
     {
         $this->resetBind();
         $this->resetField();
@@ -33,14 +36,16 @@ class InsertBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * {@inheritdoc}
      * @param bool $onDuplicateUpdate
+     * @param bool $onDuplicateIgnore
+     * @return string
+     * @throws EmptySetClauseException
      */
-    public function getQuery($onDuplicateUpdate = false, $onDuplicateIgnore = false)
+    public function getQuery(bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): string
     {
         //~ Check for updated fields.
         foreach ($this->repository->getFields() as $field) {
-            $this->addSet($field, $this->repository->getDataValue($this->entity, $field));
+            $this->addSet($field, $this->repository->getEntityValue($this->entity, $field));
         }
 
         $onDuplicateIgnoreClause = '';
@@ -58,16 +63,16 @@ class InsertBuilder extends AbstractQueryBuilder
     /**
      * Append update values
      *
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    private function appendUpdateValues()
+    private function appendUpdateValues(): QueryBuilderInterface
     {
         //~ List of fields to update.
         $primaryKeys = $this->repository->getPrimaryKeys();
 
         //~ Check for updated fields.
         foreach ($this->repository->getFields() as $field) {
-            $value = $this->repository->getDataValue($this->entity, $field);
+            $value = $this->repository->getEntityValue($this->entity, $field);
 
             if (in_array($field, $primaryKeys)) {
                 continue;

@@ -1,0 +1,33 @@
+
+    /**
+     * Get {{ join.entity.name }} entity instance.
+     *
+     * @param  bool $isForceReload
+     * @return {{ join.entity.name }}
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws OrmException
+     */
+    public function get{{ join.entity.name }}(bool $isForceReload = false): {{ join.entity.name }}
+    {
+        if ($isForceReload || null === $this->joinOneCache{{ join.entity.name }}) {
+            $mapper = $this->getRepository()->getMapper({{ join.entity.name }}Mapper::class);
+            $this->joinOneCache{{ join.entity.name }} = $mapper->findByKeys([
+                {{ join.entity.keys }}
+            ]);
+        }
+
+        return $this->joinOneCache{{ join.entity.name }};
+    }
+
+    /**
+     * Set {{ join.entity.name }} entity instance.
+     *
+     * @param {{ join.entity.name }} $entity
+     * @return $this
+     */
+    public function set{{ join.entity.name }}({{ join.entity.name }} $entity): self
+    {
+        $this->joinOneCache{{ join.entity.name }} = $entity;
+
+        return $this;
+    }

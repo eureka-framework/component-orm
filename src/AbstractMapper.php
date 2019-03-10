@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -12,8 +12,9 @@ namespace Eureka\Component\Orm;
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\Traits;
+use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
+use Eureka\Component\Validation\ValidatorFactoryInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Container\ContainerInterface;
 
 /**
  * DataMapper Mapper abstract class.
@@ -32,17 +33,24 @@ abstract class AbstractMapper implements RepositoryInterface
     /**
      * AbstractMapper constructor.
      *
-     * @param \Eureka\Component\Database\Connection $connection
-     * @param \Psr\Container\ContainerInterface $validatorFactoryContainer
-     * @param \Eureka\Component\Orm\AbstractMapper[] $mappers
-     * @param \Psr\Cache\CacheItemPoolInterface|null $cache
+     * @param Connection $connection
+     * @param ValidatorFactoryInterface|null $validatorFactory
+     * @param ValidatorEntityFactory|null $validatorEntityFactory
+     * @param array $mappers
+     * @param CacheItemPoolInterface|null $cache
      * @param bool $enableCacheOnRead
      */
-    public function __construct(Connection $connection, ContainerInterface $validatorFactoryContainer = null, $mappers = [], CacheItemPoolInterface $cache = null, $enableCacheOnRead = false)
-    {
+    public function __construct(
+        Connection $connection,
+        ValidatorFactoryInterface $validatorFactory = null,
+        ValidatorEntityFactory $validatorEntityFactory = null,
+        $mappers = [],
+        CacheItemPoolInterface $cache = null,
+        $enableCacheOnRead = false
+    ) {
         $this->setConnection($connection);
         $this->setCache($cache);
-        $this->setValidatorFactoryContainer($validatorFactoryContainer);
+        $this->setValidatorFactories($validatorFactory, $validatorEntityFactory);
 
         $this->addMappers($mappers);
 
@@ -63,13 +71,21 @@ abstract class AbstractMapper implements RepositoryInterface
      * @return void
      * @throws \Eureka\Component\Orm\Exception\OrmException
      */
-    public function apply(callable $callback, Query\SelectBuilder $queryBuilder, string $key, int $start = 0, int $end = -1, int $batchSize = 10000)
-    {
+    public function apply(
+        callable $callback,
+        Query\SelectBuilder $queryBuilder,
+        string $key,
+        int $start = 0,
+        int $end = -1,
+        int $batchSize = 10000
+    ): void {
         if (!in_array($key, $this->primaryKeys)) {
             throw new \UnexpectedValueException(__METHOD__ . ' | The key must be a primary key.');
         }
 
-        $statement = $this->connection->prepare('SELECT MIN(' . $key . ') AS MIN, MAX(' . $key . ') AS MAX FROM ' . $this->getTable());
+        $statement = $this->connection->prepare(
+            'SELECT MIN(' . $key . ') AS MIN, MAX(' . $key . ') AS MAX FROM ' . $this->getTable()
+        );
         $statement->execute();
 
         $bounds = $statement->fetch(Connection::FETCH_OBJ);
@@ -81,8 +97,13 @@ abstract class AbstractMapper implements RepositoryInterface
         while ($currentBatchIndex <= $maxIndex) {
             /** @var \Eureka\Component\Orm\RepositoryInterface $this */
             $clonedQueryBuilder = clone Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
-            $clonedQueryBuilder->addWhere($key, $currentBatchIndex, '>=')
-                ->addWhere($key, $currentBatchIndex + $batchSize, '<')
+            $clonedQueryBuilder
+                ->addWhere($key, $currentBatchIndex, '>=')
+                ->addWhere(
+                    $key,
+                    $currentBatchIndex + $batchSize,
+                    '<'
+                )
             ;
 
             $batch = $this->query($clonedQueryBuilder);

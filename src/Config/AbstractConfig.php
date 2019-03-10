@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Config;
 
@@ -30,8 +28,8 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var string $classname Base class name of generated classes. */
     protected $classname = '';
 
-    /** @var string $baseNamespaceForData */
-    protected $baseNamespaceForData = '';
+    /** @var string $baseNamespaceForEntity */
+    protected $baseNamespaceForEntity = '';
 
     /** @var string $baseNamespaceForMapper */
     protected $baseNamespaceForMapper = '';
@@ -39,20 +37,14 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var string $baseNamespaceForRepository */
     protected $baseNamespaceForRepository = '';
 
-    /** @var string $basePathForData */
-    protected $basePathForData = '';
+    /** @var string $basePathForEntity */
+    protected $basePathForEntity = '';
 
     /** @var string $basePathForMapper */
     protected $basePathForMapper = '';
 
     /** @var string $basePathForMapper */
     protected $basePathForRepository = '';
-
-    /** @var string $dbConfig Database config name. */
-    protected $dbConfig = '';
-
-    /** @var string $dbService Database service name. */
-    protected $dbService = '';
 
     /** @var string $dbTable Table name */
     protected $dbTable = '';
@@ -75,13 +67,13 @@ abstract class AbstractConfig implements ConfigInterface
      * @param  array $config
      * @return $this
      */
-    abstract protected function init($config): ConfigInterface;
+    abstract protected function init(array $config): ConfigInterface;
 
     /**
      * Init config & validate it.
      *
      * @param  array $config
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function __construct(array $config)
     {
@@ -90,7 +82,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get Header file author.
+     *
+     * @return string
      */
     public function getAuthor(): string
     {
@@ -98,7 +92,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get Header file copyright
+     *
+     * @return string
      */
     public function getCopyright(): string
     {
@@ -106,7 +102,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get classname for the generated files
+     *
+     * @return string
      */
     public function getClassname(): string
     {
@@ -114,23 +112,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getDbConfig(): string
-    {
-        return strtolower($this->dbConfig);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDbService(): string
-    {
-        return $this->dbService;
-    }
-
-    /**
-     * {@inheritdoc}
+     * Get database table to generate.
+     *
+     * @return string
      */
     public function getDbTable(): string
     {
@@ -138,7 +122,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get database table prefix.
+     *
+     * @return string
      */
     public function getDbPrefix(): string
     {
@@ -146,7 +132,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Return true if cache is active, false in otherwise.
+     *
+     * @return bool
      */
     public function hasCache(): bool
     {
@@ -154,7 +142,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get cache prefix for main data key.
+     *
+     * @return string
      */
     public function getCachePrefix(): string
     {
@@ -162,7 +152,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get validation config.
+     *
+     * @return array
      */
     public function getValidation(): array
     {
@@ -170,7 +162,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get Config object(s) for "joined" tables
+     *
+     * @return array
      */
     public function getAllJoin(): array
     {
@@ -178,7 +172,8 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param  \Eureka\Component\Orm\Config\ConfigInterface[] $joinList
+     * @return $this
      */
     public function setJoinList(array $joinList): ConfigInterface
     {
@@ -188,15 +183,19 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get base namespace for "entity" files for generated files.
+     *
+     * @return string
      */
-    public function getBaseNamespaceForData(): string
+    public function getBaseNamespaceForEntity(): string
     {
-        return $this->baseNamespaceForData;
+        return $this->baseNamespaceForEntity;
     }
 
     /**
-     * {@inheritdoc}
+     * Get base namespace for "mapper" files for generated files.
+     *
+     * @return string
      */
     public function getBaseNamespaceForMapper(): string
     {
@@ -204,7 +203,9 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get base namespace for "repository" files for generated files.
+     *
+     * @return string
      */
     public function getBaseNamespaceForRepository(): string
     {
@@ -212,27 +213,33 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get base path for "entity" files for generated files.
+     *
+     * @return string
      */
-    public function getBasePathForData(): string
+    public function getBasePathForEntity(): string
     {
-        return trim($this->basePathForData, '/\\');
+        return rtrim($this->basePathForEntity, '/\\');
     }
 
     /**
-     * {@inheritdoc}
+     * Get base path for "mapper" files for generated files.
+     *
+     * @return string
      */
     public function getBasePathForMapper(): string
     {
-        return trim($this->basePathForMapper, '/\\');
+        return rtrim($this->basePathForMapper, '/\\');
     }
 
     /**
-     * {@inheritdoc}
+     * Get base path for "repository" files for generated files.
+     *
+     * @return string
      */
     public function getBasePathForRepository(): string
     {
-        return trim($this->basePathForRepository, '/\\');
+        return rtrim($this->basePathForRepository, '/\\');
     }
 
     /**
@@ -255,10 +262,6 @@ abstract class AbstractConfig implements ConfigInterface
             throw new \InvalidArgumentException('Class name is empty!');
         }
 
-        if (empty($this->dbConfig) && empty($this->dbService)) {
-            throw new \InvalidArgumentException('Database config & service name are empty!');
-        }
-
         if (empty($this->dbTable)) {
             throw new \InvalidArgumentException('Database table name is empty!');
         }
@@ -267,16 +270,16 @@ abstract class AbstractConfig implements ConfigInterface
             throw new \InvalidArgumentException('Cache prefix is empty!');
         }
 
-        if (empty($this->baseNamespaceForData)) {
-            throw new \InvalidArgumentException('Data namespace is empty!');
+        if (empty($this->baseNamespaceForEntity)) {
+            throw new \InvalidArgumentException('Entity namespace is empty!');
         }
 
         if (empty($this->baseNamespaceForMapper)) {
             throw new \InvalidArgumentException('Mapper namespace is empty!');
         }
 
-        if (empty($this->basePathForData)) {
-            throw new \InvalidArgumentException('Data path is empty!');
+        if (empty($this->basePathForEntity)) {
+            throw new \InvalidArgumentException('Entity base path is empty!');
         }
 
         if (empty($this->basePathForMapper)) {

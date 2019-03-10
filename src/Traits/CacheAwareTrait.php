@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -7,24 +7,25 @@
  * file that was distributed with this source code.
  */
 
-declare(strict_types=1);
-
 namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\EntityInterface;
+use Eureka\Component\Orm\Exception\InvalidQueryException;
+use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\RepositoryInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 
 /**
- * Cache trait to manage cache part in DataMapper.
+ * Cache trait to manage cache part in Data Mapper.
  *
  * @author Romain Cottard
  */
 trait CacheAwareTrait
 {
-    /** @var \Psr\Cache\CacheItemPoolInterface $cache Cache instance. Not connected if cache is not used. */
+    /** @var CacheItemPoolInterface $cache Cache instance. Not connected if cache is not used. */
     protected $cache = null;
 
     /** @var bool $isCacheEnabledOnRead If cache is enabled for Mapper class (for read) */
@@ -36,7 +37,7 @@ trait CacheAwareTrait
     /**
      * Enable cache on read queries.
      *
-     * @return $this
+     * @return RepositoryInterface
      */
     public function enableCacheOnRead(): RepositoryInterface
     {
@@ -48,7 +49,7 @@ trait CacheAwareTrait
     /**
      * Disable cache on read query.
      *
-     * @return $this
+     * @return RepositoryInterface
      */
     public function disableCacheOnRead(): RepositoryInterface
     {
@@ -60,8 +61,8 @@ trait CacheAwareTrait
     /**
      * Set cache instance.
      *
-     * @param \Psr\Cache\CacheItemPoolInterface $cache
-     * @return $this
+     * @param CacheItemPoolInterface $cache
+     * @return RepositoryInterface
      */
     protected function setCache(CacheItemPoolInterface $cache = null): RepositoryInterface
     {
@@ -74,16 +75,18 @@ trait CacheAwareTrait
      * Try to get all entities from cache.
      * Return list of entities (for found) / null (for not found in cache)
      *
-     * @param \Eureka\Component\Database\Connection $connection
-     * @param \Eureka\Component\Orm\RepositoryInterface $mapper
-     * @param \Eureka\Component\Orm\Query\SelectBuilder $queryBuilder
+     * @param Connection $connection
+     * @param RepositoryInterface $mapper
+     * @param Query\SelectBuilder $queryBuilder
      * @return array
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws InvalidQueryException
+     * @throws OrmException
      */
-    protected function selectFromCache(Connection $connection, RepositoryInterface $mapper, Query\SelectBuilder $queryBuilder): array
-    {
+    protected function selectFromCache(
+        Connection $connection,
+        RepositoryInterface $mapper,
+        Query\SelectBuilder $queryBuilder
+    ): array {
         if (!$this->isCacheEnabledOnRead) {
             return [];
         }
@@ -113,7 +116,8 @@ trait CacheAwareTrait
             $entity = $this->getCacheEntity($entityIdInstance);
             if ($entity === null) {
                 $this->cacheSkipMissingItemQuery = true;
-                $values                          = $mapper->getEntityPrimaryKeysValues($entityIdInstance);
+
+                $values = $mapper->getEntityPrimaryKeysValues($entityIdInstance);
                 if ($hasOnePrimaryKey) {
                     $addIn[] = current($values);
                 } else {
@@ -134,9 +138,9 @@ trait CacheAwareTrait
     /**
      * Get Data object from cache if is enabled.
      *
-     * @param  \Eureka\Component\Orm\EntityInterface $entity
+     * @param  EntityInterface $entity
      * @return null|EntityInterface
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws OrmException
      */
     protected function getCacheEntity(EntityInterface $entity): ?EntityInterface
     {
@@ -144,7 +148,11 @@ trait CacheAwareTrait
             return null;
         }
 
-        $cacheItem = $this->cache->getItem($entity->getCacheKey());
+        try {
+            $cacheItem = $this->cache->getItem($entity->getCacheKey());
+        } catch (InvalidArgumentException $exception) {
+            throw new OrmException('Cannot delete cache', $exception->getCode(), $exception);
+        }
 
         return $cacheItem->get();
     }
@@ -153,8 +161,8 @@ trait CacheAwareTrait
      * Delete cache
      *
      * @param  EntityInterface $entity
-     * @return $this
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @return RepositoryInterface
+     * @throws OrmException
      */
     protected function deleteCacheEntity(EntityInterface $entity): RepositoryInterface
     {
@@ -162,7 +170,11 @@ trait CacheAwareTrait
             return $this;
         }
 
-        $this->cache->deleteItem($entity->getCacheKey());
+        try {
+            $this->cache->deleteItem($entity->getCacheKey());
+        } catch (InvalidArgumentException $exception) {
+            throw new OrmException('Cannot delete cache', $exception->getCode(), $exception);
+        }
 
         return $this;
     }
@@ -171,8 +183,8 @@ trait CacheAwareTrait
      * Set data into cache if enabled.
      *
      * @param  EntityInterface $entity
-     * @return $this
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @return RepositoryInterface
+     * @throws OrmException
      */
     protected function setCacheEntity(EntityInterface $entity): RepositoryInterface
     {
@@ -180,11 +192,15 @@ trait CacheAwareTrait
             return $this;
         }
 
-        $cacheItem = $this->cache->getItem($entity->getCacheKey());
+        try {
+            $cacheItem = $this->cache->getItem($entity->getCacheKey());
 
-        $cacheItem->set($entity);
+            $cacheItem->set($entity);
 
-        $this->cache->save($cacheItem);
+            $this->cache->save($cacheItem);
+        } catch (InvalidArgumentException $exception) {
+            throw new OrmException('Cannot save cache', $exception->getCode(), $exception);
+        }
 
         return $this;
     }

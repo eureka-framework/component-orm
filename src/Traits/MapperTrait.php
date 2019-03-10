@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
@@ -24,8 +22,6 @@ use Eureka\Component\Orm\RepositoryInterface;
  */
 trait MapperTrait
 {
-    //use ConnectionAwareTrait, EntityAwareTrait, CacheAwareTrait;
-
     /** @var string $table */
     protected $table = '';
 
@@ -38,7 +34,7 @@ trait MapperTrait
     /** @var string[] $entityNamesMap */
     protected $entityNamesMap = [];
 
-    /** @var int $last_id */
+    /** @var int $lastId */
     protected $lastId = 0;
 
     /** @var int $rowCount The number of rows affected by the last SQL statement */
@@ -95,7 +91,7 @@ trait MapperTrait
 
     /**
      * @param  \Eureka\Component\Orm\RepositoryInterface[] $mappers
-     * @return $this
+     * @return RepositoryInterface
      */
     public function addMappers(array $mappers): RepositoryInterface
     {
@@ -105,7 +101,20 @@ trait MapperTrait
     }
 
     /**
-     * {@inheritdoc}
+     * @param string $name
+     * @return RepositoryInterface
+     * @throws Exception\UndefinedMapperException
+     */
+    public function getMapper(string $name): RepositoryInterface
+    {
+        if (!isset($this->mappers[$name])) {
+            throw new Exception\UndefinedMapperException('Mapper does not exist! (mapper: ' . $name . ')');
+        }
+        return $this->mappers[$name];
+    }
+
+    /**
+     * @return int
      */
     public function getLastId(): int
     {
@@ -113,7 +122,7 @@ trait MapperTrait
     }
 
     /**
-     * {@inheritdoc}
+     * @return int
      */
     public function getMaxId(): int
     {
@@ -123,14 +132,17 @@ trait MapperTrait
 
         $field = reset($this->primaryKeys);
 
-        $statement = $this->connection->prepare('SELECT MAX(' . $field . ') AS ' . $field . ' FROM ' . $this->getTable());
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        $statement = $connection->prepare('SELECT MAX(' . $field . ') AS ' . $field . ' FROM ' . $this->getTable());
         $statement->execute();
 
         return $statement->fetch(Connection::FETCH_OBJ)->{$field};
     }
 
     /**
-     * {@inheritdoc}
+     * @return int
      */
     public function rowCount(): int
     {
@@ -146,7 +158,10 @@ trait MapperTrait
      */
     public function count(Query\QueryBuilder $queryBuilder, string $field = '*'): int
     {
-        $statement = $this->connection->prepare($queryBuilder->getQueryCount($field));
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        $statement = $connection->prepare($queryBuilder->getQueryCount($field));
         $statement->execute($queryBuilder->getBind());
 
         $queryBuilder->clear();
@@ -155,11 +170,10 @@ trait MapperTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\Query\SelectBuilder $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @return bool
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws Exception\InvalidQueryException
+     * @throws Exception\OrmException
      */
     public function rowExists(Query\SelectBuilder $queryBuilder): bool
     {
@@ -179,8 +193,12 @@ trait MapperTrait
      */
     public function query(Query\QueryBuilderInterface $queryBuilder): array
     {
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        /** @var Connection $this->connection */
         $indexedBy = $queryBuilder->getListIndexedByField();
-        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        $statement = $connection->prepare($queryBuilder->getQuery());
         $statement->execute($queryBuilder->getBind());
 
         $collection = [];
@@ -201,13 +219,16 @@ trait MapperTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\Query\QueryBuilderInterface
+     * @param Query\QueryBuilderInterface $queryBuilder
      * @return array
      * @throws Exception\OrmException
      */
     public function queryRows(Query\QueryBuilderInterface $queryBuilder): array
     {
-        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        $statement = $connection->prepare($queryBuilder->getQuery());
         $statement->execute($queryBuilder->getBind());
 
         $queryBuilder->clear();
@@ -222,12 +243,11 @@ trait MapperTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\Query\SelectBuilder $queryBuilder
-     * @return \Eureka\Component\Orm\EntityInterface
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @param Query\SelectBuilder $queryBuilder
+     * @return EntityInterface
+     * @throws Exception\EntityNotExistsException
+     * @throws Exception\InvalidQueryException
+     * @throws Exception\OrmException
      */
     public function selectOne(Query\SelectBuilder $queryBuilder): EntityInterface
     {
@@ -243,11 +263,10 @@ trait MapperTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\Query\SelectBuilder $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @return array
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws Exception\InvalidQueryException
+     * @throws Exception\OrmException
      */
     public function select(Query\SelectBuilder $queryBuilder): array
     {
@@ -265,11 +284,15 @@ trait MapperTrait
             return $collection;
         }
 
-        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        $statement = $connection->prepare($queryBuilder->getQuery());
         $statement->execute($queryBuilder->getBind());
 
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
-            $entity                             = $this->newEntity($row, true);
+            /** @var EntityInterface $entity */
+            $entity = $this->newEntity($row, true);
             $collection[$entity->getCacheKey()] = $entity;
             $this->setCacheEntity($entity);
         }
@@ -283,7 +306,7 @@ trait MapperTrait
      * Set fields for mapper.
      *
      * @param  array $fields
-     * @return $this
+     * @return RepositoryInterface
      */
     protected function setFields(array $fields = []): RepositoryInterface
     {
@@ -296,7 +319,7 @@ trait MapperTrait
      * Set primary keys.
      *
      * @param  array $primaryKeys
-     * @return $this
+     * @return RepositoryInterface
      */
     protected function setPrimaryKeys(array $primaryKeys): RepositoryInterface
     {
@@ -309,7 +332,7 @@ trait MapperTrait
      * Set table name.
      *
      * @param  string $table
-     * @return $this
+     * @return RepositoryInterface
      */
     protected function setTable(string $table): RepositoryInterface
     {
@@ -320,7 +343,7 @@ trait MapperTrait
 
     /**
      * @param array $nameMap
-     * @return $this
+     * @return RepositoryInterface
      */
     protected function setNamesMap(array $nameMap): RepositoryInterface
     {
@@ -331,7 +354,7 @@ trait MapperTrait
 
     /**
      * @param array $joinConfigs
-     * @return $this
+     * @return RepositoryInterface
      */
     protected function setJoinConfigs(array $joinConfigs): RepositoryInterface
     {

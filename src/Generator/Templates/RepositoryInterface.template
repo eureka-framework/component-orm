@@ -1,23 +1,21 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
- * Copyright (c) {{ copyright }}
+ * Copyright (c) {{ comment.copyright }}
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-declare(strict_types=1);
+namespace {{ class.namespace }};
 
-namespace {{ namespace }};
-
-use {{ ormNamespace }}\RepositoryInterface;
+use {{ orm.namespace }}\RepositoryInterface;
 
 /**
- * {{ className }} repository interface.
+ * {{ class.name }} repository interface.
  *
- * @author {{ author }}
+ * @author {{ comment.author }}
  */
-interface {{ className }}RepositoryInterface extends RepositoryInterface
+interface {{ class.repository }} extends RepositoryInterface
 {
 }

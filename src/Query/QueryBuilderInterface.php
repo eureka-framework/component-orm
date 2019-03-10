@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -8,6 +8,8 @@
  */
 
 namespace Eureka\Component\Orm\Query;
+
+use Eureka\Component\Orm\Exception\OrmException;
 
 /**
  * QueryBuilderInterface
@@ -19,33 +21,33 @@ interface QueryBuilderInterface
     /**
      * Clear query params
      *
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function clear();
+    public function clear(): QueryBuilderInterface;
 
     /**
      * @return array
      */
-    public function getBind();
+    public function getBind(): array;
 
     /**
      * @return string
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws OrmException
      */
-    public function getQuery();
+    public function getQuery(): string;
 
     /**
      * Get indexed by
      *
      * @return string
      */
-    public function getListIndexedByField();
+    public function getListIndexedByField(): string;
 
     /**
      * Set indexed by
      *
      * @param  string $field
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function setListIndexedByField($field);
+    public function setListIndexedByField(string $field): QueryBuilderInterface;
 }

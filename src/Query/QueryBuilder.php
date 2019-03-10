@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -9,12 +9,17 @@
 
 namespace Eureka\Component\Orm\Query;
 
+use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
+
 class QueryBuilder extends SelectBuilder
 {
     /**
-     * {@inheritdoc}
+     * @param bool $usePrefix
+     * @param string $prefix
+     * @return string
+     * @throws EmptyWhereClauseException
      */
-    public function getQuery($usePrefix = false, $prefix = '')
+    public function getQuery(bool $usePrefix = false, string $prefix = ''): string
     {
         return 'SELECT ' . $this->getQueryFieldsPersonalized() .
             $this->getQueryFromPersonalized() .

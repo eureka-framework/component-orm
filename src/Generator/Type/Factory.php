@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Type;
 
+use Eureka\Component\Orm\Exception\GeneratorException;
+
 /**
  * Factory to instantiate type.
  *
@@ -21,17 +23,16 @@ class Factory
     /**
      * Instantiate new type.
      *
-     * @param  string $sqlType
-     * @param  string $sqlComment
+     * @param string $sqlType
+     * @param string $sqlComment
      * @return TypeInterface
-     * @throws \RangeException
-     * @throws \Exception
+     * @throws GeneratorException
      */
     public static function create(string $sqlType, string $sqlComment): TypeInterface
     {
         $matches = array();
         if (!(bool) preg_match('`([a-z]+)\(?([0-9]*)\)? ?(.*)`', $sqlType, $matches)) {
-            throw new \Exception();
+            throw new GeneratorException('Invalid sql type');
         }
 
         $type   = (string) $matches[1];
@@ -45,7 +46,7 @@ class Factory
             $classname = __NAMESPACE__ . '\Type' . ucfirst($type);
 
             if (!class_exists($classname)) {
-                throw new \RangeException('Sql type cannot be converted into php type! (type: ' . $type . ')');
+                throw new GeneratorException('Sql type cannot be converted into php type! (type: ' . $type . ')');
             }
 
             $type = new $classname();

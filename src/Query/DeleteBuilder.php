@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -9,16 +9,24 @@
 
 namespace Eureka\Component\Orm\Query;
 
+use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Query\Traits;
 
+/**
+ * Class DeleteBuilder
+ *
+ * @author Romain Cottard
+ */
 class DeleteBuilder extends AbstractQueryBuilder
 {
     use Traits\WhereTrait;
 
     /**
-     * {@inheritdoc}
+     * Clear query params
+     *
+     * @return QueryBuilderInterface
      */
-    public function clear()
+    public function clear(): QueryBuilderInterface
     {
         $this->resetBind();
         $this->resetWhere();
@@ -27,9 +35,10 @@ class DeleteBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
+     * @throws OrmException
      */
-    public function getQuery()
+    public function getQuery(): string
     {
         if ($this->entity !== null) {
             //~ List of fields to update.
@@ -42,7 +51,7 @@ class DeleteBuilder extends AbstractQueryBuilder
                     continue;
                 }
 
-                $this->addWhere($field, $this->repository->getDataValue($this->entity, $field));
+                $this->addWhere($field, $this->repository->getEntityValue($this->entity, $field));
             }
         }
 

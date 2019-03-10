@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -8,6 +8,8 @@
  */
 
 namespace Eureka\Component\Orm\Query\Traits;
+
+use Eureka\Component\Orm\Query\QueryBuilderInterface;
 
 /**
  * Class LimitTrait
@@ -29,9 +31,9 @@ trait LimitTrait
      * @param  int $offset
      * @return $this
      */
-    public function setLimit($limit, $offset = null)
+    public function setLimit(int $limit, ?int $offset = null)
     {
-        $this->limit  = (int) $limit;
+        $this->limit  = $limit;
         $this->offset = $offset;
 
         return $this;
@@ -42,23 +44,21 @@ trait LimitTrait
      *
      * @return string
      */
-    public function getQueryLimit()
+    public function getQueryLimit(): string
     {
         if ($this->limit !== null && $this->offset !== null) {
             return 'LIMIT ' . $this->offset . ', ' . $this->limit;
-        } else {
-            if (null !== $this->limit) {
-                return 'LIMIT ' . $this->limit;
-            } else {
-                return '';
-            }
+        } elseif (null !== $this->limit) {
+            return 'LIMIT ' . $this->limit;
         }
+
+        return '';
     }
 
     /**
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function resetLimit()
+    public function resetLimit(): QueryBuilderInterface
     {
         $this->offset = 0;
         $this->limit  = 0;

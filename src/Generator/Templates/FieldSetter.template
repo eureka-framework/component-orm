@@ -1,0 +1,18 @@
+    /**
+     * Set value for property "{{ property.description }}"
+     *
+     * @param  {{ property.type }} {{ property.varname }}
+     * @return $this{{ property.exception }}
+     */
+    public function {{ property.setter }}({{ property.typehint }} {{ property.varname }}): self
+    {
+        {{ property.validation }}
+
+        if ($this->exists() && $this->{{ property.name }} !== {{ property.varname }}) {
+            $this->updated['{{ property.name }}'] = true;
+        }
+
+        $this->{{ property.name }} = {{ property.varname }};
+
+        return $this;
+    }

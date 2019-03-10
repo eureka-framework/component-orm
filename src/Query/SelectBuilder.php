@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -9,6 +9,7 @@
 
 namespace Eureka\Component\Orm\Query;
 
+use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Query\Traits;
 
 class SelectBuilder extends AbstractQueryBuilder
@@ -16,9 +17,10 @@ class SelectBuilder extends AbstractQueryBuilder
     use Traits\FieldTrait, Traits\GroupTrait, Traits\LimitTrait, Traits\OrderTrait, Traits\WhereTrait;
 
     /**
-     * {@inheritdoc}
+     * @param bool $forNotCached
+     * @return QueryBuilderInterface
      */
-    public function clear($forNotCached = false)
+    public function clear(bool $forNotCached = false): QueryBuilderInterface
     {
         if (!$forNotCached) {
             $this->resetField();
@@ -34,11 +36,14 @@ class SelectBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * {@inheritdoc}
+     * @param bool $usePrefix
+     * @param string $prefix
+     * @return string
+     * @throws EmptyWhereClauseException
      */
-    public function getQuery($usePrefix = false, $prefix = '')
+    public function getQuery(bool $usePrefix = false, string $prefix = ''): string
     {
-        return 'SELECT ' . $this->getQueryFields($this->repository, $usePrefix, $prefix) .
+        return 'SELECT ' . $this->getQueryFields($this->repository, $usePrefix) .
             $this->getQueryFrom($this->repository) .
             $this->getQueryWhere() .
             $this->getQueryGroupBy() .

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -10,10 +10,11 @@
 namespace Eureka\Component\Orm\Query;
 
 use Eureka\Component\Orm\EntityInterface;
+use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\RepositoryInterface;
 
 /**
- * Class Query
+ * Class AbstractQueryBuilder
  *
  * @author Romain Cottard
  */
@@ -25,30 +26,30 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     /** @var string $listIndexedByField */
     protected $listIndexedByField = '';
 
-    /** @var \Eureka\Component\Orm\RepositoryInterface */
+    /** @var RepositoryInterface */
     protected $repository;
 
-    /** @var \Eureka\Component\Orm\EntityInterface|null */
+    /** @var EntityInterface|null */
     protected $entity;
 
     /**
      * Clear query params
      *
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    abstract public function clear();
+    abstract public function clear(): QueryBuilderInterface;
 
     /**
      * @return string
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws OrmException
      */
-    abstract public function getQuery();
+    abstract public function getQuery(): string;
 
     /**
      * AbstractQueryBuilder constructor.
      *
-     * @param \Eureka\Component\Orm\RepositoryInterface $repository
-     * @param \Eureka\Component\Orm\EntityInterface $entity
+     * @param RepositoryInterface $repository
+     * @param EntityInterface $entity
      */
     public function __construct(RepositoryInterface $repository, EntityInterface $entity = null)
     {
@@ -57,9 +58,9 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     }
 
     /**
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function resetBind()
+    public function resetBind(): QueryBuilderInterface
     {
         $this->bind = [];
 
@@ -72,7 +73,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
      * @param  bool $isUnique
      * @return string Return bind name field
      */
-    public function addBind($field, $value, $isUnique = false)
+    public function addBind(string $field, $value, bool $isUnique = false): string
     {
         $suffix = ($isUnique ? '_' . uniqid() : '');
         $name   = ':' . strtolower($field . $suffix);
@@ -87,7 +88,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
      *
      * @return array
      */
-    public function getBind()
+    public function getBind(): array
     {
         return $this->bind;
     }
@@ -96,9 +97,9 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
      * Set bind
      *
      * @param  array $bind Binded values
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function bind(array $bind)
+    public function bind(array $bind): QueryBuilderInterface
     {
         $this->bind = $bind;
 
@@ -106,17 +107,22 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get indexed by
+     *
+     * @return string
      */
-    public function getListIndexedByField()
+    public function getListIndexedByField(): string
     {
         return $this->listIndexedByField;
     }
 
     /**
-     * {@inheritdoc}
+     * Set indexed by
+     *
+     * @param  string $field
+     * @return QueryBuilderInterface
      */
-    public function setListIndexedByField($field)
+    public function setListIndexedByField($field): QueryBuilderInterface
     {
         $this->listIndexedByField = $field;
 

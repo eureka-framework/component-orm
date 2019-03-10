@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -7,15 +7,12 @@
  * file that was distributed with this source code.
  */
 
-declare(strict_types=1);
-
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\RepositoryInterface;
-use Eureka\Component\Validation\Entity\FormEntity;
+use Eureka\Component\Validation\Entity\GenericEntity;
+use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
+use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
-use Eureka\Component\Validation\ValidatorInterface;
-use Psr\Container\ContainerInterface;
 
 /**
  * Repository trait.
@@ -24,56 +21,50 @@ use Psr\Container\ContainerInterface;
  */
 trait ValidatorAwareTrait
 {
-    /** @var null|\Psr\Container\ContainerInterface */
-    protected $validatorFactoryContainer = null;
+    /** @var ValidatorFactoryInterface $validatorFactory */
+    private $validatorFactory;
+
+    /** @var ValidatorEntityFactory $validatorEntityFactory */
+    private $validatorEntityFactory;
 
     /**
-     * @param  \Psr\Container\ContainerInterface $validatorFactoryContainer
-     * @return $this
+     * @param ValidatorFactoryInterface $validatorFactory
+     * @param ValidatorEntityFactoryInterface $validatorEntityFactory
+     * @return self
      */
-    protected function setValidatorFactoryContainer(ContainerInterface $validatorFactoryContainer = null): RepositoryInterface
-    {
-        $this->validatorFactoryContainer = $validatorFactoryContainer;
+    protected function setValidatorFactories(
+        ?ValidatorFactoryInterface $validatorFactory,
+        ?ValidatorEntityFactoryInterface $validatorEntityFactory
+    ): self {
+        $this->validatorFactory       = $validatorFactory;
+        $this->validatorEntityFactory = $validatorEntityFactory;
 
         return $this;
     }
 
     /**
-     * @return \Eureka\Component\Validation\Entity\FormEntity
+     * @param array $config
+     * @param array $data
+     * @return GenericEntity
      */
-    protected function newEntityForm(): FormEntity
+    protected function newGenericEntity(array $config = [], array $data = []): GenericEntity
     {
-        return new FormEntity($this->getValidatorFactory(), $this->getValidatorConfig());
+        return new GenericEntity($this->getValidatorFactory(), $config, $data);
     }
 
     /**
-     * @param  string $type
-     * @return \Eureka\Component\Validation\ValidatorInterface
+     * @return ValidatorFactoryInterface|null
      */
-    protected function getValidator($type): ValidatorInterface
+    protected function getValidatorFactory(): ?ValidatorFactoryInterface
     {
-        return $this->validatorFactoryContainer->get($type);
+        return $this->validatorFactory;
     }
 
     /**
-     * @return \Eureka\Component\Validation\ValidatorFactoryInterface
+     * @return ValidatorEntityFactoryInterface|null
      */
-    protected function getValidatorFactory(): ValidatorFactoryInterface
+    protected function getValidatorEntityFactory(): ?ValidatorEntityFactoryInterface
     {
-        return $this->validatorFactoryContainer->get('factory');
-    }
-
-    /**
-     * @return array
-     */
-    protected function getValidatorConfig(): array
-    {
-        $configs   = $this->validatorFactoryContainer->get('config');
-        $className = get_class($this);
-        if (!isset($configs[$className])) {
-            return [];
-        }
-
-        return $configs[$className];
+        return $this->validatorEntityFactory;
     }
 }

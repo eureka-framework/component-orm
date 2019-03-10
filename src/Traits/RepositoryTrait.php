@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -7,13 +7,13 @@
  * file that was distributed with this source code.
  */
 
-declare(strict_types=1);
-
 namespace Eureka\Component\Orm\Traits;
 
+use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception;
 use Eureka\Component\Orm\Query;
+use Eureka\Component\Orm\RepositoryInterface;
 
 /**
  * Repository trait.
@@ -22,24 +22,22 @@ use Eureka\Component\Orm\Query;
  */
 trait RepositoryTrait
 {
-    //use MapperTrait, CacheAwareTrait;
-
     /**
      * @param  int $id
-     * @return \Eureka\Component\Orm\EntityInterface
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @return object
+     * @throws Exception\EntityNotExistsException
+     * @throws Exception\OrmException
      */
-    public function findById(int $id): EntityInterface
+    public function findById(int $id): object
     {
         if (count($this->getPrimaryKeys()) > 1) {
-            throw new \LogicException(__METHOD__ . '|Cannot use findById() method for table with multiple primary keys !');
+            throw new \LogicException(
+                __METHOD__ . '|Cannot use findById() method for table with multiple primary keys !'
+            );
         }
 
         $primaryKeys = $this->getPrimaryKeys();
-        $field = reset($primaryKeys);
+        $field       = reset($primaryKeys);
 
         return $this->findByKeys([$field => $id]);
     }
@@ -47,14 +45,14 @@ trait RepositoryTrait
     /**
      * @param  array $keys
      * @return EntityInterface
-     * @throws \Eureka\Component\Orm\Exception\EntityNotExistsException
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws Exception\EntityNotExistsException
+     * @throws Exception\InvalidQueryException
+     * @throws Exception\OrmException
      */
-    public function findByKeys(array $keys): EntityInterface
+    public function findByKeys(array $keys): object
     {
         /** @var \Eureka\Component\Orm\RepositoryInterface $this */
+
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
         foreach ($keys as $field => $value) {
             $queryBuilder->addWhere($field, $value);
@@ -66,9 +64,8 @@ trait RepositoryTrait
     /**
      * @param  array $keys
      * @return EntityInterface[]
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws Exception\InvalidQueryException
+     * @throws Exception\OrmException
      */
     public function findAllByKeys(array $keys): array
     {
@@ -85,14 +82,16 @@ trait RepositoryTrait
      * @param \Eureka\Component\Orm\EntityInterface $entity
      * @return bool
      * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function delete(EntityInterface $entity): bool
     {
         /** @var \Eureka\Component\Orm\RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_DELETE, $this, $entity);
 
-        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        $statement = $connection->prepare($queryBuilder->getQuery());
         $result    = $statement->execute($queryBuilder->getBind());
 
         //~ Reset some data
@@ -113,26 +112,34 @@ trait RepositoryTrait
      * @return bool
      * @throws \Eureka\Component\Orm\Exception\InsertFailedException
      * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function insert(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool
-    {
+    public function insert(
+        EntityInterface $entity,
+        bool $onDuplicateUpdate = false,
+        bool $onDuplicateIgnore = false
+    ): bool {
         if ($entity->exists() && !$entity->isUpdated()) {
             return false;
         }
 
-        /** @var \Eureka\Component\Orm\RepositoryInterface $this */
+        /** @var RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_INSERT, $this, $entity);
 
-        $statement = $this->connection->prepare($queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore));
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        /** @var Query\InsertBuilder $queryBuilder */
+        $statement = $connection->prepare($queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore));
         $statement->execute($queryBuilder->getBind());
 
         if ($onDuplicateIgnore && $statement->rowCount() === 0) {
-            throw new Exception\InsertFailedException(__METHOD__ . 'INSERT IGNORE could not insert (duplicate key or error)');
+            throw new Exception\InsertFailedException(
+                __METHOD__ . 'INSERT IGNORE could not insert (duplicate key or error)'
+            );
         }
 
         //~ If has auto increment key (commonly, is a primary key), set value
-        $lastInsertId = (int) $this->connection->lastInsertId();
+        $lastInsertId = (int) $connection->lastInsertId();
         if ($lastInsertId > 0) {
             $this->lastId = $lastInsertId;
 
@@ -154,7 +161,6 @@ trait RepositoryTrait
      * @param \Eureka\Component\Orm\EntityInterface $entity
      * @return bool
      * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function update(EntityInterface $entity): bool
     {
@@ -165,7 +171,10 @@ trait RepositoryTrait
         /** @var \Eureka\Component\Orm\RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_UPDATE, $this, $entity);
 
-        $statement = $this->connection->prepare($queryBuilder->getQuery());
+        /** @var Connection $connection */
+        $connection = $this->getConnection();
+
+        $statement = $connection->prepare($queryBuilder->getQuery());
         $result    = $statement->execute($queryBuilder->getBind());
 
         //~ Reset some data
@@ -185,7 +194,6 @@ trait RepositoryTrait
      * @return bool
      * @throws \Eureka\Component\Orm\Exception\InsertFailedException
      * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function persist(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool
     {

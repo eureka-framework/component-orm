@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -8,6 +8,8 @@
  */
 
 namespace Eureka\Component\Orm\Query\Traits;
+
+use Eureka\Component\Orm\Query\QueryBuilderInterface;
 
 /**
  * Class GroupTrait
@@ -28,15 +30,15 @@ trait GroupTrait
      * @param  bool $isUnique
      * @return string Return bind name field
      */
-    abstract public function addBind($field, $value, $isUnique = false);
+    abstract public function addBind(string $field, $value, bool $isUnique = false): string;
 
     /**
      * Add groupBy clause.
      *
      * @param  string $field
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function addGroupBy($field)
+    public function addGroupBy(string $field): QueryBuilderInterface
     {
         $this->groupList[] = $field;
 
@@ -50,9 +52,9 @@ trait GroupTrait
      * @param  string|int $value
      * @param  string $sign
      * @param  string $havingConcat
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function addHaving($field, $value, $sign = '=', $havingConcat = 'AND')
+    public function addHaving(string $field, $value, string $sign = '=', string $havingConcat = 'AND'): QueryBuilderInterface
     {
         $fieldHaving = (0 < count($this->havingList) ? ' ' . $havingConcat . ' ' . $field : $field);
 
@@ -67,7 +69,7 @@ trait GroupTrait
      *
      * @return string
      */
-    public function getQueryGroupBy()
+    public function getQueryGroupBy(): string
     {
         return (0 < count($this->groupList) ? 'GROUP BY ' . implode(', ', $this->groupList) : '');
     }
@@ -77,7 +79,7 @@ trait GroupTrait
      *
      * @return string
      */
-    public function getQueryHaving()
+    public function getQueryHaving(): string
     {
         $return = '';
 
@@ -92,9 +94,9 @@ trait GroupTrait
     }
 
     /**
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function resetGroup()
+    public function resetGroup(): QueryBuilderInterface
     {
         $this->havingList = [];
         $this->groupList  = [];

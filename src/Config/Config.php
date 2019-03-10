@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Config;
 
@@ -34,24 +32,21 @@ class Config extends AbstractConfig
         $this->classname = $config['class']['classname'];
 
         //~ Namespace
-        $this->baseNamespaceForData       = $config['namespace']['data'];
+        $this->baseNamespaceForEntity     = $config['namespace']['entity'];
         $this->baseNamespaceForMapper     = $config['namespace']['mapper'];
         $this->baseNamespaceForRepository = isset($config['namespace']['repository']) ? $config['namespace']['repository'] : null;
 
         //~ Path
-        $this->basePathForData       = $config['path']['data'];
+        $this->basePathForEntity     = $config['path']['entity'];
         $this->basePathForMapper     = $config['path']['mapper'];
         $this->basePathForRepository = isset($config['path']['repository']) ? $config['path']['repository'] : null;
 
         //~ Cache
-        //$this->cacheName   = '';//$config['cache']['name'];
         $this->cachePrefix = $config['cache']['prefix'];
 
         //~ Db
         $this->dbTable   = $config['database']['table'];
         $this->dbPrefix  = $config['database']['prefix'];
-        $this->dbConfig  = !empty($config['database']['config']) ? $config['database']['config'] : '';
-        $this->dbService = !empty($config['database']['service']) ? $config['database']['service'] : '';
 
         //~ Validation
         $this->validation = !empty($config['validation']) ? $config['validation'] : [];

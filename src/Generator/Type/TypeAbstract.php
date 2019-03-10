@@ -46,7 +46,7 @@ abstract class TypeAbstract implements TypeInterface
     protected $validatorOptions = [];
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
     public function getCastDb(): string
     {
@@ -54,7 +54,7 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
     public function getCastMethod(): string
     {
@@ -62,15 +62,15 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public function getType(): string
+    public function getAsString(): string
     {
         return $this->type;
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
     public function getEmptyValue(): string
     {
@@ -78,7 +78,7 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return int
      */
     public function getLength(): int
     {
@@ -86,7 +86,7 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
     public function getValidatorType(): string
     {
@@ -94,7 +94,7 @@ abstract class TypeAbstract implements TypeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return bool
      */
     public function isUnsigned(): bool
     {
@@ -138,5 +138,13 @@ abstract class TypeAbstract implements TypeInterface
         $this->other = $other;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getAsString();
     }
 }

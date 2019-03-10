@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -11,6 +11,7 @@ namespace Eureka\Component\Orm\Query\Traits;
 
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Exception\InvalidQueryException;
+use Eureka\Component\Orm\Query\QueryBuilderInterface;
 
 /**
  * Class WhereTrait
@@ -28,7 +29,7 @@ trait WhereTrait
      * @param  bool $isUnique
      * @return string Return bind name field
      */
-    abstract public function addBind($field, $value, $isUnique = false);
+    abstract public function addBind(string $field, $value, bool $isUnique = false): string;
 
     /**
      * Add In list item.
@@ -37,10 +38,10 @@ trait WhereTrait
      * @param  array $values List of values (integer)
      * @param  string $whereConcat Concat type with other where elements
      * @param  bool $not Whether the condition should be NOT IN instead of IN
-     * @return $this
-     * @throws \Eureka\Component\Orm\Exception\InvalidQueryException
+     * @return QueryBuilderInterface
+     * @throws InvalidQueryException
      */
-    public function addIn($field, $values, $whereConcat = 'AND', $not = false)
+    public function addIn(string $field, array $values, string $whereConcat = 'AND', bool $not = false): QueryBuilderInterface
     {
         if (!is_array($values) || count($values) === 0) {
             throw new InvalidQueryException('Values for addIn must be an array, and non empty!');
@@ -68,13 +69,13 @@ trait WhereTrait
      * @param  string|int $value
      * @param  string $sign
      * @param  string $whereConcat
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function addWhere($field, $value, $sign = '=', $whereConcat = 'AND')
+    public function addWhere(string $field, $value, string $sign = '=', string $whereConcat = 'AND'): QueryBuilderInterface
     {
         $fieldWhere = (0 < count($this->whereList) ? ' ' . $whereConcat . ' ' . $field : $field);
 
-        $bindName          = $this->addBind($field, $value, true);
+        $bindName = $this->addBind($field, $value, true);
         $this->whereList[] = $fieldWhere . ' ' . $sign . $bindName;
 
         return $this;
@@ -86,9 +87,9 @@ trait WhereTrait
      * @param  string[] $keys
      * @param  string $sign
      * @param  string $whereConcat
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function addWhereKeysOr($keys, $sign = '=', $whereConcat = 'OR')
+    public function addWhereKeysOr(array $keys, string $sign = '=', string $whereConcat = 'OR'): QueryBuilderInterface
     {
         $whereList = [];
 
@@ -111,9 +112,9 @@ trait WhereTrait
      *
      * @param  bool $throwExceptionForEmptyWhere
      * @return string
-     * @throws
+     * @throws EmptyWhereClauseException
      */
-    public function getQueryWhere($throwExceptionForEmptyWhere = false)
+    public function getQueryWhere(bool $throwExceptionForEmptyWhere = false): string
     {
         $return = '';
 
@@ -129,11 +130,10 @@ trait WhereTrait
         return $return;
     }
 
-
     /**
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function resetWhere()
+    public function resetWhere(): QueryBuilderInterface
     {
         $this->whereList = [];
 

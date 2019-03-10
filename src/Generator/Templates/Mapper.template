@@ -1,23 +1,21 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
- * Copyright (c) {{ copyright }}
+ * Copyright (c) {{ comment.copyright }}
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-declare(strict_types=1);
+namespace {{ class.namespace }};
 
-namespace {{ namespace }};
-
-use {{ useNamespace }};
+use {{ repository.namespace }}\{{ class.repository }};
 
 /**
- * Mapper class for table "{{ dbTable }}"
+ * Mapper class for table "{{ database.table }}"
  *
- * @author {{ author }}
+ * @author {{ comment.author }}
  */
-class {{ className }}Mapper extends {{ extends }} implements {{ implements }}
+class {{ class.mapper }} extends Abstracts\Abstract{{ class.mapper }} implements {{ class.repository }}
 {
 }

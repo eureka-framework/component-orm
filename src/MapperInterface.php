@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
@@ -24,9 +22,15 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
 {
     /**
      * @param  AbstractMapper[] $mappers
-     * @return $this
+     * @return RepositoryInterface
      */
     public function addMappers(array $mappers): RepositoryInterface;
+
+    /**
+     * @param string $name
+     * @return RepositoryInterface
+     */
+    public function getMapper(string $name): RepositoryInterface;
 
     /**
      * Return fields for current table.
@@ -105,17 +109,16 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
      *
      * @param  SelectBuilder $queryBuilder
      * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\OrmException
      */
     public function rowExists(SelectBuilder $queryBuilder): bool;
 
     /**
      * Fetch rows for specified query.
      *
-     * @param  \Eureka\Component\Orm\Query\QueryBuilderInterface $queryBuilder
+     * @param  QueryBuilderInterface $queryBuilder
      * @return EntityInterface[] Array of EntityInterface object for query.
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\OrmException
      */
     public function query(QueryBuilderInterface $queryBuilder): array;
 
@@ -124,7 +127,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
      *
      * @param  QueryBuilderInterface $queryBuilder
      * @return \stdClass[] Array of stdClass object for query.
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\OrmException
      */
     public function queryRows(QueryBuilderInterface $queryBuilder): array;
 
@@ -133,8 +136,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
      *
      * @param  SelectBuilder $queryBuilder
      * @return EntityInterface[] List of row.
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws Exception\OrmException
      */
     public function select(SelectBuilder $queryBuilder): array;
 
@@ -144,8 +146,8 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
      * @param  SelectBuilder $queryBuilder
      * @return EntityInterface
      * @throws Exception\EntityNotExistsException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws Exception\InvalidQueryException
+     * @throws Exception\OrmException
      */
-    public function selectOne(SelectBuilder $queryBuilder): EntityInterface;
+    public function selectOne(SelectBuilder $queryBuilder);
 }

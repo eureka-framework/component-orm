@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,8 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
@@ -30,7 +28,7 @@ interface EntityInterface
      * @param  int $id
      * @return $this
      */
-    public function setAutoIncrementId(int $id): EntityInterface;
+    public function setAutoIncrementId(int $id);
 
     /**
      * Return cache key for the current data instance.
@@ -53,7 +51,7 @@ interface EntityInterface
      * @param  bool $exists
      * @return $this
      */
-    public function setExists(bool $exists): EntityInterface;
+    public function setExists(bool $exists);
 
     /**
      * If at least one data has been updated.
@@ -69,5 +67,5 @@ interface EntityInterface
      *
      * @return $this
      */
-    public function resetUpdated(): EntityInterface;
+    public function resetUpdated();
 }

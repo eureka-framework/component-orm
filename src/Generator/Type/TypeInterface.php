@@ -37,7 +37,7 @@ interface TypeInterface
      *
      * @return string
      */
-    public function getType(): string;
+    public function getAsString(): string;
 
     /**
      * Get empty value for this type.
@@ -66,4 +66,11 @@ interface TypeInterface
      * @return bool
      */
     public function isUnsigned(): bool;
+
+    /**
+     * Get as string.
+     *
+     * @return string
+     */
+    public function __toString(): string;
 }

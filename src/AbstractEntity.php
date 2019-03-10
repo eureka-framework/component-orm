@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -7,13 +7,10 @@
  * file that was distributed with this source code.
  */
 
-declare(strict_types=1);
-
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Database\Connection;
-use Eureka\Component\Validation\ValidatorInterface;
-use Psr\Container\ContainerInterface;
+use Eureka\Component\Orm\Traits\ValidatorAwareTrait;
+use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
  * DataMapper Data abstract class.
@@ -22,6 +19,8 @@ use Psr\Container\ContainerInterface;
  */
 abstract class AbstractEntity implements EntityInterface
 {
+    use ValidatorAwareTrait;
+
     /** @var bool $hasAutoIncrement If data has auto increment value. */
     protected $hasAutoIncrement = false;
 
@@ -34,17 +33,11 @@ abstract class AbstractEntity implements EntityInterface
     /** @var array $updated List of updated field */
     protected $updated = [];
 
-    /** @var string[][] $mapperClasses */
-    protected $mapperClasses = [];
-
-    /** @var AbstractMapper[] mappers */
-    protected $mappers = [];
-
     /** @var null|\Psr\Container\ContainerInterface $validatorFactoryContainer */
     protected $validatorFactoryContainer = null;
 
-    /** @var Connection[] $connections */
-    protected static $connections = [];
+    /** @var RepositoryInterface $repository Entity repository */
+    private $repository;
 
     /**
      * Return cache key for the current data instance.
@@ -63,18 +56,6 @@ abstract class AbstractEntity implements EntityInterface
     public function setAutoIncrementId(int $id): EntityInterface
     {
         return $this;
-    }
-
-    /**
-     * AbstractEntity constructor.
-     *
-     * @param \Eureka\Component\Orm\RepositoryInterface[]
-     * @param \Psr\Container\ContainerInterface|null $validatorFactoryContainer
-     */
-    public function __construct($mappers = [], ContainerInterface $validatorFactoryContainer = null)
-    {
-        $this->setMappers($mappers);
-        $this->validatorFactoryContainer = $validatorFactoryContainer;
     }
 
     /**
@@ -116,7 +97,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param  bool $isDeleted
      * @return $this
      */
-    public function setIsDelete(bool $isDeleted): EntityInterface
+    public function setIsDeleted(bool $isDeleted): EntityInterface
     {
         $this->isDeleted = (bool) $isDeleted;
 
@@ -128,7 +109,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @return bool
      */
-    public function isDelete(): bool
+    public function isDeleted(): bool
     {
         return $this->isDeleted;
     }
@@ -175,41 +156,64 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Add mapper for lazy loading joins.
-     *
-     * @param  RepositoryInterface $mapper
-     * @return $this
+     * @return RepositoryInterface
      */
-    public function addMapper(RepositoryInterface $mapper): EntityInterface
+    public function getRepository(): RepositoryInterface
     {
-        $this->mappers[get_class($mapper)] = $mapper;
-
-        return $this;
+        return $this->repository;
     }
 
     /**
-     * Set mapper list for lazy loading joins.
+     * Get form entity container.
      *
-     * @param  RepositoryInterface[] $mappers
+     * @param  void
+     * @return GenericEntity
+     */
+    public function getGenericEntity()
+    {
+        $genericEntity = $this->newGenericEntity();
+        $repository    = $this->getRepository();
+
+        foreach ($repository->getFields() as $field) {
+            $config = $repository->getNamesMap($field);
+            $getter = $config['get'];
+            $setter = $config['set'];
+
+            $genericEntity->$setter($this->$getter());
+        }
+
+        return $genericEntity;
+    }
+
+    /**
+     * Hydrate entity with form entity values
+     *
+     * @param  GenericEntity $genericEntity
      * @return $this
      */
-    public function setMappers(array $mappers): EntityInterface
+    public function hydrateFromGenericEntity(GenericEntity $genericEntity)
     {
-        $this->mappers = [];
+        $repository = $this->getRepository();
+        foreach ($repository->getFields() as $field) {
+            $config = $repository->getNamesMap($field);
+            $getter = $config['get'];
+            $setter = $config['set'];
 
-        foreach ($mappers as $mapper) {
-            $this->addMapper($mapper);
+            $newValue = $genericEntity->$getter();
+            if ($newValue !== null) {
+                $this->$setter($newValue);
+            }
         }
 
         return $this;
     }
 
     /**
-     * @param  string $type
-     * @return \Eureka\Component\Validation\ValidatorInterface
+     * @param RepositoryInterface $repository
+     * @return void
      */
-    protected function getValidator($type): ValidatorInterface
+    protected function setRepository(RepositoryInterface $repository): void
     {
-        return $this->validatorFactoryContainer->get($type);
+        $this->repository = $repository;
     }
 }

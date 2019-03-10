@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -9,10 +9,11 @@
 
 namespace Eureka\Component\Orm\Query\Traits;
 
+use Eureka\Component\Orm\Query\QueryBuilderInterface;
 use Eureka\Component\Orm\RepositoryInterface;
 
 /**
- * Class WhereTrait
+ * Trait FieldTrait
  *
  * @author Romain Cottard
  */
@@ -28,9 +29,9 @@ trait FieldTrait
     private $calculateFoundRows = false;
 
     /**
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    protected function resetField()
+    protected function resetField(): QueryBuilderInterface
     {
         $this->fields = [];
 
@@ -38,9 +39,9 @@ trait FieldTrait
     }
 
     /**
-     * @return $this
+     * @return QueryBuilderInterface
      */
-    public function enableCalculateFoundRows()
+    public function enableCalculateFoundRows(): QueryBuilderInterface
     {
         $this->calculateFoundRows = true;
 
@@ -50,7 +51,7 @@ trait FieldTrait
     /**
      * @return void
      */
-    public function disableCalculateFoundRows()
+    public function disableCalculateFoundRows(): void
     {
         $this->calculateFoundRows = false;
     }
@@ -60,7 +61,7 @@ trait FieldTrait
      * @param  string $alias
      * @return void
      */
-    public function addField($name, $alias = '')
+    public function addField(string $name, string $alias = ''): void
     {
         $this->fields[] = '`' . $name . '`' . (!empty($alias) ? ' AS ' . '`' . $alias . '`' : '');
     }
@@ -70,7 +71,7 @@ trait FieldTrait
      * @param  string $alias
      * @return void
      */
-    public function addFrom($name, $alias = '')
+    public function addFrom(string $name, string $alias = ''): void
     {
         $this->from = '`' . $name . '`' . (!empty($alias) ? ' AS ' . '`' . $alias . '`' : '');
     }
@@ -79,7 +80,7 @@ trait FieldTrait
      * @param  string[] $fields
      * @return string
      */
-    public function getQueryFieldsPersonalized($fields = [])
+    public function getQueryFieldsPersonalized(array $fields = []): string
     {
         if (empty($fields) || !is_array($fields)) {
             $fields = $this->fields;
@@ -102,10 +103,10 @@ trait FieldTrait
      * @param  bool $onlyPrimaryKeys Get only primary key(s) field(s)
      * @return string
      */
-    public function getQueryFields(RepositoryInterface $repository, $isPrefixed = false, $onlyPrimaryKeys = false)
+    public function getQueryFields(RepositoryInterface $repository, bool $isPrefixed = false, bool $onlyPrimaryKeys = false): string
     {
-        $fields         = [];
-        $table          = $repository->getTable();
+        $fields = [];
+        $table = $repository->getTable();
         $fieldsForQuery = $onlyPrimaryKeys ? $repository->getPrimaryKeys() : $repository->getFields();
 
         foreach ($fieldsForQuery as $field) {
@@ -121,7 +122,7 @@ trait FieldTrait
      * @param  RepositoryInterface $repository
      * @return string
      */
-    public function getQueryFrom(RepositoryInterface $repository)
+    public function getQueryFrom(RepositoryInterface $repository): string
     {
         return ' FROM ' . $repository->getTable();
     }
@@ -131,7 +132,7 @@ trait FieldTrait
      *
      * @return string
      */
-    public function getQueryFromPersonalized()
+    public function getQueryFromPersonalized(): string
     {
         return ' FROM ' . $this->from;
     }

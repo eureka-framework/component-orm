@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -7,9 +7,11 @@
  * file that was distributed with this source code.
  */
 
-declare(strict_types=1);
-
 namespace Eureka\Component\Orm;
+
+use Eureka\Component\Orm\Exception\EntityNotExistsException;
+use Eureka\Component\Orm\Exception\InsertFailedException;
+use Eureka\Component\Orm\Exception\OrmException;
 
 /**
  * Interface RepositoryInterface
@@ -22,21 +24,19 @@ interface RepositoryInterface extends MapperInterface
      * Get first row corresponding of the primary keys.
      *
      * @param  int $id
-     * @return EntityInterface
+     * @return self
+     * @throws OrmException
+     * @throws EntityNotExistsException
      * @throws \LogicException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function findById(int $id): EntityInterface;
+    public function findById(int $id);
 
     /**
      * Get rows corresponding of the keys.
      *
      * @param  string[] $keys
      * @return EntityInterface[] List of row
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Exception
+     * @throws OrmException
      */
     public function findAllByKeys(array $keys): array;
 
@@ -46,10 +46,10 @@ interface RepositoryInterface extends MapperInterface
      * @param  string[] $primaryKeys
      * @return EntityInterface
      * @throws \UnexpectedValueException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws EntityNotExistsException
+     * @throws OrmException
      */
-    public function findByKeys(array $primaryKeys): EntityInterface;
+    public function findByKeys(array $primaryKeys);
 
     /**
      * Either insert or update an entity
@@ -58,8 +58,7 @@ interface RepositoryInterface extends MapperInterface
      * @param  bool $onDuplicateUpdate If true, add on duplicate update clause to the insert query.
      * @param  bool $onDuplicateIgnore If true, add IGNORE on insert query to avoid SQL errors if duplicate
      * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
+     * @throws OrmException
      */
     public function persist(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool;
 
@@ -68,9 +67,8 @@ interface RepositoryInterface extends MapperInterface
      *
      * @param  EntityInterface $entity
      * @return bool
+     * @throws OrmException
      * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
      */
     public function delete(EntityInterface $entity): bool;
 
@@ -81,10 +79,9 @@ interface RepositoryInterface extends MapperInterface
      * @param  bool $onDuplicateUpdate If true, add on duplicate update clause to the insert query.
      * @param  bool $onDuplicateIgnore If true, add IGNORE on insert query to avoid SQL errors if duplicate
      * @return bool State of insert
-     * @throws \Eureka\Component\Orm\Exception\InsertFailedException
+     * @throws InsertFailedException
+     * @throws OrmException
      * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
      */
     public function insert(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool;
 
@@ -93,9 +90,8 @@ interface RepositoryInterface extends MapperInterface
      *
      * @param  EntityInterface $entity
      * @return bool
+     * @throws OrmException
      * @throws \LogicException
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \Exception
      */
     public function update(EntityInterface $entity): bool;
 }

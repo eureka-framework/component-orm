@@ -1,0 +1,9 @@
+    /**
+     * Get value for property "{{ property.description }}"
+     *
+     * @return {{ property.type }}
+     */
+    public function {{ property.getter }}(): {{ property.typehint }}
+    {
+        return $this->{{ property.name }};
+    }

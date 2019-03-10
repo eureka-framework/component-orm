@@ -1,0 +1,21 @@
+<?php declare(strict_types=1);
+
+/*
+ * Copyright (c) {{ comment.copyright }}
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace {{ class.namespace }};
+
+use {{ orm.namespace }}\EntityInterface;
+
+/**
+ * DataMapper Data class for table "{{ database.table }}"
+ *
+ * @author {{ comment.author }}
+ */
+class {{ class.name }} extends Abstracts\Abstract{{ class.name }} implements EntityInterface
+{
+}
