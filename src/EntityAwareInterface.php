@@ -29,7 +29,7 @@ interface EntityAwareInterface
     /**
      * @param  \stdClass|null $row
      * @param  bool $exists
-     * @return \Eureka\Component\Orm\EntityInterface
+     * @return $this
      */
     public function newEntity(\stdClass $row = null, bool $exists = false);
 
@@ -46,4 +46,12 @@ interface EntityAwareInterface
      * @return mixed
      */
     public function getEntityValue(EntityInterface $entity, string $field);
+
+    /**
+     * Get array "key" => "value" for primaries keys.
+     *
+     * @param  EntityInterface $entity
+     * @return array
+     */
+    public function getEntityPrimaryKeysValues(EntityInterface $entity): array;
 }

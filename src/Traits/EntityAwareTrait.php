@@ -118,7 +118,7 @@ trait EntityAwareTrait
      * @param  EntityInterface $entity
      * @return array
      */
-    protected function getEntityPrimaryKeysValues(EntityInterface $entity): array
+    public function getEntityPrimaryKeysValues(EntityInterface $entity): array
     {
         $values = [];
 

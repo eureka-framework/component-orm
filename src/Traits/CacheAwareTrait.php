@@ -108,6 +108,7 @@ trait CacheAwareTrait
 
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
 
+            /** @var EntityInterface $entityIdInstance */
             $entityIdInstance = $mapper->newEntity($row, true);
 
             //~ Pre-fill collection to keep the order
