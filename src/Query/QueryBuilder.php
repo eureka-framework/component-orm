@@ -11,6 +11,11 @@ namespace Eureka\Component\Orm\Query;
 
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 
+/**
+ * Class QueryBuilder
+ *
+ * @author Romain Cottard
+ */
 class QueryBuilder extends SelectBuilder
 {
     /**

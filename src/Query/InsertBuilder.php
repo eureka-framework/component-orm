@@ -29,7 +29,7 @@ class InsertBuilder extends AbstractQueryBuilder
     public function clear(): QueryBuilderInterface
     {
         $this->resetBind();
-        $this->resetField();
+        $this->resetFields();
         $this->resetSet();
 
         return $this;

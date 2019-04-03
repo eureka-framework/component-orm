@@ -57,6 +57,8 @@ trait EntityAwareTrait
     }
 
     /**
+     * Create new instance of EntityInterface implementation class & return it.
+     *
      * @param  \stdClass|null $row
      * @param  bool $exists
      * @return EntityInterface
@@ -66,7 +68,7 @@ trait EntityAwareTrait
         $entity = new $this->entityClass($this, $this->getValidatorFactory());
 
         if (!($entity instanceof EntityInterface)) {
-            throw new \LogicException('Data object not instance of EntityInterface class!');
+            throw new \LogicException('Entity object is not an instance of EntityInterface class!');
         }
 
         if ($row instanceof \stdClass) {
@@ -79,6 +81,39 @@ trait EntityAwareTrait
 
         return $entity;
     }
+
+    /**
+     * Create new instance of EntityInterface implementation class & return it.
+     * Remove prefix from result set field to retrieve the correct field name.
+     *
+     * @param  \stdClass $row
+     * @param  string $suffix
+     * @return EntityInterface
+     * @throws \LogicException
+     */
+    public function newEntitySuffixAware(\stdClass $row, string $suffix): EntityInterface
+    {
+        $entity = new $this->entityClass($this, $this->getValidatorFactory());
+
+        if (!($entity instanceof EntityInterface)) {
+            throw new \LogicException('Entity object is not an instance of AbstractData class!');
+        }
+
+        if ($row instanceof \stdClass) {
+            foreach ($row as $field => $value) {
+                $suffixPosition = strrpos($field, $suffix);
+                if (!empty($suffix) && $suffixPosition !== false) {
+                    $field = substr($field, 0, $suffixPosition);
+                }
+                $this->setEntityValue($entity, $field, $value);
+            }
+        }
+
+        $entity->setExists(true);
+
+        return $entity;
+    }
+
 
     /**
      * @param  EntityInterface $entity

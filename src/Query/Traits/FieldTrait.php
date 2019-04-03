@@ -31,7 +31,7 @@ trait FieldTrait
     /**
      * @return QueryBuilderInterface
      */
-    protected function resetField(): QueryBuilderInterface
+    protected function resetFields(): QueryBuilderInterface
     {
         $this->fields = [];
 
@@ -59,11 +59,13 @@ trait FieldTrait
     /**
      * @param  string $name
      * @param  string $alias
+     * @param  bool $escape
      * @return void
      */
-    public function addField(string $name, string $alias = ''): void
+    public function addField(string $name, string $alias = '', bool $escape = true): void
     {
-        $this->fields[] = '`' . $name . '`' . (!empty($alias) ? ' AS ' . '`' . $alias . '`' : '');
+        $name = $escape ? '`' . $name . '`' : $name;
+        $this->fields[] = $name . (!empty($alias) ? ' AS ' . '`' . $alias . '`' : '');
     }
 
     /**
@@ -103,19 +105,55 @@ trait FieldTrait
      * @param  bool $onlyPrimaryKeys Get only primary key(s) field(s)
      * @return string
      */
-    public function getQueryFields(RepositoryInterface $repository, bool $isPrefixed = false, bool $onlyPrimaryKeys = false): string
-    {
-        $fields = [];
-        $table = $repository->getTable();
-        $fieldsForQuery = $onlyPrimaryKeys ? $repository->getPrimaryKeys() : $repository->getFields();
+    public function getQueryFields(
+        RepositoryInterface $repository,
+        bool $isPrefixed = false,
+        bool $onlyPrimaryKeys = false
+    ): string {
 
-        foreach ($fieldsForQuery as $field) {
-            $fields[] = ($isPrefixed ? '`' . $table . '`.' : '') . '`' . $field . '`';
+        $calc = ($this->calculateFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '');
+
+        if (!empty($this->fields)) {
+            $fields = $this->fields;
+        } else {
+            $fields = $this->getQueryFieldsList($repository, $isPrefixed, $onlyPrimaryKeys);
         }
 
-        return ($this->calculateFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '') . implode(', ', $fields);
+        return $calc . implode(', ', $fields);
     }
 
+    /**
+     * Get fields to select
+     *
+     * @param RepositoryInterface $repository
+     * @param bool $isPrefixed
+     * @param bool $onlyPrimaryKeys
+     * @param string|null $aliasPrefix
+     * @param string|null $aliasSuffix
+     * @return array
+     */
+    public function getQueryFieldsList(
+        RepositoryInterface $repository,
+        bool $isPrefixed = false,
+        bool $onlyPrimaryKeys = false,
+        ?string $aliasPrefix = null,
+        ?string $aliasSuffix = null
+    ): array {
+
+        $fields = $onlyPrimaryKeys ? $repository->getPrimaryKeys() : $repository->getFields();
+
+        if ($isPrefixed) {
+            $table          = !empty($aliasPrefix) ? $aliasPrefix : $repository->getTable();
+            $fields         = [];
+            $fieldsToPrefix = $onlyPrimaryKeys ? $repository->getPrimaryKeys() : $repository->getFields();
+
+            foreach ($fieldsToPrefix as $field) {
+                $fields[] = $table . '.' . $field . (!empty($aliasSuffix) ? ' AS '. $field . $aliasSuffix : '');
+            }
+        }
+
+        return $fields;
+    }
     /**
      * Get FROM clause
      *

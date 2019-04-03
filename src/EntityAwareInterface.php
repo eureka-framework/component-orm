@@ -27,11 +27,24 @@ interface EntityAwareInterface
     public function disableIgnoreNotMappedFields();
 
     /**
+     * Create new instance of EntityInterface implementation class & return it.
+     *
      * @param  \stdClass|null $row
      * @param  bool $exists
      * @return $this
      */
     public function newEntity(\stdClass $row = null, bool $exists = false);
+
+    /**
+     * Create new instance of EntityInterface implementation class & return it.
+     * Remove prefix from result set field to retrieve the correct field name.
+     *
+     * @param  \stdClass $row
+     * @param  string $suffix
+     * @return EntityInterface
+     * @throws \LogicException
+     */
+    public function newEntitySuffixAware(\stdClass $row, string $suffix);
 
     /**
      * @param  \Eureka\Component\Orm\EntityInterface $entity

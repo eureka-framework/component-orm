@@ -13,6 +13,11 @@ use Eureka\Component\Orm\Exception\EmptySetClauseException;
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Query\Traits;
 
+/**
+ * Class UpdateBuilder
+ *
+ * @author Romain Cottard
+ */
 class UpdateBuilder extends AbstractQueryBuilder
 {
     use Traits\WhereTrait, Traits\FieldTrait, Traits\SetTrait;
@@ -23,7 +28,7 @@ class UpdateBuilder extends AbstractQueryBuilder
     public function clear(): QueryBuilderInterface
     {
         $this->resetBind();
-        $this->resetField();
+        $this->resetFields();
         $this->resetSet();
         $this->resetWhere();
 

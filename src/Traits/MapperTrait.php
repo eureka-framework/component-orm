@@ -11,6 +11,7 @@ namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\EntityInterface;
+use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Exception;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\RepositoryInterface;
@@ -110,6 +111,7 @@ trait MapperTrait
         if (!isset($this->mappers[$name])) {
             throw new Exception\UndefinedMapperException('Mapper does not exist! (mapper: ' . $name . ')');
         }
+
         return $this->mappers[$name];
     }
 
@@ -127,7 +129,9 @@ trait MapperTrait
     public function getMaxId(): int
     {
         if (count($this->primaryKeys) > 1) {
-            throw new \LogicException(__METHOD__ . '|Cannot use getMaxId() method for table with multiple primary keys !');
+            throw new \LogicException(
+                __METHOD__ . '|Cannot use getMaxId() method for table with multiple primary keys !'
+            );
         }
 
         $field = reset($this->primaryKeys);
@@ -196,7 +200,7 @@ trait MapperTrait
         /** @var Connection $connection */
         $connection = $this->getConnection();
 
-        /** @var Connection $this->connection */
+        /** @var Connection $this ->connection */
         $indexedBy = $queryBuilder->getListIndexedByField();
         $statement = $connection->prepare($queryBuilder->getQuery());
         $statement->execute($queryBuilder->getBind());
@@ -208,7 +212,9 @@ trait MapperTrait
         $id = 0;
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
             if ($indexedBy !== null && !isset($row->$indexedBy)) {
-                throw new Exception\OrmException('List is supposed to be indexed by a column that does not exist: ' . $indexedBy);
+                throw new Exception\OrmException(
+                    'List is supposed to be indexed by a column that does not exist: ' . $indexedBy
+                );
             }
 
             $index              = $indexedBy !== null ? $row->$indexedBy : $id++;
@@ -220,10 +226,12 @@ trait MapperTrait
 
     /**
      * @param Query\QueryBuilderInterface $queryBuilder
+     * @param bool $join
+     * @param array $fields
      * @return array
      * @throws Exception\OrmException
      */
-    public function queryRows(Query\QueryBuilderInterface $queryBuilder): array
+    public function queryRows(Query\QueryBuilderInterface $queryBuilder, $join = false, $fields = []): array
     {
         /** @var Connection $connection */
         $connection = $this->getConnection();
@@ -292,7 +300,7 @@ trait MapperTrait
 
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
             /** @var EntityInterface $entity */
-            $entity = $this->newEntity($row, true);
+            $entity                             = $this->newEntity($row, true);
             $collection[$entity->getCacheKey()] = $entity;
             $this->setCacheEntity($entity);
         }
@@ -300,6 +308,38 @@ trait MapperTrait
         $queryBuilder->clear();
 
         return $collection;
+    }
+
+    /**
+     * Select all rows corresponding of where clause.
+     * Use eager loading to select joined entities.
+     *
+     * @param Query\SelectBuilder $queryBuilder
+     * @param array $filters
+     * @return array
+     * @throws Exception\OrmException
+     * @throws Exception\UndefinedMapperException
+     */
+    public function selectJoin(Query\SelectBuilder $queryBuilder, array $filters = []): array
+    {
+        $configs = $this->getJoinsConfig($filters);
+        $list    = $this->getRawResultsWithJoin($queryBuilder, $configs);
+        list($collection, $relations) = $this->getCollectionAndRelations($list, $configs);
+
+        //~ Resolve all relations
+        foreach ($collection as $hash => $data) {
+            foreach ($configs as $name => $join) {
+                if ($join['relation'] === JoinRelation::MANY) {
+                    $setter = 'setAll' . $name;
+                    $data->$setter($relations[$name][$hash]);
+                } else {
+                    $setter = 'set' . $name;
+                    $data->$setter(reset($relations[$name][$hash]));
+                }
+            }
+        }
+
+        return array_values($collection);
     }
 
     /**
@@ -361,5 +401,131 @@ trait MapperTrait
         $this->joinConfigs = $joinConfigs;
 
         return $this;
+    }
+
+    /**
+     * Get list of joins config filters if filters is provided.
+     *
+     * @param  array $filters
+     * @return array
+     */
+    private function getJoinsConfig(array $filters = [])
+    {
+        $joins = [];
+
+        foreach ($this->joinConfigs as $name => $join) {
+            if (!empty($filters) && !in_array($name, $filters)) {
+                continue;
+            }
+
+            $joins[$name] = $join;
+        }
+
+        return $joins;
+    }
+
+    /**
+     * @param Query\SelectBuilder $queryBuilder
+     * @param array $joinConfigs
+     * @return array
+     * @throws Exception\OrmException
+     * @throws Exception\UndefinedMapperException
+     */
+    private function getRawResultsWithJoin(Query\SelectBuilder $queryBuilder, array $joinConfigs): array
+    {
+        /** @var RepositoryInterface $this */
+        //~ Add main fields to query builder
+        foreach ($queryBuilder->getQueryFieldsList($this, true) as $field) {
+            $queryBuilder->addField($field, '', false);
+        }
+
+        $index = 0;
+
+        foreach ($joinConfigs as $join) {
+            $mapper = $this->getMapper($join['mapper']);
+
+            $aliasPrefix = $mapper->getTable() . '_' . $index++;
+            $aliasSuffix = '_' . $aliasPrefix;
+
+            $keyLeft  = key($join['keys']);
+            $keyRight = current($join['keys']);
+
+            $keyRight = $keyRight === true ? $keyLeft : $keyRight;
+
+            //~ Add joined fields to query builder
+            foreach ($queryBuilder->getQueryFieldsList($mapper, true, false, $aliasPrefix, $aliasSuffix) as $field) {
+                $queryBuilder->addField($field, '', false);
+            }
+
+            //~ Add join to query builder
+            $queryBuilder->addJoin(
+                $join['type'],
+                $mapper->getTable(),
+                $keyLeft,
+                $this->getTable(),
+                $keyRight,
+                $aliasPrefix
+            );
+        }
+
+        return $this->queryRows($queryBuilder);
+    }
+
+    /**
+     * @param \stdClass[] $list
+     * @param string[] $joinConfigs
+     * @return array
+     * @throws Exception\UndefinedMapperException
+     */
+    private function getCollectionAndRelations(array $list, array $joinConfigs): array
+    {
+        $this->enableIgnoreNotMappedFields();
+
+        $collection = [];
+        $relations  = [];
+        $getters    = [];
+        foreach ($this->getPrimaryKeys() as $primaryKey) {
+            $map       = $this->getNamesMap($primaryKey);
+            $getters[] = $map['get'];
+        }
+
+        foreach ($list as $row) {
+            //~ Main entity
+            $data = $this->newEntity($row, true);
+
+            //~ Resolve one-many relations
+            $ids = [];
+            foreach ($getters as $getterPrimaryKey) {
+                $ids[] = '|' . $data->$getterPrimaryKey();
+            }
+            $hash = md5(implode('|', $ids));
+
+            if (!isset($collection[$hash])) {
+                $collection[$hash] = $data;
+            }
+
+            //~ Build relation joined
+            $index = 0;
+            foreach ($joinConfigs as $name => $join) {
+                $mapper      = $this->getMapper($join['mapper']);
+                $aliasSuffix = '_' . $mapper->getTable() . '_' . $index++;
+
+                $mapper->enableIgnoreNotMappedFields();
+
+                $dataJoin = $mapper->newEntitySuffixAware($row, $aliasSuffix);
+
+                if (!isset($relations[$name][$hash])) {
+                    $relations[$name][$hash] = [];
+                }
+
+                $relations[$name][$hash][] = $dataJoin;
+
+                $mapper->disableIgnoreNotMappedFields();
+            }
+        }
+
+        $this->disableIgnoreNotMappedFields();
+
+        return [$collection, $relations];
     }
 }
