@@ -32,7 +32,7 @@ trait MapperTrait
     /** @var string[] $primaryKeys */
     protected $primaryKeys = [];
 
-    /** @var string[] $entityNamesMap */
+    /** @var string[][] $entityNamesMap */
     protected $entityNamesMap = [];
 
     /** @var int $lastId */

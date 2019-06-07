@@ -47,9 +47,9 @@ trait LimitTrait
     public function getQueryLimit(): string
     {
         if ($this->limit !== null && $this->offset !== null) {
-            return 'LIMIT ' . $this->offset . ', ' . $this->limit;
+            return ' LIMIT ' . $this->offset . ', ' . $this->limit;
         } elseif (null !== $this->limit) {
-            return 'LIMIT ' . $this->limit;
+            return ' LIMIT ' . $this->limit;
         }
 
         return '';

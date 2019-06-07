@@ -44,6 +44,6 @@ class QueryBuilder extends SelectBuilder
      */
     public function getQueryCount($field = '*')
     {
-        return 'SELECT COUNT(`' . $field . '`) AS NB_RESULTS FROM ' . $this->getQueryFromPersonalized() . ' ' . $this->getQueryWhere();
+        return 'SELECT COUNT(' . $field . ') AS NB_RESULTS ' . $this->getQueryFrom($this->repository) . ' ' . $this->getQueryWhere();
     }
 }

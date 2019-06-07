@@ -11,7 +11,7 @@ namespace {{ class.namespace }};
 
 use {{ orm.namespace }}\AbstractEntity;
 use {{ orm.namespace }}\RepositoryInterface;
-use {{ orm.namespace }}\Exception\OrmException;
+use Eureka\Component\Validation\Exception\ValidationException;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
 use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
 {{ entity.uses }}

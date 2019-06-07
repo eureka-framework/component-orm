@@ -40,7 +40,7 @@ trait JoinTrait
     ): QueryBuilderInterface {
 
         $using    = 'ON ' . $leftPrefix . '.' . $leftField . ' = ' . $rightPrefix . '.' . $rightField;
-        $this->joinList[]  = $type . ' JOIN ' . $table . ' AS ' . $rightPrefix . ' ' . $using;
+        $this->joinList[]  = ' ' . $type . ' JOIN ' . $table . ' AS ' . $rightPrefix . ' ' . $using;
 
         return $this;
     }

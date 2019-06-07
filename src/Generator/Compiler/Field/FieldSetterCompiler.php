@@ -47,7 +47,7 @@ class FieldSetterCompiler extends AbstractFieldCompiler
         $validation = $this->getValidations($this->field->getType(), '$' . $this->getPropertyName($this->field));
 
         if (!empty($validation)) {
-            $exception = "\n     * @throws \Eureka\Component\Validation\Exception\ValidationException";
+            $exception = "\n     * @throws ValidationException";
         }
 
         $context
