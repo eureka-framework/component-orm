@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=0);
 
 /*
  * Copyright (c) Romain Cottard
@@ -80,6 +80,41 @@ trait EntityAwareTrait
         $entity->setExists($exists);
 
         return $entity;
+    }
+
+    /**
+     * Create new entity from array.
+     * Array fields must be named as the entity properties name.
+     *
+     * @param  array $form
+     * @return EntityInterface
+     */
+    public function newEntityFromArray(array $form): EntityInterface
+    {
+        return $this->updateEntityFromArray($this->newEntity(), $form);
+    }
+
+    /**
+     * Update entity from form data.
+     * Form fields must be named as the entity properties name.
+     *
+     * @param EntityInterface $data
+     * @param array $form
+     * @return EntityInterface
+     */
+    public function updateEntityFromArray(EntityInterface $data, array $form): EntityInterface
+    {
+        foreach ($this->getFields() as $field) {
+            $map = $this->getNamesMap($field);
+
+            if (!array_key_exists($map['property'], $form)) {
+                continue;
+            }
+
+            $this->setEntityValue($data, $field, $form[$map['property']]);
+        }
+
+        return $data;
     }
 
     /**

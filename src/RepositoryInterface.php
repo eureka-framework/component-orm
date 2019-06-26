@@ -24,7 +24,7 @@ interface RepositoryInterface extends MapperInterface
      * Get first row corresponding of the primary keys.
      *
      * @param  int $id
-     * @return self
+     * @return EntityInterface
      * @throws OrmException
      * @throws EntityNotExistsException
      * @throws \LogicException
