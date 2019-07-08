@@ -28,7 +28,7 @@ trait RepositoryTrait
      * @throws Exception\EntityNotExistsException
      * @throws Exception\OrmException
      */
-    public function findById(int $id): object
+    public function findById(int $id)
     {
         if (count($this->getPrimaryKeys()) > 1) {
             throw new \LogicException(
@@ -51,7 +51,7 @@ trait RepositoryTrait
      */
     public function findByKeys(array $keys): object
     {
-        /** @var \Eureka\Component\Orm\RepositoryInterface $this */
+        /** @var RepositoryInterface $this */
 
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
         foreach ($keys as $field => $value) {
@@ -64,12 +64,11 @@ trait RepositoryTrait
     /**
      * @param  array $keys
      * @return EntityInterface[]
-     * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
      */
     public function findAllByKeys(array $keys): array
     {
-        /** @var \Eureka\Component\Orm\RepositoryInterface $this */
+        /** @var RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
         foreach ($keys as $field => $value) {
             $queryBuilder->addWhere($field, $value);
@@ -79,13 +78,13 @@ trait RepositoryTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\EntityInterface $entity
+     * @param EntityInterface $entity
      * @return bool
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\OrmException
      */
     public function delete(EntityInterface $entity): bool
     {
-        /** @var \Eureka\Component\Orm\RepositoryInterface $this */
+        /** @var RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_DELETE, $this, $entity);
 
         /** @var Connection $connection */
@@ -106,12 +105,12 @@ trait RepositoryTrait
     }
 
     /**
-     * @param  \Eureka\Component\Orm\EntityInterface $entity
+     * @param  EntityInterface $entity
      * @param  bool $onDuplicateUpdate
      * @param  bool $onDuplicateIgnore
      * @return bool
-     * @throws \Eureka\Component\Orm\Exception\InsertFailedException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\InsertFailedException
+     * @throws Exception\OrmException
      */
     public function insert(
         EntityInterface $entity,
@@ -158,9 +157,9 @@ trait RepositoryTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\EntityInterface $entity
+     * @param EntityInterface $entity
      * @return bool
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\OrmException
      */
     public function update(EntityInterface $entity): bool
     {
@@ -168,7 +167,7 @@ trait RepositoryTrait
             return false;
         }
 
-        /** @var \Eureka\Component\Orm\RepositoryInterface $this */
+        /** @var RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_UPDATE, $this, $entity);
 
         /** @var Connection $connection */
@@ -188,12 +187,12 @@ trait RepositoryTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\EntityInterface $entity
+     * @param EntityInterface $entity
      * @param bool $onDuplicateUpdate
      * @param bool $onDuplicateIgnore
      * @return bool
-     * @throws \Eureka\Component\Orm\Exception\InsertFailedException
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\InsertFailedException
+     * @throws Exception\OrmException
      */
     public function persist(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool
     {

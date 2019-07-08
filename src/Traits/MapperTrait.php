@@ -10,6 +10,7 @@
 namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Database\Connection;
+use Eureka\Component\Orm\AbstractMapper;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Exception;
@@ -41,7 +42,7 @@ trait MapperTrait
     /** @var int $rowCount The number of rows affected by the last SQL statement */
     protected $rowCount = 0;
 
-    /** @var \Eureka\Component\Orm\RepositoryInterface[] $mappers */
+    /** @var RepositoryInterface[] $mappers */
     protected $mappers = [];
 
     /** @var array $joinConfigs */
@@ -91,7 +92,7 @@ trait MapperTrait
     }
 
     /**
-     * @param  \Eureka\Component\Orm\RepositoryInterface[] $mappers
+     * @param  RepositoryInterface[] $mappers
      * @return RepositoryInterface
      */
     public function addMappers(array $mappers): RepositoryInterface
@@ -156,7 +157,7 @@ trait MapperTrait
     /**
      * Count number of rows corresponding to the query.
      *
-     * @param  \Eureka\Component\Orm\Query\QueryBuilder $queryBuilder
+     * @param  Query\QueryBuilder $queryBuilder
      * @param  string $field
      * @return int
      */
@@ -191,7 +192,7 @@ trait MapperTrait
     }
 
     /**
-     * @param \Eureka\Component\Orm\Query\QueryBuilderInterface
+     * @param Query\QueryBuilderInterface
      * @return array
      * @throws Exception\OrmException
      */
@@ -231,7 +232,7 @@ trait MapperTrait
      * @return array
      * @throws Exception\OrmException
      */
-    public function queryRows(Query\QueryBuilderInterface $queryBuilder, $join = false, $fields = []): array
+    public function queryRows(Query\QueryBuilderInterface $queryBuilder, bool $join = false, array $fields = []): array
     {
         /** @var Connection $connection */
         $connection = $this->getConnection();
@@ -281,7 +282,7 @@ trait MapperTrait
         $collection = [];
 
         if ($this->isCacheEnabledOnRead) {
-            /** @var \Eureka\Component\Orm\AbstractMapper $this */
+            /** @var AbstractMapper $this */
             $collection = $this->selectFromCache($this->connection, $this, $queryBuilder);
         }
 

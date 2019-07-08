@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types=0);
 
 /*
  * Copyright (c) Romain Cottard
@@ -36,6 +36,25 @@ interface EntityAwareInterface
     public function newEntity(\stdClass $row = null, bool $exists = false);
 
     /**
+     * Create new entity from array.
+     * Array fields must be named as the entity properties name.
+     *
+     * @param  array $form
+     * @return EntityInterface
+     */
+    public function newEntityFromArray(array $form);
+
+    /**
+     * Update entity from form data.
+     * Form fields must be named as the entity properties name.
+     *
+     * @param  EntityInterface $data
+     * @param  array $form
+     * @return EntityInterface
+     */
+    public function updateEntityFromArray(EntityInterface $data, array $form);
+
+    /**
      * Create new instance of EntityInterface implementation class & return it.
      * Remove prefix from result set field to retrieve the correct field name.
      *
@@ -47,14 +66,14 @@ interface EntityAwareInterface
     public function newEntitySuffixAware(\stdClass $row, string $suffix);
 
     /**
-     * @param  \Eureka\Component\Orm\EntityInterface $entity
+     * @param  EntityInterface $entity
      * @param  string $field
      * @return bool
      */
     public function isEntityUpdated(EntityInterface $entity, string $field): bool;
 
     /**
-     * @param  \Eureka\Component\Orm\EntityInterface $entity
+     * @param  EntityInterface $entity
      * @param  string $field
      * @return mixed
      */

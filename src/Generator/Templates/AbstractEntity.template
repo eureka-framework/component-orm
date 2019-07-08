@@ -50,8 +50,9 @@ abstract class Abstract{{ class.name }} extends AbstractEntity
      */
     public function getCacheKey(): string
     {
-        return '{{ cache.key.prefix }}' . $this->getId();
+        return '{{ cache.key.prefix }}.' . {{ cache.key.suffix }};
     }
+
 {{ method.getters }}
 {{ method.setters }}
 {{ method.joins }}

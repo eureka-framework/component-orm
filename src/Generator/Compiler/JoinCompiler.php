@@ -11,6 +11,7 @@ namespace Eureka\Component\Orm\Generator\Compiler;
 
 use Eureka\Component\Orm\Config\ConfigInterface;
 use Eureka\Component\Orm\Exception\GeneratorException;
+use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Generator\Compiler\Field\Field;
 
 /**
@@ -29,6 +30,9 @@ class JoinCompiler extends AbstractMethodCompiler
     /** @var Context $mainContext */
     private $mainContext;
 
+    /** @var string $name */
+    private $name;
+
     /**
      * JoinCompiler constructor.
      *
@@ -36,20 +40,29 @@ class JoinCompiler extends AbstractMethodCompiler
      * @param array $joinConfig
      * @param Field[] $fields
      * @param Context $mainContext
+     * @param string $name
      */
-    public function __construct(ConfigInterface $config, array $joinConfig, array $fields, Context $mainContext)
+    public function __construct(ConfigInterface $config, array $joinConfig, array $fields, Context $mainContext, string $name = '')
     {
+        if ($joinConfig['relation'] === 'many') {
+            $templates = [
+                __DIR__ . '/../Templates/MethodJoinMany.template' => false,
+            ];
+        } else {
+            $templates = [
+                __DIR__ . '/../Templates/MethodJoinOne.template'  => false,
+            ];
+        }
+
         parent::__construct(
             $config,
-            [
-                __DIR__ . '/../Templates/MethodJoinOne.template'  => false,
-                __DIR__ . '/../Templates/MethodJoinMany.template' => false,
-            ]
+            $templates
         );
 
         $this->joinConfig  = $joinConfig;
         $this->fields      = $fields;
         $this->mainContext = $mainContext;
+        $this->name        = $name;
     }
 
     /**
@@ -62,8 +75,12 @@ class JoinCompiler extends AbstractMethodCompiler
         /** @var ConfigInterface $config */
         $config = $this->joinConfig['instance'];
 
+        $className = $config->getClassname();
+        $name      = !empty($this->name) ? $this->name : $className;
+
         $context
-            ->add('join.entity.name', $config->getClassname())
+            ->add('join.entity.class', $className)
+            ->add('join.entity.name', $name)
             ->add('join.entity.keys', $this->buildKeys())
         ;
 
@@ -79,26 +96,33 @@ class JoinCompiler extends AbstractMethodCompiler
         /** @var ConfigInterface $config */
         $config    = $this->joinConfig['instance'];
         $className = $config->getClassname();
+        $name      = !empty($this->name) ? $this->name : $className;
 
         //~ Update class properties
         $classProperties = $this->mainContext->get('class.properties');
 
         if (!empty($classProperties)) {
-            $compiler = new PropertyCompiler(
-                'joinManyCache' . $className,
-                $className,
-                $className,
-                'null'
-            );
-            $classProperties = $classProperties . "\n" . implode("\n", $compiler->compile());
+            if ($this->joinConfig['relation'] === 'many') {
+                $compiler        = new PropertyCompiler(
+                    'joinManyCache' . $name, $className, $className, 'null'
+                );
 
-            $compiler = new PropertyCompiler(
-                'joinOneCache' . $className,
-                $className,
-                $className,
-                'null'
-            );
-            $this->mainContext->add('class.properties', $classProperties . "\n" . implode("\n", $compiler->compile()));
+                $this->mainContext->add(
+                    'class.properties',
+                    $classProperties . "\n" . implode("\n", $compiler->compile())
+                );
+
+            } else {
+
+                $compiler = new PropertyCompiler(
+                    'joinOneCache' . $name, $className, $className, 'null'
+                );
+
+                $this->mainContext->add(
+                    'class.properties',
+                    $classProperties . "\n" . implode("\n", $compiler->compile())
+                );
+            }
         }
 
         //~ Update class "uses"
@@ -107,6 +131,7 @@ class JoinCompiler extends AbstractMethodCompiler
         if (!empty($this->mainContext->get('entity.uses'))) {
             $classUses[] = $this->mainContext->get('entity.uses');
         }
+
         $classUses[] = 'use ' . $config->getBaseNamespaceForEntity() . '\\' . $className . ';';
         $classUses[] = 'use ' . $config->getBaseNamespaceForMapper() . '\\' . $className . 'Mapper;';
 

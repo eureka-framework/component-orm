@@ -3,14 +3,13 @@
      * Get {{ join.entity.name }} entity instance.
      *
      * @param  bool $isForceReload
-     * @return {{ join.entity.name }}
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @return {{ join.entity.class }}
      * @throws OrmException
      */
-    public function get{{ join.entity.name }}(bool $isForceReload = false): {{ join.entity.name }}
+    public function get{{ join.entity.name }}(bool $isForceReload = false): {{ join.entity.class }}
     {
         if ($isForceReload || null === $this->joinOneCache{{ join.entity.name }}) {
-            $mapper = $this->getRepository()->getMapper({{ join.entity.name }}Mapper::class);
+            $mapper = $this->getRepository()->getMapper({{ join.entity.class }}Mapper::class);
             $this->joinOneCache{{ join.entity.name }} = $mapper->findByKeys([
                 {{ join.entity.keys }}
             ]);
@@ -20,12 +19,12 @@
     }
 
     /**
-     * Set {{ join.entity.name }} entity instance.
+     * Set {{ join.entity.class }} entity instance.
      *
-     * @param {{ join.entity.name }} $entity
+     * @param {{ join.entity.class }} $entity
      * @return $this
      */
-    public function set{{ join.entity.name }}({{ join.entity.name }} $entity): self
+    public function set{{ join.entity.name }}({{ join.entity.class }} $entity): self
     {
         $this->joinOneCache{{ join.entity.name }} = $entity;
 

@@ -140,7 +140,12 @@ trait EntityAwareTrait
                 if (!empty($suffix) && $suffixPosition !== false) {
                     $field = substr($field, 0, $suffixPosition);
                 }
-                $this->setEntityValue($entity, $field, $value);
+
+                try {
+                    $this->setEntityValue($entity, $field, $value);
+                } catch (\TypeError $exception) {
+                    //~ Skip type error when data came from database
+                }
             }
         }
 

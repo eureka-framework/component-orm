@@ -1,16 +1,15 @@
 
     /**
-     * Get list of {{ join.entity.name }} entities instance.
+     * Get list of {{ join.entity.class }} entities instance.
      *
      * @param  bool $isForceReload
-     * @return {{ join.entity.name }}[]
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @return {{ join.entity.class }}[]
      * @throws OrmException
      */
     public function getAll{{ join.entity.name }}(bool $isForceReload = false): array
     {
         if ($isForceReload || null === $this->joinManyCache{{ join.entity.name }}) {
-            $mapper = $this->getRepository()->getMapper({{ join.entity.name }}Mapper::class);
+            $mapper = $this->getRepository()->getMapper({{ join.entity.class }}Mapper::class);
             $this->joinManyCache{{ join.entity.name }} = $mapper->findAllByKeys([
                 {{ join.entity.keys }}
             ]);
@@ -20,9 +19,9 @@
     }
 
     /**
-     * Set {{ join.entity.name }} entity instances.
+     * Set {{ join.entity.class }} entity instances.
      *
-     * @param {{ join.entity.name }}[] $entities
+     * @param {{ join.entity.class }}[] $entities
      * @return $this
      */
     public function setAll{{ join.entity.name }}(array $entities): self

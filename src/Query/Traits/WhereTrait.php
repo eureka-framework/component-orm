@@ -69,11 +69,13 @@ trait WhereTrait
      * @param  string|int $value
      * @param  string $sign
      * @param  string $whereConcat
+     * @param  string $prefix
      * @return QueryBuilderInterface
      */
-    public function addWhere(string $field, $value, string $sign = '=', string $whereConcat = 'AND'): QueryBuilderInterface
+    public function addWhere(string $field, $value, string $sign = '=', string $whereConcat = 'AND', $prefix = ''): QueryBuilderInterface
     {
-        $fieldWhere = (0 < count($this->whereList) ? ' ' . $whereConcat . ' ' . $field : $field);
+        $fieldWithPrefix = !empty($prefix) ? $prefix . '.' . $field : $field;
+        $fieldWhere = (0 < count($this->whereList) ? ' ' . $whereConcat . ' ' . $fieldWithPrefix : $fieldWithPrefix);
 
         $bindName = $this->addBind($field, $value, true);
         $this->whereList[] = $fieldWhere . ' ' . $sign . $bindName;

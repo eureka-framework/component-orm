@@ -10,6 +10,7 @@
 namespace Eureka\Component\Orm\Generator\Compiler;
 
 use Eureka\Component\Orm\Config;
+use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldGetterCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldPropertyCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterCompiler;
@@ -48,7 +49,8 @@ class EntityCompiler extends AbstractClassCompiler
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
         $context->add('class.namespace', $this->config->getBaseNamespaceForEntity() . ($isAbstract ? '\Abstracts' : ''));
-        $context->add('cache.key.prefix', $this->config->getCachePrefix());
+        $context->add('cache.key.prefix', rtrim($this->config->getCachePrefix(), '.'));
+        $context->add('cache.key.suffix', $this->buildCacheSuffix());
 
         $context->add('entity.uses', '');
 
@@ -70,9 +72,13 @@ class EntityCompiler extends AbstractClassCompiler
         $context->add('method.getters', implode("\n", $compiledTemplate['getters']));
         $context->add('method.setters', implode("\n", $compiledTemplate['setters']));
 
+        if (!empty($this->config->getAllJoin())) {
+            $this->appendClassUseOrmException($context);
+        }
+
         //~ Compile templates about joins
-        foreach ($this->config->getAllJoin() as $joinConfig) {
-            $compiler = new JoinCompiler($this->config, $joinConfig, $this->fields, $context);
+        foreach ($this->config->getAllJoin() as $name => $joinConfig) {
+            $compiler = new JoinCompiler($this->config, $joinConfig, $this->fields, $context, $name);
             $compiler->updateGlobalContext();
             $compiledTemplate['joins'] = array_merge($compiledTemplate['joins'], $compiler->compile());
         }
@@ -80,5 +86,39 @@ class EntityCompiler extends AbstractClassCompiler
         $context->add('method.joins', implode("\n", $compiledTemplate['joins']));
 
         return $context;
+    }
+
+    /**
+     * @return string
+     */
+    private function buildCacheSuffix(): string
+    {
+        $getters = [];
+        foreach ($this->fields as $field) {
+            if (!$field->isPrimaryKey()) {
+                continue;
+            }
+            $getters[] = '$this->' . $this->getNameForGetter($field) . '()';
+        }
+
+        return implode(' . ', $getters);
+    }
+
+    /**
+     * @param Context $context
+     * @return void
+     */
+    private function appendClassUseOrmException(Context $context): void
+    {
+        $classUses = [];
+
+        //~ Get previous class uses.
+        if (!empty($context->get('entity.uses'))) {
+            $classUses[] = $context->get('entity.uses');
+        }
+
+        $classUses[] = 'use ' . OrmException::class . ';';
+
+        $context->add('entity.uses', implode("\n", $classUses));
     }
 }

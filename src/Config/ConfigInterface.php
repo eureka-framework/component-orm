@@ -122,7 +122,7 @@ interface ConfigInterface
     public function getAllJoin(): array;
 
     /**
-     * @param  \Eureka\Component\Orm\Config\ConfigInterface[] $joinList
+     * @param  ConfigInterface[] $joinList
      * @return $this
      */
     public function setJoinList(array $joinList): ConfigInterface;
