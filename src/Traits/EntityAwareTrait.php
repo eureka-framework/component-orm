@@ -11,6 +11,7 @@ namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\RepositoryInterface;
+use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
  * Entity Trait.
@@ -92,6 +93,20 @@ trait EntityAwareTrait
     public function newEntityFromArray(array $form): EntityInterface
     {
         return $this->updateEntityFromArray($this->newEntity(), $form);
+    }
+
+    /**
+     * Hydrate entity with form entity values
+     *
+     * @param  GenericEntity $genericEntity
+     * @return EntityInterface
+     */
+    public function newEntityFromGeneric(GenericEntity $genericEntity): EntityInterface
+    {
+        $entity = $this->newEntity();
+        $entity->hydrateFromGenericEntity($genericEntity);
+
+        return $entity;
     }
 
     /**

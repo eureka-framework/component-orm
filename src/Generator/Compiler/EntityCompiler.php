@@ -10,11 +10,15 @@
 namespace Eureka\Component\Orm\Generator\Compiler;
 
 use Eureka\Component\Orm\Config;
+use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldGetterCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldPropertyCompiler;
+use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterAutoIncrementCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterCompiler;
-use Eureka\Component\Orm\Exception\GeneratorException;
+use Eureka\Component\Orm\Generator\Compiler\Field\FieldValidatorService;
+use Eureka\Component\Orm\Generator\Type;
+use Eureka\Component\Validation\Validator\IntegerValidator;
 
 /**
  * Class EntityCompiler
@@ -51,6 +55,7 @@ class EntityCompiler extends AbstractClassCompiler
         $context->add('class.namespace', $this->config->getBaseNamespaceForEntity() . ($isAbstract ? '\Abstracts' : ''));
         $context->add('cache.key.prefix', rtrim($this->config->getCachePrefix(), '.'));
         $context->add('cache.key.suffix', $this->buildCacheSuffix());
+        $context->add('validator.config', $this->buildValidatorConfig());
 
         $context->add('entity.uses', '');
 
@@ -66,6 +71,10 @@ class EntityCompiler extends AbstractClassCompiler
             $compiledTemplate['properties'] = array_merge($compiledTemplate['properties'], (new FieldPropertyCompiler($field))->compile());
             $compiledTemplate['getters']    = array_merge($compiledTemplate['getters'], (new FieldGetterCompiler($field))->compile());
             $compiledTemplate['setters']    = array_merge($compiledTemplate['setters'], (new FieldSetterCompiler($field))->compile());
+
+            if ($field->isAutoIncrement()) {
+                $compiledTemplate['setters'] = array_merge($compiledTemplate['setters'], (new FieldSetterAutoIncrementCompiler($field))->compile());
+            }
         }
 
         $context->add('class.properties', implode("\n", $compiledTemplate['properties']));
@@ -105,6 +114,25 @@ class EntityCompiler extends AbstractClassCompiler
     }
 
     /**
+     * @return string
+     */
+    private function buildValidatorConfig(): string
+    {
+        $fieldValidatorService = new FieldValidatorService();
+
+        $config = [];
+        foreach ($this->fields as $field) {
+            $config[$field->getName()] = "
+            '" . $field->getName() . "' => [
+                'type'      => '" . $field->getType()->getValidatorType() . "',
+                'options'   => " . $fieldValidatorService->getValidatorOptions($field, true) . ",
+            ],";
+        }
+
+        return implode('', $config);
+    }
+
+    /**
      * @param Context $context
      * @return void
      */
@@ -121,4 +149,5 @@ class EntityCompiler extends AbstractClassCompiler
 
         $context->add('entity.uses', implode("\n", $classUses));
     }
+
 }

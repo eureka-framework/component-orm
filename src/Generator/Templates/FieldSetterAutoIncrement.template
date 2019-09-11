@@ -1,0 +1,10 @@
+    /**
+     * Set auto increment value.
+     *
+     * @param  integer $id
+     * @return $this{{ property.exception }}
+     */
+    public function setAutoIncrementId(int $id): self
+    {
+        return $this->{{ property.setter }}($id);
+    }

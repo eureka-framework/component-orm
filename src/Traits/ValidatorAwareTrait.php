@@ -9,8 +9,10 @@
 
 namespace Eureka\Component\Orm\Traits;
 
+use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Validation\Entity\GenericEntity;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
+use Eureka\Component\Validation\Exception\ValidationException;
 use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
 
@@ -26,6 +28,19 @@ trait ValidatorAwareTrait
 
     /** @var ValidatorEntityFactory $validatorEntityFactory */
     private $validatorEntityFactory;
+
+    /** @var array $validationConfig */
+    private $validationConfig = [];
+
+    /**
+     * @param array $data
+     * @param array $config
+     * @return GenericEntity
+     */
+    public function newGenericEntity(array $data = [], array $config = []): GenericEntity
+    {
+        return new GenericEntity($this->getValidatorFactory(), $config ?? $this->getValidatorConfig(), $data);
+    }
 
     /**
      * @param ValidatorFactoryInterface $validatorFactory
@@ -43,16 +58,6 @@ trait ValidatorAwareTrait
     }
 
     /**
-     * @param array $config
-     * @param array $data
-     * @return GenericEntity
-     */
-    protected function newGenericEntity(array $config = [], array $data = []): GenericEntity
-    {
-        return new GenericEntity($this->getValidatorFactory(), $config, $data);
-    }
-
-    /**
      * @return ValidatorFactoryInterface|null
      */
     protected function getValidatorFactory(): ?ValidatorFactoryInterface
@@ -66,5 +71,53 @@ trait ValidatorAwareTrait
     protected function getValidatorEntityFactory(): ?ValidatorEntityFactoryInterface
     {
         return $this->validatorEntityFactory;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getValidatorConfig(): array
+    {
+        return $this->validationConfig;
+    }
+
+    /**
+     * @param array $config
+     * @return void
+     */
+    protected function setValidatorConfig(array $config): void
+    {
+        $this->validationConfig = $config;
+    }
+
+    /**
+     * @param string $field
+     * @param $data
+     * @return void
+     * @throws ValidationException
+     */
+    protected function validateInput(string $field, $data): void
+    {
+        if (empty($this->validationConfig[$field])) {
+            throw new ValidationException('No validation config defined for given field! (field: ' . $field . ')');
+        }
+
+        $config = $this->validationConfig[$field];
+        if (empty($config['type'])) {
+            throw new ValidationException('No validation type defined for given field! (field: ' . $field . ')');
+        }
+
+        $validatorType    = $config['type'];
+        $validatorOptions = $config['options'] ?? [];
+
+        if (strpos($validatorType, '\\') !== false) {
+            //~ Custom class validator
+            $validator = new $validatorType();
+        } else {
+            //~ Component type validator
+            $validator = $this->getValidatorFactory()->getValidator($validatorType);
+        }
+
+        $validator->validate($data, $validatorOptions);
     }
 }

@@ -41,6 +41,10 @@ abstract class Abstract{{ class.name }} extends AbstractEntity
     ) {
         $this->setRepository($repository);
         $this->setValidatorFactories($validatorFactory, $validatorEntityFactory);
+
+        $this->setValidatorConfig([
+            {{ validator.config }}
+        ]);
     }
 
     /**

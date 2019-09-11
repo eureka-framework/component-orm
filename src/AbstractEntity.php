@@ -33,9 +33,6 @@ abstract class AbstractEntity implements EntityInterface
     /** @var array $updated List of updated field */
     protected $updated = [];
 
-    /** @var null|\Psr\Container\ContainerInterface $validatorFactoryContainer */
-    protected $validatorFactoryContainer = null;
-
     /** @var RepositoryInterface $repository Entity repository */
     private $repository;
 
@@ -53,7 +50,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param  integer $id
      * @return $this
      */
-    public function setAutoIncrementId(int $id): EntityInterface
+    public function setAutoIncrementId(int $id)
     {
         return $this;
     }

@@ -9,6 +9,8 @@
 
 namespace Eureka\Component\Orm;
 
+use Eureka\Component\Validation\Entity\GenericEntity;
+
 /**
  * DataMapper Data interface, should be implemented by all data objects
  *
@@ -36,6 +38,27 @@ interface EntityInterface
      * @return string
      */
     public function getCacheKey(): string;
+
+    /**
+     * @return RepositoryInterface
+     */
+    public function getRepository(): RepositoryInterface;
+
+    /**
+     * Get form entity container.
+     *
+     * @param  void
+     * @return GenericEntity
+     */
+    public function getGenericEntity();
+
+    /**
+     * Hydrate entity with form entity values
+     *
+     * @param  GenericEntity $genericEntity
+     * @return $this
+     */
+    public function hydrateFromGenericEntity(GenericEntity $genericEntity);
 
     /**
      * If the data set exists.

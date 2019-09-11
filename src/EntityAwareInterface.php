@@ -9,6 +9,8 @@
 
 namespace Eureka\Component\Orm;
 
+use Eureka\Component\Validation\Entity\GenericEntity;
+
 /**
  * Entity aware interface.
  *
@@ -64,6 +66,23 @@ interface EntityAwareInterface
      * @throws \LogicException
      */
     public function newEntitySuffixAware(\stdClass $row, string $suffix);
+
+    /**
+     * Create new instance of EntityInterface implementation class & return it.
+     *
+     * @param  array $data
+     * @param  array $config
+     * @return GenericEntity
+     */
+    public function newGenericEntity(array $data = [], array $config = []): GenericEntity;
+
+    /**
+     * Hydrate entity with form entity values
+     *
+     * @param  GenericEntity $genericEntity
+     * @return EntityInterface
+     */
+    public function newEntityFromGeneric(GenericEntity $genericEntity);
 
     /**
      * @param  EntityInterface $entity
