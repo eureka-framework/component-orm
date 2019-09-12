@@ -22,15 +22,6 @@ class AbstractFieldCompiler extends AbstractCompiler
     /** @var Field $field */
     protected $field;
 
-    /** @var array $validation */
-    private $validation = [];
-
-    /** @var bool $hasValidation */
-    private $hasValidation = false;
-
-    /** @var bool $hasValidationAuto */
-    private $hasValidationAuto = false;
-
     /**
      * AbstractFieldCompiler constructor.
      *
@@ -64,34 +55,6 @@ class AbstractFieldCompiler extends AbstractCompiler
         }
 
         return array_values($rendered);
-    }
-
-    /**
-     * @param array $validation
-     * @return void
-     */
-    public function setValidation(array $validation): void
-    {
-        $this->validation = isset($validation['extended_validation'][$this->field->getName()]) ? $validation['extended_validation'][$this->field->getName()] : [];
-
-        $this->hasValidation     = (isset($validation['enabled']) && (bool) $validation['enabled']);
-        $this->hasValidationAuto = $this->hasValidation && (isset($validation['auto']) && (bool) $validation['auto']);
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasValidation(): bool
-    {
-        return $this->hasValidation;
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasValidationAuto(): bool
-    {
-        return $this->hasValidationAuto;
     }
 
     /**

@@ -36,7 +36,7 @@ trait GroupTrait
      * Add groupBy clause.
      *
      * @param  string $field
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addGroupBy(string $field): QueryBuilderInterface
     {
@@ -52,7 +52,7 @@ trait GroupTrait
      * @param  string|int $value
      * @param  string $sign
      * @param  string $havingConcat
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addHaving(string $field, $value, string $sign = '=', string $havingConcat = 'AND'): QueryBuilderInterface
     {
@@ -94,7 +94,7 @@ trait GroupTrait
     }
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function resetGroup(): QueryBuilderInterface
     {

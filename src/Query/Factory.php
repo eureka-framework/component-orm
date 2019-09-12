@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -14,7 +14,7 @@ use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\RepositoryInterface;
 
 /**
- * Class Builder
+ * Class Factory
  *
  * @author Romain Cottard
  */
@@ -28,10 +28,10 @@ class Factory
 
     /**
      * @param  string $type
-     * @param  \Eureka\Component\Orm\RepositoryInterface $repository
-     * @param  \Eureka\Component\Orm\EntityInterface $entity
-     * @return \Eureka\Component\Orm\Query\DeleteBuilder|\Eureka\Component\Orm\Query\InsertBuilder|\Eureka\Component\Orm\Query\QueryBuilder|\Eureka\Component\Orm\Query\SelectBuilder|\Eureka\Component\Orm\Query\UpdateBuilder
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @param  RepositoryInterface $repository
+     * @param  EntityInterface $entity
+     * @return DeleteBuilder|InsertBuilder|QueryBuilder|SelectBuilder|UpdateBuilder
+     * @throws OrmException
      */
     public static function getBuilder($type, RepositoryInterface $repository, EntityInterface $entity = null)
     {

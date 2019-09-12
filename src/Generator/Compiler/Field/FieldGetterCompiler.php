@@ -11,7 +11,6 @@ namespace Eureka\Component\Orm\Generator\Compiler\Field;
 
 use Eureka\Component\Orm\Generator\Compiler\AbstractFieldCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Context;
-use Eureka\Component\Orm\Generator\Type;
 
 /**
  * Class Field Getter Compiler

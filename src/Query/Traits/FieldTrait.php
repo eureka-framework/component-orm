@@ -29,7 +29,7 @@ trait FieldTrait
     private $calculateFoundRows = false;
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     protected function resetFields(): QueryBuilderInterface
     {
@@ -39,7 +39,7 @@ trait FieldTrait
     }
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function enableCalculateFoundRows(): QueryBuilderInterface
     {
@@ -49,11 +49,13 @@ trait FieldTrait
     }
 
     /**
-     * @return void
+     * @return self|QueryBuilderInterface
      */
-    public function disableCalculateFoundRows(): void
+    public function disableCalculateFoundRows(): QueryBuilderInterface
     {
         $this->calculateFoundRows = false;
+
+        return $this;
     }
 
     /**

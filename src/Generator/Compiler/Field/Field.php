@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -56,7 +56,7 @@ class Field
      * Field constructor.
      *
      * @param \stdClass $field
-     * @param array $dbPrefixes
+     * @param array|string $dbPrefixes
      * @param array $validationConfig
      * @throws GeneratorException
      */

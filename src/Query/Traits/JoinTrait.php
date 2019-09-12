@@ -28,7 +28,7 @@ trait JoinTrait
      * @param string $leftPrefix
      * @param string $rightField
      * @param string $rightPrefix
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addJoin(
         string $type,
@@ -68,7 +68,7 @@ trait JoinTrait
     }
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function resetJoin(): QueryBuilderInterface
     {

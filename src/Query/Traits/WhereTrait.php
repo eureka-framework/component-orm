@@ -38,7 +38,7 @@ trait WhereTrait
      * @param  array $values List of values (integer)
      * @param  string $whereConcat Concat type with other where elements
      * @param  bool $not Whether the condition should be NOT IN instead of IN
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      * @throws InvalidQueryException
      */
     public function addIn(string $field, array $values, string $whereConcat = 'AND', bool $not = false): QueryBuilderInterface
@@ -70,7 +70,7 @@ trait WhereTrait
      * @param  string $sign
      * @param  string $whereConcat
      * @param  string $prefix
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addWhere(string $field, $value, string $sign = '=', string $whereConcat = 'AND', $prefix = ''): QueryBuilderInterface
     {
@@ -89,7 +89,7 @@ trait WhereTrait
      * @param  string[] $keys
      * @param  string $sign
      * @param  string $whereConcat
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addWhereKeysOr(array $keys, string $sign = '=', string $whereConcat = 'OR'): QueryBuilderInterface
     {
@@ -133,7 +133,7 @@ trait WhereTrait
     }
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function resetWhere(): QueryBuilderInterface
     {

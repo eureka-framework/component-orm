@@ -38,7 +38,7 @@ trait SetTrait
      *
      * @param  string $field
      * @param  string|int|null $value
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addSet(string $field, $value): QueryBuilderInterface
     {
@@ -54,7 +54,7 @@ trait SetTrait
      *
      * @param  string $field
      * @param  string|int|null $value
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addUpdate(string $field, $value): QueryBuilderInterface
     {
@@ -95,7 +95,7 @@ trait SetTrait
     }
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function resetSet(): QueryBuilderInterface
     {

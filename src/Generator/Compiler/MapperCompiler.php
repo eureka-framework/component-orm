@@ -12,9 +12,6 @@ namespace Eureka\Component\Orm\Generator\Compiler;
 use Eureka\Component\Orm\Config;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Enumerator\JoinType;
-use Eureka\Component\Orm\Generator\Compiler\Field\FieldGetterCompiler;
-use Eureka\Component\Orm\Generator\Compiler\Field\FieldPropertyCompiler;
-use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterCompiler;
 use Eureka\Component\Orm\Exception\GeneratorException;
 
 /**

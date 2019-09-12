@@ -29,9 +29,9 @@ trait LimitTrait
      *
      * @param  int $limit
      * @param  int $offset
-     * @return $this
+     * @return self|QueryBuilderInterface
      */
-    public function setLimit(int $limit, ?int $offset = null)
+    public function setLimit(int $limit, ?int $offset = null): QueryBuilderInterface
     {
         $this->limit  = $limit;
         $this->offset = $offset;
@@ -56,7 +56,7 @@ trait LimitTrait
     }
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function resetLimit(): QueryBuilderInterface
     {

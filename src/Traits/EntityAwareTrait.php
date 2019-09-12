@@ -27,7 +27,7 @@ trait EntityAwareTrait
     protected $ignoreNotMappedFields = false;
 
     /**
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     public function enableIgnoreNotMappedFields(): RepositoryInterface
     {
@@ -37,7 +37,7 @@ trait EntityAwareTrait
     }
 
     /**
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     public function disableIgnoreNotMappedFields(): RepositoryInterface
     {
@@ -48,7 +48,7 @@ trait EntityAwareTrait
 
     /**
      * @param  string $entityClass
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     public function setEntityClass(string $entityClass): RepositoryInterface
     {
@@ -226,7 +226,7 @@ trait EntityAwareTrait
      * @param  EntityInterface $entity
      * @param  string $field
      * @param  mixed $value
-     * @return mixed
+     * @return self|RepositoryInterface
      * @throws \DomainException
      */
     protected function setEntityValue(EntityInterface $entity, string $field, $value): RepositoryInterface

@@ -37,7 +37,7 @@ trait CacheAwareTrait
     /**
      * Enable cache on read queries.
      *
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     public function enableCacheOnRead(): RepositoryInterface
     {
@@ -49,7 +49,7 @@ trait CacheAwareTrait
     /**
      * Disable cache on read query.
      *
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     public function disableCacheOnRead(): RepositoryInterface
     {
@@ -62,7 +62,7 @@ trait CacheAwareTrait
      * Set cache instance.
      *
      * @param CacheItemPoolInterface $cache
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     protected function setCache(CacheItemPoolInterface $cache = null): RepositoryInterface
     {
@@ -162,7 +162,7 @@ trait CacheAwareTrait
      * Delete cache
      *
      * @param  EntityInterface $entity
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      * @throws OrmException
      */
     protected function deleteCacheEntity(EntityInterface $entity): RepositoryInterface
@@ -184,7 +184,7 @@ trait CacheAwareTrait
      * Set data into cache if enabled.
      *
      * @param  EntityInterface $entity
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      * @throws OrmException
      */
     protected function setCacheEntity(EntityInterface $entity): RepositoryInterface

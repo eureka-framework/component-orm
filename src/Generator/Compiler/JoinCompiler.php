@@ -11,7 +11,6 @@ namespace Eureka\Component\Orm\Generator\Compiler;
 
 use Eureka\Component\Orm\Config\ConfigInterface;
 use Eureka\Component\Orm\Exception\GeneratorException;
-use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Generator\Compiler\Field\Field;
 
 /**

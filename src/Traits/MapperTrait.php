@@ -93,7 +93,7 @@ trait MapperTrait
 
     /**
      * @param  RepositoryInterface[] $mappers
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     public function addMappers(array $mappers): RepositoryInterface
     {
@@ -192,7 +192,7 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\QueryBuilderInterface
+     * @param Query\QueryBuilderInterface $queryBuilder
      * @return array
      * @throws Exception\OrmException
      */
@@ -227,8 +227,8 @@ trait MapperTrait
 
     /**
      * @param Query\QueryBuilderInterface $queryBuilder
-     * @param bool $join
      * @param array $fields
+     * @param bool $join
      * @return array
      * @throws Exception\OrmException
      */
@@ -347,7 +347,7 @@ trait MapperTrait
      * Set fields for mapper.
      *
      * @param  array $fields
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     protected function setFields(array $fields = []): RepositoryInterface
     {
@@ -360,7 +360,7 @@ trait MapperTrait
      * Set primary keys.
      *
      * @param  array $primaryKeys
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     protected function setPrimaryKeys(array $primaryKeys): RepositoryInterface
     {
@@ -373,7 +373,7 @@ trait MapperTrait
      * Set table name.
      *
      * @param  string $table
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     protected function setTable(string $table): RepositoryInterface
     {
@@ -384,7 +384,7 @@ trait MapperTrait
 
     /**
      * @param array $nameMap
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     protected function setNamesMap(array $nameMap): RepositoryInterface
     {
@@ -395,7 +395,7 @@ trait MapperTrait
 
     /**
      * @param array $joinConfigs
-     * @return RepositoryInterface
+     * @return self|RepositoryInterface
      */
     protected function setJoinConfigs(array $joinConfigs): RepositoryInterface
     {

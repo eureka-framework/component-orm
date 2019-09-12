@@ -63,13 +63,13 @@ abstract class AbstractMapper implements RepositoryInterface
 
     /**
      * @param callable $callback
-     * @param \Eureka\Component\Orm\Query\SelectBuilder $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @param string $key
      * @param int $start
      * @param int $end
      * @param int $batchSize
      * @return void
-     * @throws \Eureka\Component\Orm\Exception\OrmException
+     * @throws Exception\OrmException
      */
     public function apply(
         callable $callback,
@@ -95,7 +95,7 @@ abstract class AbstractMapper implements RepositoryInterface
         $currentBatchIndex = $minIndex;
 
         while ($currentBatchIndex <= $maxIndex) {
-            /** @var \Eureka\Component\Orm\RepositoryInterface $this */
+            /** @var RepositoryInterface $this */
             $clonedQueryBuilder = clone Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
             $clonedQueryBuilder
                 ->addWhere($key, $currentBatchIndex, '>=')

@@ -9,7 +9,6 @@
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Validation\Entity\GenericEntity;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\Exception\ValidationException;

@@ -85,19 +85,4 @@ class FieldSetterCompiler extends AbstractFieldCompiler
 
         return $validations;
     }
-
-    /**
-     * @param Field $field
-     * @return string
-     */
-    private function getAutoIncrementSetter(Field $field): string
-    {
-        if (!$field->isAutoIncrement()) {
-            return '';
-        }
-
-
-
-        return '';
-    }
 }

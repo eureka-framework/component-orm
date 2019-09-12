@@ -22,7 +22,7 @@ class Config extends AbstractConfig
      * @param  array $config
      * @return $this
      */
-    protected function init($config): ConfigInterface
+    protected function init(array $config): ConfigInterface
     {
         //~ Comment
         $this->author    = $config['comment']['author'];

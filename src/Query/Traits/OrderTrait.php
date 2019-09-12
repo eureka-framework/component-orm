@@ -26,7 +26,7 @@ trait OrderTrait
      *
      * @param  string $field
      * @param  string $dir
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function addOrder(string $field, string $dir = 'ASC'): QueryBuilderInterface
     {
@@ -46,7 +46,7 @@ trait OrderTrait
     }
 
     /**
-     * @return QueryBuilderInterface
+     * @return self|QueryBuilderInterface
      */
     public function resetOrder(): QueryBuilderInterface
     {

@@ -82,8 +82,8 @@ trait ConnectionAwareTrait
     }
 
     /**
-     * @param \Eureka\Component\Database\Connection $connection
-     * @return RepositoryInterface
+     * @param Connection $connection
+     * @return self|RepositoryInterface
      */
     protected function setConnection(Connection $connection): RepositoryInterface
     {

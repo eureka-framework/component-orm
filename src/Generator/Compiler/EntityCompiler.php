@@ -17,8 +17,6 @@ use Eureka\Component\Orm\Generator\Compiler\Field\FieldPropertyCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterAutoIncrementCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldValidatorService;
-use Eureka\Component\Orm\Generator\Type;
-use Eureka\Component\Validation\Validator\IntegerValidator;
 
 /**
  * Class EntityCompiler
@@ -149,5 +147,4 @@ class EntityCompiler extends AbstractClassCompiler
 
         $context->add('entity.uses', implode("\n", $classUses));
     }
-
 }
