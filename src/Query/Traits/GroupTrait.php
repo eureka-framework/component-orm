@@ -71,7 +71,7 @@ trait GroupTrait
      */
     public function getQueryGroupBy(): string
     {
-        return (0 < count($this->groupList) ? 'GROUP BY ' . implode(', ', $this->groupList) : '');
+        return (0 < count($this->groupList) ? ' GROUP BY ' . implode(', ', $this->groupList) . ' ' : '');
     }
 
     /**
@@ -84,7 +84,7 @@ trait GroupTrait
         $return = '';
 
         if (0 < count($this->havingList)) {
-            $return = 'HAVING ';
+            $return =  'HAVING ';
             foreach ($this->havingList as $having) {
                 $return .= $having . ' ';
             }
