@@ -75,7 +75,7 @@ trait ValidatorAwareTrait
     /**
      * @return array
      */
-    protected function getValidatorConfig(): array
+    public function getValidatorConfig(): array
     {
         return $this->validationConfig;
     }

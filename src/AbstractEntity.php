@@ -168,7 +168,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function getGenericEntity()
     {
-        $genericEntity = $this->newGenericEntity();
+        $genericEntity = $this->newGenericEntity([], $this->getValidatorConfig());
         $repository    = $this->getRepository();
 
         foreach ($repository->getFields() as $field) {
