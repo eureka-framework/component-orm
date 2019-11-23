@@ -87,11 +87,11 @@ interface ConfigInterface
     public function getDbTable(): string;
 
     /**
-     * Get database table prefix.
+     * Get database table prefix(es).
      *
-     * @return string
+     * @return string[]
      */
-    public function getDbPrefix(): string;
+    public function getDbPrefix(): array;
 
     /**
      * Return true if cache is active, false in otherwise.

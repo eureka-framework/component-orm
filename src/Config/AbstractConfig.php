@@ -49,8 +49,8 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var string $dbTable Table name */
     protected $dbTable = '';
 
-    /** @var string $dbPrefix Table prefix to remove from method name. */
-    protected $dbPrefix = '';
+    /** @var string[] $dbPrefix Table prefix to remove from method name. */
+    protected $dbPrefix = [];
 
     /** @var string $cachePrefix Cache name prefix. */
     protected $cachePrefix = '';
@@ -122,11 +122,11 @@ abstract class AbstractConfig implements ConfigInterface
     }
 
     /**
-     * Get database table prefix.
+     * Get database table prefix(es).
      *
-     * @return string
+     * @return string[]
      */
-    public function getDbPrefix(): string
+    public function getDbPrefix(): array
     {
         return $this->dbPrefix;
     }

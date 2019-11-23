@@ -64,7 +64,7 @@ class Field
     {
         $this->setData($field);
 
-        $this->dbPrefixes = is_string($dbPrefixes) ? [$dbPrefixes] : $dbPrefixes;
+        $this->dbPrefixes = $dbPrefixes;
         $this->validation = isset($validationConfig['extended_validation'][$field->Field]) ? $validationConfig['extended_validation'][$field->Field] : [];
 
         $this->hasValidation     = (isset($validationConfig['enabled']) && (bool) $validationConfig['enabled']);

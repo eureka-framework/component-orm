@@ -46,7 +46,11 @@ class Config extends AbstractConfig
 
         //~ Db
         $this->dbTable   = $config['database']['table'];
-        $this->dbPrefix  = $config['database']['prefix'];
+        if (!is_array($config['database']['prefix'])) {
+            $this->dbPrefix = [$config['database']['prefix']];
+        } else {
+            $this->dbPrefix = $config['database']['prefix'];
+        }
 
         //~ Validation
         $this->validation = !empty($config['validation']) ? $config['validation'] : [];
