@@ -42,7 +42,7 @@ trait OrderTrait
      */
     public function getQueryOrderBy(): string
     {
-        return (0 < count($this->orderList) ? 'ORDER BY ' . implode(',', $this->orderList) : '');
+        return (0 < count($this->orderList) ? ' ORDER BY ' . implode(',', $this->orderList) : '');
     }
 
     /**
