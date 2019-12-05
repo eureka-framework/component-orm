@@ -146,9 +146,10 @@ class MapperCompiler extends AbstractClassCompiler
                 throw new GeneratorException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')');
             }
 
-            $uses [] = 'use ' . $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper;';
+            $className = $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper';
+            $uses[$className] = 'use ' . $className . ';';
         }
 
-        return implode('', $uses);
+        return implode("\n", $uses);
     }
 }

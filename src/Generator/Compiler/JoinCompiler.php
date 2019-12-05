@@ -125,16 +125,14 @@ class JoinCompiler extends AbstractMethodCompiler
         }
 
         //~ Update class "uses"
-        $classUses = [];
+        $classUses = $this->mainContext->get('entity.uses');
 
-        if (!empty($this->mainContext->get('entity.uses'))) {
-            $classUses[] = $this->mainContext->get('entity.uses');
-        }
+        $useEntityClassName = $config->getBaseNamespaceForEntity() . '\\' . $className;
+        $useMapperClassName = $config->getBaseNamespaceForMapper() . '\\' . $className . 'Mapper';
+        $classUses[$useEntityClassName] = 'use ' . $useEntityClassName . ';';
+        $classUses[$useMapperClassName] = 'use ' . $useMapperClassName . ';';
 
-        $classUses[] = 'use ' . $config->getBaseNamespaceForEntity() . '\\' . $className . ';';
-        $classUses[] = 'use ' . $config->getBaseNamespaceForMapper() . '\\' . $className . 'Mapper;';
-
-        $this->mainContext->add('entity.uses', implode("\n", $classUses));
+        $this->mainContext->add('entity.uses', $classUses);
 
         return $this;
     }

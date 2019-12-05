@@ -55,7 +55,7 @@ class EntityCompiler extends AbstractClassCompiler
         $context->add('cache.key.suffix', $this->buildCacheSuffix());
         $context->add('validator.config', $this->buildValidatorConfig());
 
-        $context->add('entity.uses', '');
+        $context->add('entity.uses', []);
 
         $compiledTemplate = [
             'properties' => [],
@@ -91,6 +91,7 @@ class EntityCompiler extends AbstractClassCompiler
         }
 
         $context->add('method.joins', implode("\n", $compiledTemplate['joins']));
+        $context->add('entity.uses', implode("\n", $context->get('entity.uses')));
 
         return $context;
     }
@@ -136,15 +137,10 @@ class EntityCompiler extends AbstractClassCompiler
      */
     private function appendClassUseOrmException(Context $context): void
     {
-        $classUses = [];
+        $classUses = $context->get('entity.uses');
 
-        //~ Get previous class uses.
-        if (!empty($context->get('entity.uses'))) {
-            $classUses[] = $context->get('entity.uses');
-        }
+        $classUses[OrmException::class] = 'use ' . OrmException::class . ';';
 
-        $classUses[] = 'use ' . OrmException::class . ';';
-
-        $context->add('entity.uses', implode("\n", $classUses));
+        $context->add('entity.uses', $classUses);
     }
 }
