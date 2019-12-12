@@ -62,10 +62,11 @@ interface EntityAwareInterface
      *
      * @param  \stdClass $row
      * @param  string $suffix
+     * @param  string $type
      * @return EntityInterface
      * @throws \LogicException
      */
-    public function newEntitySuffixAware(\stdClass $row, string $suffix);
+    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type);
 
     /**
      * Create new instance of EntityInterface implementation class & return it.

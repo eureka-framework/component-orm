@@ -325,7 +325,7 @@ trait MapperTrait
     {
         $configs = $this->getJoinsConfig($filters);
         $list    = $this->getRawResultsWithJoin($queryBuilder, $configs);
-        list($collection, $relations) = $this->getCollectionAndRelations($list, $configs);
+        [$collection, $relations] = $this->getCollectionAndRelations($list, $configs);
 
         //~ Resolve all relations
         foreach ($collection as $hash => $data) {
@@ -513,13 +513,15 @@ trait MapperTrait
 
                 $mapper->enableIgnoreNotMappedFields();
 
-                $dataJoin = $mapper->newEntitySuffixAware($row, $aliasSuffix);
+                $dataJoin = $mapper->newEntitySuffixAware($row, $aliasSuffix, $join['type']);
 
                 if (!isset($relations[$name][$hash])) {
                     $relations[$name][$hash] = [];
                 }
 
-                $relations[$name][$hash][] = $dataJoin;
+                if ($dataJoin !== null) {
+                    $relations[$name][$hash][] = $dataJoin;
+                }
 
                 $mapper->disableIgnoreNotMappedFields();
             }

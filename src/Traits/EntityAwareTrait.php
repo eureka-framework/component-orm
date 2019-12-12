@@ -10,6 +10,7 @@
 namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Orm\EntityInterface;
+use Eureka\Component\Orm\Enumerator\JoinType;
 use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
@@ -138,10 +139,11 @@ trait EntityAwareTrait
      *
      * @param  \stdClass $row
      * @param  string $suffix
-     * @return EntityInterface
+     * @param  string $type
+     * @return EntityInterface|null
      * @throws \LogicException
      */
-    public function newEntitySuffixAware(\stdClass $row, string $suffix): EntityInterface
+    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?EntityInterface
     {
         $entity = new $this->entityClass($this, $this->getValidatorFactory());
 
@@ -149,18 +151,35 @@ trait EntityAwareTrait
             throw new \LogicException('Entity object is not an instance of AbstractData class!');
         }
 
-        if ($row instanceof \stdClass) {
-            foreach ($row as $field => $value) {
-                $suffixPosition = strrpos($field, $suffix);
-                if (!empty($suffix) && $suffixPosition !== false) {
-                    $field = substr($field, 0, $suffixPosition);
-                }
+        if (! ($row instanceof \stdClass)) {
+            return null;
+        }
 
-                try {
-                    $this->setEntityValue($entity, $field, $value);
-                } catch (\TypeError $exception) {
-                    //~ Skip type error when data came from database
+        $data              = [];
+        $hasSomeJoinValues = ($type !== JoinType::LEFT);
+
+        //~ Check if join entity as value (or if is LEFT without left entity)
+        foreach ($row as $field => $value) {
+            $suffixPosition = strrpos($field, $suffix);
+            if (!empty($suffix) && $suffixPosition !== false) {
+                $field = substr($field, 0, $suffixPosition);
+                if ($type === JoinType::LEFT && $value !== null) {
+                    $hasSomeJoinValues = true;
                 }
+            }
+
+            $data[$field] = $value;
+        }
+
+        if (!$hasSomeJoinValues) {
+            return null;
+        }
+
+        foreach ($data as $field => $value) {
+            try {
+                $this->setEntityValue($entity, $field, $value);
+            } catch (\TypeError $exception) {
+                //~ Skip type error when data came from database
             }
         }
 
