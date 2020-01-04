@@ -78,6 +78,10 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
         $suffix = ($isUnique ? '_' . uniqid() : '');
         $name   = ':' . strtolower($field . $suffix);
 
+        if (is_bool($value)) {
+            $value = (int) $value;
+        }
+
         $this->bind[$name] = $value;
 
         return $name;
