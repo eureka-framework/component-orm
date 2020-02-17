@@ -103,7 +103,7 @@ abstract class AbstractCompiler
 
         //~ Replace template vars
         $content = str_replace($context->getKeys(), $context->getValues(), $content);
-        return str_replace("\n\n\n", "\n\n", $content); // clean double empty lines
+        return str_replace(["\n\n\n", "    }\n\n}"], ["\n\n", "    }\n}"], $content); // clean double empty lines
     }
 
     /**
