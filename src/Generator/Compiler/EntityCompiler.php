@@ -113,25 +113,6 @@ class EntityCompiler extends AbstractClassCompiler
     }
 
     /**
-     * @return string
-     */
-    private function buildValidatorConfig(): string
-    {
-        $fieldValidatorService = new FieldValidatorService();
-
-        $config = [];
-        foreach ($this->fields as $field) {
-            $config[$field->getName()] = "
-            '" . $field->getName() . "' => [
-                'type'      => '" . $field->getType()->getValidatorType() . "',
-                'options'   => " . $fieldValidatorService->getValidatorOptions($field, true) . ",
-            ],";
-        }
-
-        return implode('', $config);
-    }
-
-    /**
      * @param Context $context
      * @return void
      */

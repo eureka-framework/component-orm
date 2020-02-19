@@ -13,6 +13,7 @@ use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Config;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Compiler\Field\Field;
+use Eureka\Component\Orm\Generator\Compiler\Field\FieldValidatorService;
 
 /**
  * Class AbstractClassCompiler
@@ -145,6 +146,25 @@ class AbstractClassCompiler extends AbstractCompiler
         }
 
         return $filePathName;
+    }
+
+    /**
+     * @return string
+     */
+    protected function buildValidatorConfig(): string
+    {
+        $fieldValidatorService = new FieldValidatorService();
+
+        $config = [];
+        foreach ($this->fields as $field) {
+            $config[$field->getName()] = "
+            '" . $field->getName() . "' => [
+                'type'      => '" . $field->getType()->getValidatorType() . "',
+                'options'   => " . $fieldValidatorService->getValidatorOptions($field, true) . ",
+            ],";
+        }
+
+        return implode('', $config);
     }
 
     /**

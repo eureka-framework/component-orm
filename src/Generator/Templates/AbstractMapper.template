@@ -46,6 +46,9 @@ abstract class Abstract{{ class.mapper }} extends AbstractMapper
         $this->setNamesMap([{{ database.map }}
         ]);
 
+        $this->setValidatorConfig([{{ validator.config }}
+        ]);
+
         $this->setJoinConfigs([{{ database.joins }}
         ]);
     }

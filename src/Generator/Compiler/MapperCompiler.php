@@ -56,6 +56,7 @@ class MapperCompiler extends AbstractClassCompiler
             ->add('database.map', $this->buildMap())
             ->add('database.joins', $this->buildJoins())
             ->add('mapper.uses', $this->buildUses())
+            ->add('validator.config', $this->buildValidatorConfig())
         ;
 
         return $context;

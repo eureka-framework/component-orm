@@ -28,10 +28,10 @@ class FieldValidatorService
     {
         $validationConfig = $field->getValidation();
 
+        $options = !empty($validationConfig['options']) ? $validationConfig['options'] : [];
+
         if ($field->hasValidationAuto()) {
-            $options = $this->getValidatorOptionsFromType($field, $field->getType());
-        } else {
-            $options = !empty($validationConfig['options']) ? $validationConfig['options'] : [];
+            $options = $this->getValidatorOptionsFromType($field, $field->getType(), $options);
         }
 
         if (!$toString) {
@@ -49,11 +49,11 @@ class FieldValidatorService
     /**
      * @param Field $field
      * @param Type\TypeInterface $type
+     * @param array $options
      * @return array
      */
-    private function getValidatorOptionsFromType(Field $field, Type\TypeInterface $type): array
+    private function getValidatorOptionsFromType(Field $field, Type\TypeInterface $type, array $options = []): array
     {
-        $options    = [];
         $isNullable = $field->isNullable();
         $isUnsigned = $type->isUnsigned();
 
@@ -64,13 +64,13 @@ class FieldValidatorService
             case Type\TypeMediumint::class:
             case Type\TypeSmallint::class:
             case Type\TypeTinyint::class:
-                $options = array_merge($options, $this->getIntegerOptions(get_class($type), $isUnsigned));
+                $options = array_merge($this->getIntegerOptions(get_class($type), $isUnsigned), $options);
                 break;
             //~ Case float
             case Type\TypeFloat::class:
             case Type\TypeDouble::class:
             case Type\TypeDecimal::class:
-                $options = array_merge($options, $this->getDecimalOptions($isUnsigned));
+                $options = array_merge($this->getDecimalOptions($isUnsigned), $options);
                 break;
             //~ Case Strings
             case Type\TypeLongtext::class:
@@ -79,7 +79,7 @@ class FieldValidatorService
             case Type\TypeTinytext::class:
             case Type\TypeVarchar::class:
             case Type\TypeChar::class:
-                $options = array_merge($options, $this->getStringOptions(get_class($type), $type, $isNullable));
+                $options = array_merge($this->getStringOptions(get_class($type), $type, $isNullable), $options);
                 break;
             case Type\TypeBool::class:
             case Type\TypeDateTime::class:
