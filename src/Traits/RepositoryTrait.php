@@ -49,7 +49,7 @@ trait RepositoryTrait
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
      */
-    public function findByKeys(array $keys): object
+    public function findByKeys(array $keys)
     {
         /** @var RepositoryInterface $this */
 
