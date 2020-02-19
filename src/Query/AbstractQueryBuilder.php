@@ -126,7 +126,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
      * @param  string $field
      * @return QueryBuilderInterface
      */
-    public function setListIndexedByField($field): QueryBuilderInterface
+    public function setListIndexedByField(string $field): QueryBuilderInterface
     {
         $this->listIndexedByField = $field;
 
