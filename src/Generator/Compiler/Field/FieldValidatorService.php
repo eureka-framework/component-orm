@@ -78,6 +78,7 @@ class FieldValidatorService
             case Type\TypeText::class:
             case Type\TypeTinytext::class:
             case Type\TypeVarchar::class:
+            case Type\TypeVarbinary::class:
             case Type\TypeChar::class:
                 $options = array_merge($this->getStringOptions(get_class($type), $type, $isNullable), $options);
                 break;
@@ -173,6 +174,7 @@ class FieldValidatorService
                 $options['max_length'] = 255;
                 break;
             case Type\TypeVarchar::class:
+            case Type\TypeVarbinary::class:
             case Type\TypeChar::class:
                 if (!$isNullable) {
                     $options['min_length'] = 0;

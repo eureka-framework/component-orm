@@ -21,9 +21,10 @@ class TypeVarbinary extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type       = 'string';
-        $this->castDb     = '(string)';
-        $this->castMethod = '(string)';
-        $this->emptyValue = 'null';
+        $this->type          = 'string';
+        $this->castDb        = '(string)';
+        $this->castMethod    = '(string)';
+        $this->emptyValue    = 'null';
+        $this->validatorType = 'string';
     }
 }
