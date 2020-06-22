@@ -89,6 +89,21 @@ trait WhereTrait
     }
 
     /**
+     * Add where clause (raw mode).
+     *
+     * @param  string $where
+     * @param  string $whereConcat
+     * @return self|QueryBuilderInterface
+     */
+    public function addWhereRaw(string $where, string $whereConcat = 'AND'): QueryBuilderInterface
+    {
+        $fieldWhere        = (0 < count($this->whereList) ? ' ' . $whereConcat . ' ' . $where : $where);
+        $this->whereList[] = $fieldWhere;
+
+        return $this;
+    }
+
+    /**
      * Add where clause.
      *
      * @param  string[] $keys
