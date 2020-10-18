@@ -25,7 +25,7 @@ use Eureka\Component\Validation\ValidatorFactoryInterface;
 trait ValidatorAwareTrait
 {
     /** @var ValidatorFactoryInterface|null $validatorFactory */
-    private ?ValidatorFactoryInterface$validatorFactory;
+    private ?ValidatorFactoryInterface $validatorFactory;
 
     /** @var ValidatorEntityFactoryInterface|null $validatorEntityFactory */
     private ?ValidatorEntityFactoryInterface $validatorEntityFactory;

@@ -35,7 +35,7 @@ class Factory
      * @return DeleteBuilder|InsertBuilder|QueryBuilder|SelectBuilder|UpdateBuilder
      * @throws OrmException
      */
-    public static function getBuilder(string$type, RepositoryInterface $repository, EntityInterface $entity = null)
+    public static function getBuilder(string $type, RepositoryInterface $repository, EntityInterface $entity = null)
     {
         switch ($type) {
             case self::TYPE_SELECT:

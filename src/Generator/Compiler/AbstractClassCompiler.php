@@ -32,7 +32,7 @@ class AbstractClassCompiler extends AbstractCompiler
     private string $type;
 
     /** @var Config\ConfigInterface $config */
-    protected Config\ConfigInterface$config;
+    protected Config\ConfigInterface $config;
 
     /** @var Field[] $fields */
     protected array $fields = [];
