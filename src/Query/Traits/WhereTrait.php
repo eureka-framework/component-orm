@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
@@ -21,7 +23,7 @@ use Eureka\Component\Orm\Query\QueryBuilderInterface;
 trait WhereTrait
 {
     /** @var string[] $whereList List of where restriction for current query */
-    protected $whereList = [];
+    protected array $whereList = [];
 
     /**
      * @param  string $field
@@ -43,8 +45,8 @@ trait WhereTrait
      */
     public function addIn(string $field, array $values, string $whereConcat = 'AND', bool $not = false): QueryBuilderInterface
     {
-        if (!is_array($values) || count($values) === 0) {
-            throw new InvalidQueryException('Values for addIn must be an array, and non empty!');
+        if (empty($values)) {
+            throw new InvalidQueryException('Values for addIn must be non empty!');
         }
 
         $field = (0 < count($this->whereList) ? ' ' . $whereConcat . ' ' . $field : $field);
@@ -52,7 +54,6 @@ trait WhereTrait
         //~ Bind values (more safety)
         $fields = [];
         foreach ($values as $value) {
-
             $bindName = $this->addBind('value', $value, true);
             $fields[] = $bindName;
         }

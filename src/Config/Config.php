@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Config;
 
@@ -34,12 +36,12 @@ class Config extends AbstractConfig
         //~ Namespace
         $this->baseNamespaceForEntity     = $config['namespace']['entity'];
         $this->baseNamespaceForMapper     = $config['namespace']['mapper'];
-        $this->baseNamespaceForRepository = isset($config['namespace']['repository']) ? $config['namespace']['repository'] : null;
+        $this->baseNamespaceForRepository = $config['namespace']['repository'] ?? '';
 
         //~ Path
         $this->basePathForEntity     = $config['path']['entity'];
         $this->basePathForMapper     = $config['path']['mapper'];
-        $this->basePathForRepository = isset($config['path']['repository']) ? $config['path']['repository'] : null;
+        $this->basePathForRepository = $config['path']['repository'] ?? '';
 
         //~ Cache
         $this->cachePrefix = $config['cache']['prefix'];

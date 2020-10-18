@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Compiler\Field;
 
@@ -20,37 +22,37 @@ use Eureka\Component\Orm\Generator\Type;
 class Field
 {
     /** @var string $name field name */
-    protected $name = '';
+    protected string $name = '';
 
     /** @var string[] $dbPrefixes field prefix */
-    protected $dbPrefixes = [];
+    protected array $dbPrefixes = [];
 
     /** @var mixed $default Default value. */
     protected $default = null;
 
     /** @var bool $isNullable If field can be null. */
-    protected $isNullable = false;
+    protected bool $isNullable = false;
 
     /** @var bool $isAutoIncrement Is auto-increment field. */
-    protected $isAutoIncrement = false;
+    protected bool $isAutoIncrement = false;
 
     /** @var bool $isPrimaryKey Is primary key. */
-    protected $isPrimaryKey = false;
+    protected bool $isPrimaryKey = false;
 
     /** @var bool $isKey Is key (index, primary or unique). */
-    protected $isKey = false;
+    protected bool $isKey = false;
 
     /** @var Type\TypeInterface $type Type instance. */
-    protected $type = null;
+    protected Type\TypeInterface $type;
 
     /** @var array $validation Validation config if provided. */
-    protected $validation = [];
+    protected array $validation = [];
 
     /** @var bool $hasValidation */
-    protected $hasValidation = false;
+    protected bool $hasValidation = false;
 
     /** @var bool $hasValidationAuto */
-    protected $hasValidationAuto = false;
+    protected bool $hasValidationAuto = false;
 
     /**
      * Field constructor.

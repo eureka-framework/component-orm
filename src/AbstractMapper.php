@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
@@ -23,7 +25,12 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 abstract class AbstractMapper implements RepositoryInterface
 {
-    use Traits\ConnectionAwareTrait, Traits\MapperTrait, Traits\RepositoryTrait, Traits\EntityAwareTrait, Traits\CacheAwareTrait, Traits\ValidatorAwareTrait;
+    use Traits\ConnectionAwareTrait;
+    use Traits\MapperTrait;
+    use Traits\RepositoryTrait;
+    use Traits\EntityAwareTrait;
+    use Traits\CacheAwareTrait;
+    use Traits\ValidatorAwareTrait;
 
     /**
      * Initialize mapper with proper values for mapped table.

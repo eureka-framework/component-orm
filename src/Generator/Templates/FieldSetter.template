@@ -9,7 +9,7 @@
         {{ property.validation }}
 
         if ($this->exists() && $this->{{ property.name }} !== {{ property.varname }}) {
-            $this->updated['{{ property.name }}'] = true;
+            $this->markFieldAsUpdated('{{ property.name }}');
         }
 
         $this->{{ property.name }} = {{ property.varname }};

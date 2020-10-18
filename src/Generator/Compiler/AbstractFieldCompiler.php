@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Compiler;
 
@@ -20,7 +22,7 @@ use Eureka\Component\Orm\Generator\Compiler\Field\Field;
 class AbstractFieldCompiler extends AbstractCompiler
 {
     /** @var Field $field */
-    protected $field;
+    protected Field $field;
 
     /**
      * AbstractFieldCompiler constructor.

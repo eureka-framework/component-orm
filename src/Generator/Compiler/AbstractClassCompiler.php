@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Compiler;
 
@@ -27,13 +29,13 @@ class AbstractClassCompiler extends AbstractCompiler
     protected const TYPE_ENTITY     = 'entity';
 
     /** @var string $type */
-    private $type = '';
+    private string $type;
 
     /** @var Config\ConfigInterface $config */
-    protected $config;
+    protected Config\ConfigInterface$config;
 
     /** @var Field[] $fields */
-    protected $fields = [];
+    protected array $fields = [];
 
     /**
      * AbstractCompiler constructor.
@@ -101,13 +103,16 @@ class AbstractClassCompiler extends AbstractCompiler
      */
     protected function writeTemplate(string $file, string $content, bool $skipExisting = false): void
     {
-        echo '$file: ' . $file . PHP_EOL;
+        if ($this->verbose) {
+            echo '$file: ' . $file . PHP_EOL;
+        }
+
         if ($skipExisting && file_exists($file)) {
             return;
         }
 
         if (file_put_contents($file, $content) === false) {
-            throw new GeneratorException('Unable to write final file! (file: ' . $file . ')');
+            throw new GeneratorException('Unable to write final file! (file: ' . $file . ')'); // @codeCoverageIgnore
         }
     }
 
@@ -138,11 +143,11 @@ class AbstractClassCompiler extends AbstractCompiler
                 $filePathName = $basePath . $abstractPrefix . $baseName . 'Mapper.php';
                 break;
             default:
-                throw new \DomainException('Invalid type file');
+                throw new \DomainException('Invalid type file'); // @codeCoverageIgnore
         }
 
         if (!is_dir($basePath) && !mkdir($basePath, 0755, true)) {
-            throw new \RuntimeException('Cannot created output directory! (dir:' . $basePath . ')');
+            throw new \RuntimeException('Cannot created output directory! (dir:' . $basePath . ')'); // @codeCoverageIgnore
         }
 
         return $filePathName;

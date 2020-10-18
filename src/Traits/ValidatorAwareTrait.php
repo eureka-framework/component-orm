@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -22,14 +24,14 @@ use Eureka\Component\Validation\ValidatorFactoryInterface;
  */
 trait ValidatorAwareTrait
 {
-    /** @var ValidatorFactoryInterface $validatorFactory */
-    private $validatorFactory;
+    /** @var ValidatorFactoryInterface|null $validatorFactory */
+    private ?ValidatorFactoryInterface$validatorFactory;
 
-    /** @var ValidatorEntityFactory $validatorEntityFactory */
-    private $validatorEntityFactory;
+    /** @var ValidatorEntityFactoryInterface|null $validatorEntityFactory */
+    private ?ValidatorEntityFactoryInterface $validatorEntityFactory;
 
     /** @var array $validationConfig */
-    private $validationConfig = [];
+    private array $validationConfig = [];
 
     /**
      * @param array $data
@@ -38,12 +40,12 @@ trait ValidatorAwareTrait
      */
     public function newGenericEntity(array $data = [], array $config = []): GenericEntity
     {
-        return new GenericEntity($this->getValidatorFactory(), $config ?? $this->getValidatorConfig(), $data);
+        return $this->validatorEntityFactory->createGeneric($config ?? $this->getValidatorConfig(), $data);
     }
 
     /**
-     * @param ValidatorFactoryInterface $validatorFactory
-     * @param ValidatorEntityFactoryInterface $validatorEntityFactory
+     * @param ValidatorFactoryInterface|null $validatorFactory
+     * @param ValidatorEntityFactoryInterface|null $validatorEntityFactory
      * @return self
      */
     protected function setValidatorFactories(

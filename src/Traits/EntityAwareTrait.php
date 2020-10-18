@@ -1,4 +1,4 @@
-<?php declare(strict_types=0);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=0);
 
 namespace Eureka\Component\Orm\Traits;
 
@@ -22,13 +24,13 @@ use Eureka\Component\Validation\Entity\GenericEntity;
 trait EntityAwareTrait
 {
     /** @var string $entityClass Name of class use to instance DataMapper Data class. */
-    protected $entityClass = '';
+    protected string $entityClass = '';
 
-    /** @var bool If true, does not throw an exception for not mapped fields (ie : COUNT()) in setDataValue */
-    protected $ignoreNotMappedFields = false;
+    /** @var bool $ignoreNotMappedFields If true, does not throw an exception for not mapped fields (ie : COUNT()) in setDataValue */
+    protected bool $ignoreNotMappedFields = false;
 
     /**
-     * @return self|RepositoryInterface
+     * @return $this|RepositoryInterface
      */
     public function enableIgnoreNotMappedFields(): RepositoryInterface
     {
@@ -38,7 +40,7 @@ trait EntityAwareTrait
     }
 
     /**
-     * @return self|RepositoryInterface
+     * @return $this|RepositoryInterface
      */
     public function disableIgnoreNotMappedFields(): RepositoryInterface
     {
@@ -49,7 +51,7 @@ trait EntityAwareTrait
 
     /**
      * @param  string $entityClass
-     * @return self|RepositoryInterface
+     * @return $this|RepositoryInterface
      */
     public function setEntityClass(string $entityClass): RepositoryInterface
     {

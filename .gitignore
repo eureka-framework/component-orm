@@ -1,0 +1,10 @@
+#~ Composer
+composer.phar
+composer.lock
+/vendor/
+
+#~ CI
+/build/
+.phpunit.result.cache
+/tests/Generated/*
+!/tests/Generated/.gitkeep

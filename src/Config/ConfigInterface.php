@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Config;
 
@@ -92,13 +94,6 @@ interface ConfigInterface
      * @return string[]
      */
     public function getDbPrefix(): array;
-
-    /**
-     * Return true if cache is active, false in otherwise.
-     *
-     * @return bool
-     */
-    public function hasCache(): bool;
 
     /**
      * Get cache prefix for main data key.

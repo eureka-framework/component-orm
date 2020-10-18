@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
@@ -20,10 +22,10 @@ use Eureka\Component\Orm\Query\QueryBuilderInterface;
 trait SetTrait
 {
     /** @var string[] $setList List of set for current query (update or insert) */
-    protected $setList = [];
+    protected array $setList = [];
 
     /** @var string[] $setList List of set for current query (update or insert) */
-    protected $updateList = [];
+    protected array $updateList = [];
 
     /**
      * @param  string $field

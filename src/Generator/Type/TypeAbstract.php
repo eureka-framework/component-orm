@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Type;
 
@@ -17,31 +19,31 @@ namespace Eureka\Component\Orm\Generator\Type;
 abstract class TypeAbstract implements TypeInterface
 {
     /** @var string $castDb String for cast in query. */
-    protected $castDb = '';
+    protected string $castDb = '';
 
     /** @var string $castMethod String for cast in method. */
-    protected $castMethod = '';
+    protected string $castMethod = '';
 
     /** @var string $type Type name */
-    protected $type = '';
+    protected string $type = '';
 
     /** @var bool $isUnsigned If type is unsigned */
-    protected $isUnsigned = false;
+    protected bool $isUnsigned = false;
 
     /** @var int $length Number of characters length (string). For numbers, number of digit "displayed". 0 for unlimited. */
-    protected $length = 0;
+    protected int $length = 0;
 
     /** @var string $other Other data. */
-    protected $other = '';
+    protected string $other = '';
 
     /** @var string $emptyValue String for empty value. */
-    protected $emptyValue = '';
+    protected string $emptyValue = '';
 
     /** @var string $validatorType Validator type|class */
-    protected $validatorType = '';
+    protected string $validatorType = '';
 
     /** @var array $validatorOptions Validator options */
-    protected $validatorOptions = [];
+    protected array $validatorOptions = [];
 
     /**
      * @return string

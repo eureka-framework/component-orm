@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Config;
 
@@ -16,50 +18,47 @@ namespace Eureka\Component\Orm\Config;
  */
 abstract class AbstractConfig implements ConfigInterface
 {
-    /** @var bool $hasCache If use cache in orm classes */
-    protected $hasCache = false;
-
     /** @var string $author Comment author name <email> */
-    protected $author = '';
+    protected string $author = '';
 
     /** @var string $copyright Header file copyright */
-    protected $copyright = '';
+    protected string $copyright = '';
 
     /** @var string $classname Base class name of generated classes. */
-    protected $classname = '';
+    protected string $classname = '';
 
     /** @var string $baseNamespaceForEntity */
-    protected $baseNamespaceForEntity = '';
+    protected string $baseNamespaceForEntity = '';
 
     /** @var string $baseNamespaceForMapper */
-    protected $baseNamespaceForMapper = '';
+    protected string $baseNamespaceForMapper = '';
 
     /** @var string $baseNamespaceForRepository */
-    protected $baseNamespaceForRepository = '';
+    protected string $baseNamespaceForRepository = '';
 
     /** @var string $basePathForEntity */
-    protected $basePathForEntity = '';
+    protected string $basePathForEntity = '';
 
     /** @var string $basePathForMapper */
-    protected $basePathForMapper = '';
+    protected string $basePathForMapper = '';
 
     /** @var string $basePathForMapper */
-    protected $basePathForRepository = '';
+    protected string $basePathForRepository = '';
 
     /** @var string $dbTable Table name */
-    protected $dbTable = '';
+    protected string $dbTable = '';
 
     /** @var string[] $dbPrefix Table prefix to remove from method name. */
-    protected $dbPrefix = [];
+    protected array $dbPrefix = [];
 
     /** @var string $cachePrefix Cache name prefix. */
-    protected $cachePrefix = '';
+    protected string $cachePrefix = '';
 
     /** @var ConfigInterface[] $joinList List of joined config. */
-    protected $joinList = [];
+    protected array $joinList = [];
 
     /** @var array $validation Validation config. */
-    protected $validation = [];
+    protected array $validation = [];
 
     /**
      * Initialize config.
@@ -129,16 +128,6 @@ abstract class AbstractConfig implements ConfigInterface
     public function getDbPrefix(): array
     {
         return $this->dbPrefix;
-    }
-
-    /**
-     * Return true if cache is active, false in otherwise.
-     *
-     * @return bool
-     */
-    public function hasCache(): bool
-    {
-        return $this->hasCache;
     }
 
     /**
@@ -251,39 +240,39 @@ abstract class AbstractConfig implements ConfigInterface
     protected function validate(): ConfigInterface
     {
         if (empty($this->author)) {
-            throw new \InvalidArgumentException('Author is empty!');
+            throw new \InvalidArgumentException('Author is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->copyright)) {
-            throw new \InvalidArgumentException('Copyright is empty!');
+            throw new \InvalidArgumentException('Copyright is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->classname)) {
-            throw new \InvalidArgumentException('Class name is empty!');
+            throw new \InvalidArgumentException('Class name is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->dbTable)) {
-            throw new \InvalidArgumentException('Database table name is empty!');
+            throw new \InvalidArgumentException('Database table name is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->cachePrefix)) {
-            throw new \InvalidArgumentException('Cache prefix is empty!');
+            throw new \InvalidArgumentException('Cache prefix is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->baseNamespaceForEntity)) {
-            throw new \InvalidArgumentException('Entity namespace is empty!');
+            throw new \InvalidArgumentException('Entity namespace is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->baseNamespaceForMapper)) {
-            throw new \InvalidArgumentException('Mapper namespace is empty!');
+            throw new \InvalidArgumentException('Mapper namespace is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->basePathForEntity)) {
-            throw new \InvalidArgumentException('Entity base path is empty!');
+            throw new \InvalidArgumentException('Entity base path is empty!'); // @codeCoverageIgnore
         }
 
         if (empty($this->basePathForMapper)) {
-            throw new \InvalidArgumentException('Mapper path is empty!');
+            throw new \InvalidArgumentException('Mapper path is empty!'); // @codeCoverageIgnore
         }
 
         return $this;

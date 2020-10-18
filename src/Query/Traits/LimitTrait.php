@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
@@ -18,11 +20,11 @@ use Eureka\Component\Orm\Query\QueryBuilderInterface;
  */
 trait LimitTrait
 {
-    /** @var int $limit Max limit for current query. */
-    protected $limit = null;
+    /** @var int|null $limit Max limit for current query. */
+    protected ?int $limit = null;
 
-    /** @var int $offset Start fetch result position for current query */
-    protected $offset = null;
+    /** @var int|null $offset Start fetch result position for current query */
+    protected ?int $offset = null;
 
     /**
      * Set limit & offset.

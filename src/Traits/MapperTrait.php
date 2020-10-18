@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
@@ -25,28 +27,28 @@ use Eureka\Component\Orm\RepositoryInterface;
 trait MapperTrait
 {
     /** @var string $table */
-    protected $table = '';
+    protected string $table = '';
 
     /** @var string[] $fields */
-    protected $fields = [];
+    protected array $fields = [];
 
     /** @var string[] $primaryKeys */
-    protected $primaryKeys = [];
+    protected array $primaryKeys = [];
 
     /** @var string[][] $entityNamesMap */
-    protected $entityNamesMap = [];
+    protected array $entityNamesMap = [];
 
     /** @var int $lastId */
-    protected $lastId = 0;
+    protected int $lastId = 0;
 
     /** @var int $rowCount The number of rows affected by the last SQL statement */
-    protected $rowCount = 0;
+    protected int $rowCount = 0;
 
     /** @var RepositoryInterface[] $mappers */
-    protected $mappers = [];
+    protected array $mappers = [];
 
     /** @var array $joinConfigs */
-    protected $joinConfigs = [];
+    protected array $joinConfigs = [];
 
     /**
      * Get fields for Mapper
@@ -227,12 +229,10 @@ trait MapperTrait
 
     /**
      * @param Query\QueryBuilderInterface $queryBuilder
-     * @param array $fields
-     * @param bool $join
      * @return array
      * @throws Exception\OrmException
      */
-    public function queryRows(Query\QueryBuilderInterface $queryBuilder, bool $join = false, array $fields = []): array
+    public function queryRows(Query\QueryBuilderInterface $queryBuilder): array
     {
         /** @var Connection $connection */
         $connection = $this->getConnection();
@@ -474,7 +474,7 @@ trait MapperTrait
 
     /**
      * @param \stdClass[] $list
-     * @param string[] $joinConfigs
+     * @param array $joinConfigs
      * @return array
      * @throws Exception\UndefinedMapperException
      */

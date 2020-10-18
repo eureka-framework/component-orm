@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query;
 
@@ -21,16 +23,16 @@ use Eureka\Component\Orm\RepositoryInterface;
 abstract class AbstractQueryBuilder implements QueryBuilderInterface
 {
     /** @var array $binds List of binding values */
-    protected $bind = [];
+    protected array $bind = [];
 
     /** @var string $listIndexedByField */
-    protected $listIndexedByField = '';
+    protected string $listIndexedByField = '';
 
     /** @var RepositoryInterface */
-    protected $repository;
+    protected RepositoryInterface $repository;
 
     /** @var EntityInterface|null */
-    protected $entity;
+    protected ?EntityInterface $entity;
 
     /**
      * Clear query params
@@ -49,7 +51,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
      * AbstractQueryBuilder constructor.
      *
      * @param RepositoryInterface $repository
-     * @param EntityInterface $entity
+     * @param EntityInterface|null $entity
      */
     public function __construct(RepositoryInterface $repository, EntityInterface $entity = null)
     {
@@ -100,7 +102,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     /**
      * Set bind
      *
-     * @param  array $bind Binded values
+     * @param  array $bind Bound values
      * @return QueryBuilderInterface
      */
     public function bind(array $bind): QueryBuilderInterface

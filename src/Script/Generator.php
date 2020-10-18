@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * Copyright (c) Romain Cottard
@@ -12,15 +14,16 @@ namespace Eureka\Component\Orm\Script;
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Generator as GeneratorService;
-use Eureka\Eurekon;
+use Eureka\Component\Console;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class Generator
  *
  * @author Romain Cottard
+ * @codeCoverageIgnore
  */
-class Generator extends Eurekon\AbstractScript
+class Generator extends Console\AbstractScript
 {
     /**
      * Generator constructor.
@@ -38,7 +41,7 @@ class Generator extends Eurekon\AbstractScript
      */
     public function help(): void
     {
-        $help = new Eurekon\Help('...');
+        $help = new Console\Help('...');
         $help->addArgument('', 'config-dir', 'Config directory to inspect for config file', true, true);
         $help->addArgument('', 'config-item', 'Config name in config file to generate.', true, false);
         $help->addArgument('', 'db-service', 'Database service name (default: database.connection.common)', true, false);
@@ -53,7 +56,7 @@ class Generator extends Eurekon\AbstractScript
      */
     public function run(): void
     {
-        $argument      = Eurekon\Argument\Argument::getInstance();
+        $argument      = Console\Argument\Argument::getInstance();
         $configName    = (string) trim((string) $argument->get('config-item'));
         $dbServiceName = (string) $argument->get('db-service', null, 'database.connection.common');
 

@@ -1,2 +1,2 @@
     /** @var {{ property.type }} {{ property.varname }} Property {{ property.name }} */
-    protected {{ property.varname }} = {{ property.default }};
+    protected {{ property.typehint }} {{ property.varname }} = {{ property.default }};

@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
@@ -20,13 +22,13 @@ use Eureka\Component\Orm\RepositoryInterface;
 trait FieldTrait
 {
     /** @var string[] $fields */
-    private $fields = [];
+    private array $fields = [];
 
     /** @var string $from */
-    private $from = '';
+    private string $from = '';
 
     /** @var bool $calculateFoundRows */
-    private $calculateFoundRows = false;
+    private bool $calculateFoundRows = false;
 
     /**
      * @return self|QueryBuilderInterface
@@ -150,7 +152,7 @@ trait FieldTrait
             $fieldsToPrefix = $onlyPrimaryKeys ? $repository->getPrimaryKeys() : $repository->getFields();
 
             foreach ($fieldsToPrefix as $field) {
-                $fields[] = $table . '.' . $field . (!empty($aliasSuffix) ? ' AS '. $field . $aliasSuffix : '');
+                $fields[] = $table . '.' . $field . (!empty($aliasSuffix) ? ' AS ' . $field . $aliasSuffix : '');
             }
         }
 

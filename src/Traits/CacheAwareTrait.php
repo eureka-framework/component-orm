@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
@@ -25,14 +27,14 @@ use Psr\Cache\InvalidArgumentException;
  */
 trait CacheAwareTrait
 {
-    /** @var CacheItemPoolInterface $cache Cache instance. Not connected if cache is not used. */
-    protected $cache = null;
+    /** @var ?CacheItemPoolInterface $cache Cache instance. Not connected if cache is not used. */
+    protected ?CacheItemPoolInterface $cache = null;
 
     /** @var bool $isCacheEnabledOnRead If cache is enabled for Mapper class (for read) */
-    protected $isCacheEnabledOnRead = false;
+    protected bool $isCacheEnabledOnRead = false;
 
     /** @var bool $cacheSkipMissingItemQuery If skip query after select from cache (when has no missing item) */
-    protected $cacheSkipMissingItemQuery = false;
+    protected bool $cacheSkipMissingItemQuery = false;
 
     /**
      * Enable cache on read queries.
@@ -61,7 +63,7 @@ trait CacheAwareTrait
     /**
      * Set cache instance.
      *
-     * @param CacheItemPoolInterface $cache
+     * @param CacheItemPoolInterface|null $cache
      * @return self|RepositoryInterface
      */
     protected function setCache(CacheItemPoolInterface $cache = null): RepositoryInterface

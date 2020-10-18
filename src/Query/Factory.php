@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query;
 
@@ -29,11 +31,11 @@ class Factory
     /**
      * @param  string $type
      * @param  RepositoryInterface $repository
-     * @param  EntityInterface $entity
+     * @param  ?EntityInterface $entity
      * @return DeleteBuilder|InsertBuilder|QueryBuilder|SelectBuilder|UpdateBuilder
      * @throws OrmException
      */
-    public static function getBuilder($type, RepositoryInterface $repository, EntityInterface $entity = null)
+    public static function getBuilder(string$type, RepositoryInterface $repository, EntityInterface $entity = null)
     {
         switch ($type) {
             case self::TYPE_SELECT:

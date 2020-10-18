@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Compiler;
 
@@ -21,16 +23,16 @@ use Eureka\Component\Orm\Generator\Compiler\Field\Field;
 class JoinCompiler extends AbstractMethodCompiler
 {
     /** @var array $joinConfig */
-    private $joinConfig;
+    private array $joinConfig;
 
     /** @var Field[] $fields */
-    private $fields;
+    private array $fields;
 
     /** @var Context $mainContext */
-    private $mainContext;
+    private Context $mainContext;
 
     /** @var string $name */
-    private $name;
+    private string $name;
 
     /**
      * JoinCompiler constructor.
@@ -103,18 +105,22 @@ class JoinCompiler extends AbstractMethodCompiler
         if (!empty($classProperties)) {
             if ($this->joinConfig['relation'] === 'many') {
                 $compiler        = new PropertyCompiler(
-                    'joinManyCache' . $name, $className, $className, 'null'
+                    'joinManyCache' . $name,
+                    $className,
+                    $className,
+                    'null'
                 );
 
                 $this->mainContext->add(
                     'class.properties',
                     $classProperties . "\n" . implode("\n", $compiler->compile())
                 );
-
             } else {
-
                 $compiler = new PropertyCompiler(
-                    'joinOneCache' . $name, $className, $className, 'null'
+                    'joinOneCache' . $name,
+                    $className,
+                    $className,
+                    'null'
                 );
 
                 $this->mainContext->add(

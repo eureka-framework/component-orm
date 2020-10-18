@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
@@ -22,19 +24,19 @@ abstract class AbstractEntity implements EntityInterface
     use ValidatorAwareTrait;
 
     /** @var bool $hasAutoIncrement If data has auto increment value. */
-    protected $hasAutoIncrement = false;
+    private bool $hasAutoIncrement = false;
 
     /** @var bool $exists If data already exists in db for example. */
-    protected $exists = false;
+    private bool $exists = false;
 
     /** @var bool $isDeleted If entity must be deleted instead of persist. */
-    protected $isDeleted = false;
+    private bool $isDeleted = false;
 
     /** @var array $updated List of updated field */
-    protected $updated = [];
+    private array $updated = [];
 
     /** @var RepositoryInterface $repository Entity repository */
-    private $repository;
+    private RepositoryInterface $repository;
 
     /**
      * Return cache key for the current data instance.
@@ -47,7 +49,7 @@ abstract class AbstractEntity implements EntityInterface
      * Set auto increment value.
      * Must be overridden to use internal property setter method, according to the data class definition.
      *
-     * @param  integer $id
+     * @param  int $id
      * @return $this
      */
     public function setAutoIncrementId(int $id)
@@ -115,7 +117,7 @@ abstract class AbstractEntity implements EntityInterface
      * If at least one data has been updated.
      * If property name is specified, check only property.
      *
-     * @param  string $property
+     * @param  ?string $property
      * @return bool
      */
     public function isUpdated(string $property = null): bool
@@ -125,6 +127,17 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         return (isset($this->updated[$property]) && $this->updated[$property] === true);
+    }
+
+    /**
+     * Flag property as updated
+     *
+     * @param  string $property
+     * @return void
+     */
+    protected function markFieldAsUpdated(string $property): void
+    {
+        $this->updated[$property] = true;
     }
 
     /**

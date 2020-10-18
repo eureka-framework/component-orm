@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Copyright (c) Romain Cottard
@@ -6,6 +6,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Compiler;
 
@@ -22,19 +24,19 @@ use Eureka\Component\Orm\Generator\Type;
 abstract class AbstractCompiler
 {
     /** @var bool $verbose Verbose active or not. */
-    protected $verbose = true;
+    protected bool $verbose = true;
 
     /** @var string $rootDir */
-    protected $rootDir = __DIR__ . '/../../eureka-component';
+    protected string $rootDir = __DIR__ . '/../../eureka-component';
 
     /** @var Connection $connection */
-    protected $connection = null;
+    protected Connection $connection;
 
     /** @var string $validatorsConfig */
-    protected $validatorsConfig = '';
+    protected string $validatorsConfig = '';
 
     /** @var bool[]  */
-    protected $templates = [];
+    protected array $templates = [];
 
     /**
      * @return Context
@@ -70,12 +72,12 @@ abstract class AbstractCompiler
      * @param  string $rootDir
      * @return $this
      */
-    public function setRootDirectory(string $rootDir): self
+    /*public function setRootDirectory(string $rootDir): self
     {
         $this->rootDir = (string) $rootDir;
 
         return $this;
-    }
+    }*/
 
     /**
      * Set database connection.
@@ -114,13 +116,13 @@ abstract class AbstractCompiler
     protected function readTemplate(string $template): string
     {
         if (!is_readable($template)) {
-            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')');
+            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')'); // @codeCoverageIgnore
         }
 
         $content = file_get_contents($template);
 
         if ($content === false) {
-            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')');
+            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')'); // @codeCoverageIgnore
         }
 
         return $content;
