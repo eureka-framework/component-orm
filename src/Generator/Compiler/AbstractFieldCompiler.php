@@ -72,7 +72,7 @@ class AbstractFieldCompiler extends AbstractCompiler
             ->add('property.typehint', $this->getTypeHint())
             ->add('property.name', $name)
             ->add('property.varname', '$' . $name)
-            ->add('property.default', $this->getDefault(true, false))
+            ->add('property.default', $this->getDefault())
         ;
     }
 
@@ -111,34 +111,14 @@ class AbstractFieldCompiler extends AbstractCompiler
     /**
      * Get default value for the field.
      *
-     * @param  bool $forceReturn
-     * @param  bool $originalType
      * @return mixed
      */
-    protected function getDefault(bool $forceReturn = false, bool $originalType = false)
+    protected function getDefault()
     {
         $default = $this->field->getDefaultValue();
 
-        if ($forceReturn && $default === '') {
+        if ($default === '') {
             $default = $this->field->getType()->getEmptyValue();
-        }
-
-        if (!$originalType) {
-            return $default;
-        }
-
-        switch ($default) {
-            case 'true':
-                $default = true;
-                break;
-            case 'false':
-                $default = false;
-                break;
-            case 'null':
-                $default = null;
-                break;
-            default:
-                //~ No override
         }
 
         return $default;

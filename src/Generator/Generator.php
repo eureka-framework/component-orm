@@ -72,7 +72,7 @@ class Generator
         $configs    = [];
         $baseConfig = [];
 
-        if (!is_array($configList)) {
+        if (empty($configList)) {
             throw new \RuntimeException('Invalid config. Empty information about orm!');
         }
 
@@ -95,8 +95,7 @@ class Generator
                 }
 
                 if (!isset($baseConfig[$join['config']])) {
-                    unset($joins[$key]);
-                    continue;
+                    throw new \RuntimeException('Invalid config. Joined config "' . $join['config'] . '" does not exist!');
                 }
 
                 $joins[$key]['instance'] = clone $baseConfig[$join['config']];

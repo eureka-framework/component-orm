@@ -67,19 +67,6 @@ abstract class AbstractCompiler
     }
 
     /**
-     * Set root directory
-     *
-     * @param  string $rootDir
-     * @return $this
-     */
-    /*public function setRootDirectory(string $rootDir): self
-    {
-        $this->rootDir = (string) $rootDir;
-
-        return $this;
-    }*/
-
-    /**
      * Set database connection.
      *
      * @param  Connection $connection
@@ -132,6 +119,8 @@ abstract class AbstractCompiler
      * @param Context $context
      * @param bool $isAbstract
      * @return Context
+     *
+     * @codeCoverageIgnore
      */
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {

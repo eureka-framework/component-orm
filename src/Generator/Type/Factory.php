@@ -31,13 +31,13 @@ class Factory
     public static function create(string $sqlType, string $sqlComment): TypeInterface
     {
         $matches = array();
-        if (!(bool) preg_match('`([a-z]+)\(?([0-9]*)\)? ?(.*)`', $sqlType, $matches)) {
+        if (!(bool) preg_match('`^([a-z]+)\(?([0-9]*)\)? ?(.*)$`i', $sqlType, $matches)) {
             throw new GeneratorException('Invalid sql type');
         }
 
-        $type   = (string) $matches[1];
+        $type   = strtolower((string) $matches[1]);
         $length = (int) $matches[2];
-        $other  = (string) $matches[3];
+        $other  = strtolower((string) $matches[3]);
 
         if (strtolower($type) === 'tinyint') {
             //~ Special case for tinyint used as boolean value.

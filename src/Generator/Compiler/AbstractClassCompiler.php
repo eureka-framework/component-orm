@@ -104,11 +104,11 @@ class AbstractClassCompiler extends AbstractCompiler
     protected function writeTemplate(string $file, string $content, bool $skipExisting = false): void
     {
         if ($this->verbose) {
-            echo '$file: ' . $file . PHP_EOL;
+            echo '$file: ' . $file . PHP_EOL; // @codeCoverageIgnore
         }
 
         if ($skipExisting && file_exists($file)) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         if (file_put_contents($file, $content) === false) {

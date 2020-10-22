@@ -37,7 +37,7 @@ class FieldValidatorService
         }
 
         if (!$toString) {
-            return $options;
+            return $options; // @codeCoverageIgnore
         }
 
         $return = [];
@@ -120,8 +120,8 @@ class FieldValidatorService
             case Type\TypeTinyint::class:
                 $options = $isUnsigned ? IntegerValidator::TINYINT_UNSIGNED : IntegerValidator::TINYINT_SIGNED;
                 break;
-            default:
-                $options = [];
+            default: // should not happened
+                $options = []; // @codeCoverageIgnore
         }
 
         return $options;

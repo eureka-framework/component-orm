@@ -8,7 +8,7 @@
      */
     public function get{{ join.entity.name }}(bool $isForceReload = false): {{ join.entity.class }}
     {
-        if ($isForceReload || null === $this->joinOneCache{{ join.entity.name }}) {
+        if ($isForceReload || $this->joinOneCache{{ join.entity.name }} === null) {
             $mapper = $this->getRepository()->getMapper({{ join.entity.class }}Mapper::class);
             $this->joinOneCache{{ join.entity.name }} = $mapper->findByKeys([
                 {{ join.entity.keys }}

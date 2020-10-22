@@ -165,6 +165,7 @@ class Field
      * Get if field is in key (primary, index, unique...)
      *
      * @return bool
+     * @codeCoverageIgnore
      */
     public function isKey(): bool
     {
@@ -279,7 +280,12 @@ class Field
      */
     protected function setDefaultValue($default): self
     {
-        if ($this->isNullable() && $default === null || ($default === 'CURRENT_TIMESTAMP' && $this->getType() instanceof Type\TypeTimestamp)) {
+        $isTimeType = ($this->getType() instanceof Type\TypeTimestamp || $this->getType() instanceof Type\TypeDatetime);
+
+        if (
+            $this->isNullable() && $default === null ||
+            ($isTimeType && ($default === 'CURRENT_TIMESTAMP' || $default === 'CURRENT_TIMESTAMP()'))
+        ) {
             $this->default = 'null';
 
             return $this;

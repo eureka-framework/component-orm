@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Generator\Compiler;
 
 use Eureka\Component\Orm\Config\ConfigInterface;
+use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Compiler\Field\Field;
 
@@ -106,8 +107,8 @@ class JoinCompiler extends AbstractMethodCompiler
             if ($this->joinConfig['relation'] === 'many') {
                 $compiler        = new PropertyCompiler(
                     'joinManyCache' . $name,
-                    $className,
-                    $className,
+                    '?array',
+                    $className . '[]|EntityInterface[]|null',
                     'null'
                 );
 
@@ -118,8 +119,8 @@ class JoinCompiler extends AbstractMethodCompiler
             } else {
                 $compiler = new PropertyCompiler(
                     'joinOneCache' . $name,
-                    $className,
-                    $className,
+                    '?' . $className,
+                    $className . '|EntityInterface|null',
                     'null'
                 );
 
@@ -137,6 +138,9 @@ class JoinCompiler extends AbstractMethodCompiler
         $useMapperClassName = $config->getBaseNamespaceForMapper() . '\\' . $className . 'Mapper';
         $classUses[$useEntityClassName] = 'use ' . $useEntityClassName . ';';
         $classUses[$useMapperClassName] = 'use ' . $useMapperClassName . ';';
+
+        $classUses[EntityInterface::class] = 'use ' . EntityInterface::class . ';';
+
 
         $this->mainContext->add('entity.uses', $classUses);
 

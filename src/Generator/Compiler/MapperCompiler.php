@@ -115,7 +115,7 @@ class MapperCompiler extends AbstractClassCompiler
             $config = $join['instance'];
 
             if (!($config instanceof Config\ConfigInterface)) {
-                throw new GeneratorException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')');
+                throw new GeneratorException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'); // @codeCoverageIgnore
             }
 
             $joins [] = "
@@ -146,7 +146,7 @@ class MapperCompiler extends AbstractClassCompiler
             $config = $join['instance'];
 
             if (!($config instanceof Config\ConfigInterface)) {
-                throw new GeneratorException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')');
+                throw new GeneratorException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'); // @codeCoverageIgnore
             }
 
             $className = $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper';

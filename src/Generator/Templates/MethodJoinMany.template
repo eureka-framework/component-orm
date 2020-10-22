@@ -8,7 +8,7 @@
      */
     public function getAll{{ join.entity.name }}(bool $isForceReload = false): array
     {
-        if ($isForceReload || null === $this->joinManyCache{{ join.entity.name }}) {
+        if ($isForceReload || $this->joinManyCache{{ join.entity.name }} === null) {
             $mapper = $this->getRepository()->getMapper({{ join.entity.class }}Mapper::class);
             $this->joinManyCache{{ join.entity.name }} = $mapper->findAllByKeys([
                 {{ join.entity.keys }}
