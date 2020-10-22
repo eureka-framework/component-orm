@@ -19,20 +19,6 @@ namespace Eureka\Component\Orm\Generator\Type;
 interface TypeInterface
 {
     /**
-     * Get cast db string ((int), (bool)...)
-     *
-     * @return string
-     */
-    public function getCastDb(): string;
-
-    /**
-     * Get cast method string ((int), (bool)...)
-     *
-     * @return string
-     */
-    public function getCastMethod(): string;
-
-    /**
      * Get type string (int, bool...)
      *
      * @return string

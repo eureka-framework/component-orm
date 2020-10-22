@@ -48,22 +48,6 @@ abstract class TypeAbstract implements TypeInterface
     /**
      * @return string
      */
-    public function getCastDb(): string
-    {
-        return $this->castDb;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCastMethod(): string
-    {
-        return $this->castMethod;
-    }
-
-    /**
-     * @return string
-     */
     public function getAsString(): string
     {
         return $this->type;

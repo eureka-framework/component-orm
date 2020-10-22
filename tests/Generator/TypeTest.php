@@ -38,6 +38,17 @@ class TypeTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws GeneratorException
+     */
+    public function testIHaveAnExceptionWhenITryToGetTypeWithUnknownType()
+    {
+        $this->expectException(GeneratorException::class);
+        $this->expectExceptionMessage('Sql type cannot be converted into php type! (type: unknowntype)');
+        Type\Factory::create('unknowntype', '');
+    }
+
+    /**
      * @param string $sqlType
      * @return void
      * @throws GeneratorException
