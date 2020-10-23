@@ -38,8 +38,8 @@ trait SetTrait
     /**
      * Add set clause.
      *
-     * @param  string $field
-     * @param  string|int|null $value
+     * @param string $field
+     * @param string|int|null $value
      * @return self|QueryBuilderInterface
      */
     public function addSet(string $field, $value): QueryBuilderInterface

@@ -133,6 +133,18 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     public function select(SelectBuilder $queryBuilder): array;
 
     /**
+     * Select all rows corresponding of where clause.
+     * Use eager loading to select joined entities.
+     *
+     * @param Query\SelectBuilder $queryBuilder
+     * @param array $filters
+     * @return array
+     * @throws Exception\OrmException
+     * @throws Exception\UndefinedMapperException
+     */
+    public function selectJoin(Query\SelectBuilder $queryBuilder, array $filters = []): array;
+
+    /**
      * Select first rows corresponding to where clause.
      *
      * @param  SelectBuilder $queryBuilder

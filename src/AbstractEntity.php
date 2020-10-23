@@ -26,9 +26,6 @@ abstract class AbstractEntity implements EntityInterface
     /** @var bool $exists If data already exists in db for example. */
     private bool $exists = false;
 
-    /** @var bool $isDeleted If entity must be deleted instead of persist. */
-    private bool $isDeleted = false;
-
     /** @var array $updated List of updated field */
     private array $updated = [];
 

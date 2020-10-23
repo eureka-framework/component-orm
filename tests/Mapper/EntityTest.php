@@ -118,6 +118,9 @@ class EntityTest extends TestCase
         $this->assertTrue($user->isUpdated('id'));
         $this->assertTrue($user->isUpdated('dateUpdate'));
 
+        $this->assertTrue($repository->isEntityUpdated($user, 'user_id'));
+        $this->assertTrue($repository->isEntityUpdated($user, 'user_date_update'));
+
         $user->resetUpdated();
         $this->assertFalse($user->isUpdated());
         $this->assertFalse($user->isUpdated('id'));

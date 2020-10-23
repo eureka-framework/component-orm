@@ -60,8 +60,8 @@ trait GroupTrait
     {
         $fieldHaving = (0 < count($this->havingList) ? ' ' . $havingConcat . ' ' . $field : $field);
 
-        $bindName = $this->addBind($field, $value);
-        $this->havingList[] = $fieldHaving . ' ' . $sign . $bindName;
+        $bindName = $this->addBind($field, $value, true);
+        $this->havingList[] = $fieldHaving . ' ' . $sign . ' ' . $bindName;
 
         return $this;
     }
@@ -86,7 +86,7 @@ trait GroupTrait
         $return = '';
 
         if (0 < count($this->havingList)) {
-            $return =  'HAVING ';
+            $return =  ' HAVING ';
             foreach ($this->havingList as $having) {
                 $return .= $having . ' ';
             }

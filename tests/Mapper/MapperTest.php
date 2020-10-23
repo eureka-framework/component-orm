@@ -16,10 +16,14 @@ use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\AbstractMapper;
 use Eureka\Component\Orm\Exception\EntityNotExistsException;
 use Eureka\Component\Orm\Exception\OrmException;
+use Eureka\Component\Orm\Exception\UndefinedMapperException;
 use Eureka\Component\Orm\MapperInterface;
+use Eureka\Component\Orm\Query\QueryBuilder;
 use Eureka\Component\Orm\Query\SelectBuilder;
 use Eureka\Component\Orm\Tests\Generated\Entity\User;
 use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserParentMapper;
+use Eureka\Component\Orm\Tests\Generated\Repository\UserParentRepositoryInterface;
 use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
@@ -27,39 +31,12 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 /**
- * Class TypeTest
+ * Class MapperTest
  *
  * @author Romain Cottard
  */
 class MapperTest extends TestCase
 {
-    /**
-     * @return void
-     */
-    public function setUp(): void
-    {
-        //~ Entity
-        require_once __DIR__ . '/../Generated/Entity/Abstracts/AbstractUser.php';
-        require_once __DIR__ . '/../Generated/Entity/Abstracts/AbstractUserParent.php';
-        require_once __DIR__ . '/../Generated/Entity/Abstracts/AbstractAddress.php';
-        require_once __DIR__ . '/../Generated/Entity/User.php';
-        require_once __DIR__ . '/../Generated/Entity/UserParent.php';
-        require_once __DIR__ . '/../Generated/Entity/Address.php';
-
-        //~ Repository
-        require_once __DIR__ . '/../Generated/Repository/UserRepositoryInterface.php';
-        require_once __DIR__ . '/../Generated/Repository/UserParentRepositoryInterface.php';
-        require_once __DIR__ . '/../Generated/Repository/AddressRepositoryInterface.php';
-
-        //~ Mapper
-        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/Abstracts/AbstractUserMapper.php';
-        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/Abstracts/AbstractUserParentMapper.php';
-        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/Abstracts/AbstractAddressMapper.php';
-        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/UserMapper.php';
-        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/UserParentMapper.php';
-        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/AddressMapper.php';
-    }
-
     /**
      * @return void
      */
@@ -185,6 +162,7 @@ class MapperTest extends TestCase
         /** @var User $user */
         $user = $repository->findById(1);
         $this->assertEquals($expected, $user);
+        $this->assertSame(1, $repository->rowCount());
     }
 
     /**
@@ -235,12 +213,62 @@ class MapperTest extends TestCase
      */
     public function testICanFindEntitiesByKeys()
     {
-        $repository = $this->getUserRepositoryNoCache($this->getMockEntityFindAll(true));
+        $repository = $this->getUserRepositoryNoCache($this->getMockEntityFindAll());
 
         /** @var User $user */
         $users = $repository->findAllByKeys(['user_id' => 1]);
 
         $this->assertCount(2, $users);
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
+    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteQuery()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindAll(false), false);
+        $collection = $repository->query((new SelectBuilder($repository))->setListIndexedByField('user_email'));
+
+        $expected = [
+            'user@example.com' => $repository->newEntity(
+                (object) [
+                    'user_id'          => 1,
+                    'user_is_enabled'  => true,
+                    'user_email'       => 'user@example.com',
+                    'user_password'    => md5('password'),
+                    'user_date_create' => '2020-01-01 10:00:00',
+                    'user_date_update' => null,
+                ],
+                true
+            ),
+            'user02@example.com' => $repository->newEntity(
+                (object) [
+                    'user_id'          => 2,
+                    'user_is_enabled'  => true,
+                    'user_email'       => 'user02@example.com',
+                    'user_password'    => md5('password'),
+                    'user_date_create' => '2020-01-02 10:00:00',
+                    'user_date_update' => null,
+                ],
+                true
+            ),
+        ];
+
+        $this->assertEquals($expected, $collection);
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
+    public function testIHaveAnExceptionWhenITryToExecuteQueryAndIndexResultByNonExistingField()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindAll(false), false);
+
+        $this->expectException(OrmException::class);
+        $this->expectExceptionMessage('List is supposed to be indexed by a column that does not exist: unknown_field');
+        $collection = $repository->query((new SelectBuilder($repository))->setListIndexedByField('unknown_field'));
     }
 
     /**
@@ -256,6 +284,16 @@ class MapperTest extends TestCase
 
     /**
      * @return void
+     */
+    public function testICanCountRows()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindAll());
+
+        $this->assertSame(2, $repository->count(new QueryBuilder($repository)));
+    }
+
+    /**
+     * @return void
      * @throws OrmException
      */
     public function testICanCheckIfRowDoesNotExists()
@@ -266,19 +304,76 @@ class MapperTest extends TestCase
     }
 
     /**
+     * @return void
+     */
+    public function testICanGetMaxPrimaryKeyIdForARepository()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindId1());
+
+        $this->assertSame(1, $repository->getMaxId());
+    }
+
+    /**
+     * @return void
+     */
+    public function testIHaveAnExceptionWhenITryToGetMaxPrimaryKeyIdOnRepositoryWithMultiPrimaryKeys()
+    {
+        $repository = $this->getUserParentRepository($this->getMockEntityNone());
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot use getMaxId() method for table with multiple primary keys !');
+        $repository->getMaxId();
+    }
+
+    /**
+     * @return void
+     */
+    public function testIHaveAnExceptionWhenITryToGetNamesMapForNonExistingField()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityNone());
+
+        $this->expectException(\OutOfRangeException::class);
+        $this->expectExceptionMessage('Specified field does not exist in data names map');
+
+        $repository->getNamesMap('unknown_field');
+    }
+
+    /**
+     * @return void
+     */
+    public function testIHaveAnExceptionWhenITryToGetNonExistingMapper()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityNone());
+
+        $this->expectException(UndefinedMapperException::class);
+        $this->expectExceptionMessage('Mapper does not exist! (mapper: \Unknown\Mapper\ClassName)');
+
+        $repository->getMapper('\Unknown\Mapper\ClassName');
+    }
+
+
+    /**
      * @param array $entityMock
+     * @param bool $includeCacheMock
      * @return ConnectionFactory
      */
-    private function getConnectionFactoryMock(array $entityMock = []): ConnectionFactory
+    private function getConnectionFactoryMock(array $entityMock = [], bool $includeCacheMock = true): ConnectionFactory
     {
         if (empty($entityMock)) {
             $entityMock = $this->getMockEntityNone();
         }
 
+        if ($includeCacheMock) {
+            $count = (int) ((count($entityMock) - 4) / 4);
+        } else {
+            $count = (int) ((count($entityMock) - 2) / 2);
+        }
+
         $statementMock = $this->getMockBuilder(\PDOStatement::class)->getMock();
         $statementMock->method('execute')->willReturn(true);
-        $statementMock->method('rowCount')->willReturn(2);
+        $statementMock->method('rowCount')->willReturn($count);
         $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...$entityMock);
+        $statementMock->method('fetchColumn')->willReturn($count);
 
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();
         $connection  = $mockBuilder->getMock();
@@ -294,11 +389,12 @@ class MapperTest extends TestCase
 
     /**
      * @param array $entityMock
+     * @param bool $includeCacheMock
      * @return UserRepositoryInterface
      */
-    private function getUserRepository(array $entityMock = []): UserRepositoryInterface
+    private function getUserRepository(array $entityMock = [], bool $includeCacheMock = true): UserRepositoryInterface
     {
-        $connectionFactory = $this->getConnectionFactoryMock($entityMock);
+        $connectionFactory = $this->getConnectionFactoryMock($entityMock, $includeCacheMock);
         return new UserMapper(
             'common',
             $connectionFactory,
@@ -312,11 +408,27 @@ class MapperTest extends TestCase
 
     /**
      * @param array $entityMock
+     * @return UserParentRepositoryInterface
+     */
+    private function getUserParentRepository(array $entityMock = []): UserParentRepositoryInterface
+    {
+        $connectionFactory = $this->getConnectionFactoryMock($entityMock, false);
+        return new UserParentMapper(
+            'common',
+            $connectionFactory,
+            new ValidatorFactory(),
+            new ValidatorEntityFactory(new ValidatorFactory()),
+            []
+        );
+    }
+
+    /**
+     * @param array $entityMock
      * @return UserRepositoryInterface
      */
     private function getUserRepositoryNoCache(array $entityMock = []): UserRepositoryInterface
     {
-        $connectionFactory = $this->getConnectionFactoryMock($entityMock);
+        $connectionFactory = $this->getConnectionFactoryMock($entityMock, false);
         return new UserMapper(
             'common',
             $connectionFactory,
@@ -328,11 +440,18 @@ class MapperTest extends TestCase
         );
     }
 
+    /**
+     * @return false[]
+     */
     private function getMockEntityNone(): array
     {
         return [false];
     }
 
+    /**
+     * @param bool $includeCacheMock
+     * @return array
+     */
     private function getMockEntityFindId1(bool $includeCacheMock = true): array
     {
         $mock = [];
@@ -364,6 +483,10 @@ class MapperTest extends TestCase
         return array_merge($mock, $mock); // double for cache test
     }
 
+    /**
+     * @param bool $includeCacheMock
+     * @return array
+     */
     private function getMockEntityFindAll(bool $includeCacheMock = true): array
     {
         $mock = [];
@@ -404,5 +527,32 @@ class MapperTest extends TestCase
         );
 
         return array_merge($mock, $mock); // double for cache test
+    }
+
+    /**
+     * @return void
+     */
+    public function setUp(): void
+    {
+        //~ Entity
+        require_once __DIR__ . '/../Generated/Entity/Abstracts/AbstractUser.php';
+        require_once __DIR__ . '/../Generated/Entity/Abstracts/AbstractUserParent.php';
+        require_once __DIR__ . '/../Generated/Entity/Abstracts/AbstractAddress.php';
+        require_once __DIR__ . '/../Generated/Entity/User.php';
+        require_once __DIR__ . '/../Generated/Entity/UserParent.php';
+        require_once __DIR__ . '/../Generated/Entity/Address.php';
+
+        //~ Repository
+        require_once __DIR__ . '/../Generated/Repository/UserRepositoryInterface.php';
+        require_once __DIR__ . '/../Generated/Repository/UserParentRepositoryInterface.php';
+        require_once __DIR__ . '/../Generated/Repository/AddressRepositoryInterface.php';
+
+        //~ Mapper
+        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/Abstracts/AbstractUserMapper.php';
+        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/Abstracts/AbstractUserParentMapper.php';
+        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/Abstracts/AbstractAddressMapper.php';
+        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/UserMapper.php';
+        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/UserParentMapper.php';
+        require_once __DIR__ . '/../Generated/Infrastructure/Mapper/AddressMapper.php';
     }
 }

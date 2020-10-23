@@ -24,25 +24,25 @@ trait JoinTrait
     protected array $joinList = [];
 
     /**
-     * @param string $type
-     * @param string $table
-     * @param string $leftField
-     * @param string $leftPrefix
-     * @param string $rightField
-     * @param string $rightPrefix
-     * @return self|QueryBuilderInterface
+     * @param string $joinType
+     * @param string $joinTable
+     * @param string $mainField
+     * @param string $mainAlias
+     * @param string $joinField
+     * @param string $joinAlias
+     * @return $this|QueryBuilderInterface
      */
     public function addJoin(
-        string $type,
-        string $table,
-        string $leftField,
-        string $leftPrefix,
-        string $rightField,
-        string $rightPrefix
+        string $joinType,
+        string $joinTable,
+        string $mainField,
+        string $mainAlias,
+        string $joinField,
+        string $joinAlias
     ): QueryBuilderInterface {
 
-        $using    = 'ON ' . $leftPrefix . '.' . $leftField . ' = ' . $rightPrefix . '.' . $rightField;
-        $this->joinList[]  = ' ' . $type . ' JOIN ' . $table . ' AS ' . $rightPrefix . ' ' . $using;
+        $using    = 'ON ' . $mainAlias . '.' . $mainField . ' = ' . $joinAlias . '.' . $joinField;
+        $this->joinList[]  = ' ' . $joinType . ' JOIN ' . $joinTable . ' AS ' . $joinAlias . ' ' . $using;
 
         return $this;
     }

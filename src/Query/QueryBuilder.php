@@ -23,10 +23,11 @@ class QueryBuilder extends SelectBuilder
     /**
      * @param bool $usePrefix
      * @param string $prefix
+     * @param bool $onlyPrimaryKey
      * @return string
      * @throws EmptyWhereClauseException
      */
-    public function getQuery(bool $usePrefix = false, string $prefix = ''): string
+    public function getQuery(bool $usePrefix = false, string $prefix = '', bool $onlyPrimaryKey = false): string
     {
         return 'SELECT ' . $this->getQueryFieldsPersonalized() .
             $this->getQueryFromPersonalized() .
@@ -34,7 +35,8 @@ class QueryBuilder extends SelectBuilder
             $this->getQueryGroupBy() .
             $this->getQueryHaving() .
             $this->getQueryOrderBy() .
-            $this->getQueryLimit();
+            $this->getQueryLimit()
+        ;
     }
 
     /**
@@ -46,6 +48,10 @@ class QueryBuilder extends SelectBuilder
      */
     public function getQueryCount($field = '*')
     {
-        return 'SELECT COUNT(' . $field . ') AS NB_RESULTS ' . $this->getQueryFrom($this->repository) . ' ' . $this->getQueryWhere();
+        return 'SELECT COUNT(' . $field . ') AS nb_results' .
+            $this->getQueryFrom($this->repository) .
+            $this->getQueryWhere() .
+            $this->getQueryGroupBy()
+        ;
     }
 }

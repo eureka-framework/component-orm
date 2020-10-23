@@ -79,7 +79,7 @@ trait WhereTrait
         $fieldWhere = (0 < count($this->whereList) ? ' ' . $whereConcat . ' ' . $fieldWithPrefix : $fieldWithPrefix);
 
         if ($sign === 'REGEXP') {
-            $bindName = "'" . addslashes($value) . "'";
+            $bindName = " '" . addslashes($value) . "'";
         } else {
             $bindName = $this->addBind($field, $value, true);
         }

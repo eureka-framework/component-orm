@@ -99,12 +99,12 @@ trait ValidatorAwareTrait
     protected function validateInput(string $field, $data): void
     {
         if (empty($this->validationConfig[$field])) {
-            throw new ValidationException('No validation config defined for given field! (field: ' . $field . ')');
+            throw new ValidationException('No validation config defined for given field! (field: ' . $field . ')'); // @codeCoverageIgnore
         }
 
         $config = $this->validationConfig[$field];
         if (empty($config['type'])) {
-            throw new ValidationException('No validation type defined for given field! (field: ' . $field . ')');
+            throw new ValidationException('No validation type defined for given field! (field: ' . $field . ')'); // @codeCoverageIgnore
         }
 
         $validatorType    = $config['type'];
@@ -112,7 +112,7 @@ trait ValidatorAwareTrait
 
         if (strpos($validatorType, '\\') !== false) {
             //~ Custom class validator
-            $validator = new $validatorType();
+            $validator = new $validatorType(); // @codeCoverageIgnore
         } else {
             //~ Component type validator
             $validator = $this->getValidatorFactory()->getValidator($validatorType);

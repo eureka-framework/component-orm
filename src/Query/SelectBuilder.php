@@ -55,7 +55,7 @@ class SelectBuilder extends AbstractQueryBuilder
      * @return string
      * @throws EmptyWhereClauseException
      */
-    public function getQuery(bool $usePrefix = false, string $prefix = '', $onlyPrimaryKey = false): string
+    public function getQuery(bool $usePrefix = false, string $prefix = '', bool $onlyPrimaryKey = false): string
     {
         return 'SELECT ' . $this->getQueryFields($this->repository, $usePrefix, $onlyPrimaryKey) .
             $this->getQueryFrom($this->repository) .

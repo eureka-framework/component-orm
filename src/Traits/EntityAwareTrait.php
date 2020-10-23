@@ -147,14 +147,10 @@ trait EntityAwareTrait
      */
     public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?EntityInterface
     {
-        $entity = new $this->entityClass($this, $this->getValidatorFactory());
+        $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
         if (!($entity instanceof EntityInterface)) {
-            throw new \LogicException('Entity object is not an instance of AbstractData class!');
-        }
-
-        if (! ($row instanceof \stdClass)) {
-            return null;
+            throw new \LogicException('Entity object is not an instance of AbstractData class!'); // @codeCoverageIgnore
         }
 
         $data              = [];
@@ -165,6 +161,7 @@ trait EntityAwareTrait
             $suffixPosition = strrpos($field, $suffix);
             if (!empty($suffix) && $suffixPosition !== false) {
                 $field = substr($field, 0, $suffixPosition);
+
                 if ($type === JoinType::LEFT && $value !== null) {
                     $hasSomeJoinValues = true;
                 }
@@ -180,7 +177,7 @@ trait EntityAwareTrait
         foreach ($data as $field => $value) {
             try {
                 $this->setEntityValue($entity, $field, $value);
-            } catch (\TypeError $exception) {
+            } catch (\TypeError $exception) { // @codeCoverageIgnore
                 //~ Skip type error when data came from database
             }
         }
@@ -199,7 +196,7 @@ trait EntityAwareTrait
     public function isEntityUpdated(EntityInterface $entity, string $field): bool
     {
         if (!isset($this->entityNamesMap[$field]['property'])) {
-            throw new \DomainException('Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')');
+            throw new \DomainException('Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')'); // @codeCoverageIgnore
         }
 
         $property = $this->entityNamesMap[$field]['property'];

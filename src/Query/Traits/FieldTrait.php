@@ -88,11 +88,7 @@ trait FieldTrait
      */
     public function getQueryFieldsPersonalized(array $fields = []): string
     {
-        if (empty($fields) || !is_array($fields)) {
-            $fields = $this->fields;
-        }
-
-        if (!empty($fields) && is_array($fields)) {
+        if (!empty($fields)) {
             foreach ($fields as $field => $alias) {
                 $this->addField($field, $alias);
             }

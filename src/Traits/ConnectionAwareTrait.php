@@ -42,6 +42,7 @@ trait ConnectionAwareTrait
      *
      * @param  int|float|string|bool $value
      * @return string
+     * @codeCoverageIgnore
      */
     public function quote($value): string
     {
@@ -52,6 +53,7 @@ trait ConnectionAwareTrait
      * Start new transaction.
      *
      * @return void
+     * @codeCoverageIgnore
      */
     public function beginTransaction(): void
     {
@@ -62,6 +64,7 @@ trait ConnectionAwareTrait
      * Commit transactions.
      *
      * @return void
+     * @codeCoverageIgnore
      */
     public function commit(): void
     {
@@ -72,6 +75,7 @@ trait ConnectionAwareTrait
      * Rollback transactions.
      *
      * @return void
+     * @codeCoverageIgnore
      */
     public function rollBack(): void
     {
@@ -82,6 +86,7 @@ trait ConnectionAwareTrait
      * Check if we are in transaction or not.
      *
      * @return bool
+     * @codeCoverageIgnore
      */
     public function inTransaction(): bool
     {

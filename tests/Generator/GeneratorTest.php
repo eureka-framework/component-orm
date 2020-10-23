@@ -150,6 +150,21 @@ class GeneratorTest extends TestCase
                         ),
                     ],
                     [
+                        'SHOW FULL COLUMNS FROM comment',
+                        $this->getPDOStatementMock(
+                            [
+                                (object) ['Field' => 'comment_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
+                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                                (object) ['Field' => 'comment_text', 'Type' => 'varchar(140)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                                false,
+                                (object) ['Field' => 'comment_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
+                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                                (object) ['Field' => 'comment_text', 'Type' => 'varchar(140)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                                false,
+                            ]
+                        ),
+                    ],
+                    [
                         'SHOW FULL COLUMNS FROM user_parent',
                         $this->getPDOStatementMock(
                             [
@@ -237,7 +252,7 @@ class GeneratorTest extends TestCase
                         'config'        => 'address',
                         'relation'      => JoinRelation::MANY,
                         'type'          => JoinType::INNER,
-                        'keys'          => ['user_id' => true], // or ['user_id' => 'user_id'],
+                        'keys'          => ['user_id' => true],
                     ],
                     'UserParent' => [
                         'eager_loading' => false,
@@ -245,6 +260,13 @@ class GeneratorTest extends TestCase
                         'relation'      => JoinRelation::ONE,
                         'type'          => JoinType::INNER,
                         'keys'          => ['user_id' => 'user_id_parent'],
+                    ],
+                    'UserComment' => [
+                        'eager_loading' => true,
+                        'config'        => 'comment',
+                        'relation'      => JoinRelation::ONE,
+                        'type'          => JoinType::LEFT,
+                        'keys'          => ['user_id' => 'user_id'],
                     ],
                 ],
 
@@ -278,6 +300,38 @@ class GeneratorTest extends TestCase
                 ],
                 'class' => [
                     'classname'  => 'Address',
+                ],
+                'joins' => [],
+                'validation' => [
+                    'enabled'             => true,
+                    'auto'                => true,
+                    'extended_validation' => null,
+                ],
+            ],
+            'comment' => [
+                'comment' => [
+                    'author'    => 'Eureka Orm Generator',
+                    'copyright' => 'Test Author',
+                ],
+                'namespace' => [
+                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                ],
+                'path' => [
+                    'entity'     => __DIR__ . '/../Generated/Entity',
+                    'mapper'     => __DIR__ . '/../Generated/Infrastructure/Mapper',
+                    'repository' => __DIR__ . '/../Generated/Repository',
+                ],
+                'cache' => [
+                    'prefix'     => 'test.comment',
+                ],
+                'database' => [
+                    'table'      => 'comment',
+                    'prefix'     => ['comment'],
+                ],
+                'class' => [
+                    'classname'  => 'Comment',
                 ],
                 'joins' => [],
                 'validation' => [

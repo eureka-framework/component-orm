@@ -132,9 +132,7 @@ trait MapperTrait
     public function getMaxId(): int
     {
         if (count($this->primaryKeys) > 1) {
-            throw new \LogicException(
-                __METHOD__ . '|Cannot use getMaxId() method for table with multiple primary keys !'
-            );
+            throw new \LogicException('Cannot use getMaxId() method for table with multiple primary keys !');
         }
 
         $field = reset($this->primaryKeys);
@@ -214,13 +212,13 @@ trait MapperTrait
 
         $id = 0;
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
-            if ($indexedBy !== null && !isset($row->$indexedBy)) {
+            if (!empty($indexedBy) && !isset($row->{$indexedBy})) {
                 throw new Exception\OrmException(
                     'List is supposed to be indexed by a column that does not exist: ' . $indexedBy
                 );
             }
 
-            $index              = $indexedBy !== null ? $row->$indexedBy : $id++;
+            $index              = !empty($indexedBy) ? $row->{$indexedBy} : $id++;
             $collection[$index] = $this->newEntity($row, true);
         }
 
@@ -333,7 +331,7 @@ trait MapperTrait
                 if ($join['relation'] === JoinRelation::MANY) {
                     $setter = 'setAll' . $name;
                     $data->$setter($relations[$name][$hash]);
-                } else {
+                } elseif ($join['relation'] === JoinRelation::ONE && !empty($relations[$name][$hash])) {
                     $setter = 'set' . $name;
                     $data->$setter(reset($relations[$name][$hash]));
                 }

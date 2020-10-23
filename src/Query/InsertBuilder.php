@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query;
 
+use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\EmptySetClauseException;
 use Eureka\Component\Orm\Query\Traits;
 
@@ -47,9 +48,13 @@ class InsertBuilder extends AbstractQueryBuilder
      */
     public function getQuery(bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): string
     {
-        //~ Check for updated fields.
-        foreach ($this->repository->getFields() as $field) {
-            $this->addSet($field, $this->repository->getEntityValue($this->entity, $field));
+        //~ Build query automatically based on entity
+        if ($this->entity instanceof EntityInterface) {
+            $this->clear();
+
+            foreach ($this->repository->getFields() as $field) {
+                $this->addSet($field, $this->repository->getEntityValue($this->entity, $field));
+            }
         }
 
         $onDuplicateIgnoreClause = '';
@@ -71,7 +76,12 @@ class InsertBuilder extends AbstractQueryBuilder
      */
     private function appendUpdateValues(): QueryBuilderInterface
     {
-        //~ List of fields to update.
+        //~ if entity is not set, skip auto append update value
+        if ($this->entity === null) {
+            return $this;
+        }
+
+        //~ List of primary key to exclude from update.
         $primaryKeys = $this->repository->getPrimaryKeys();
 
         //~ Check for updated fields.
