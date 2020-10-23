@@ -342,5 +342,4 @@ class MapperJoinTest extends TestCase
         require_once __DIR__ . '/../Generated/Infrastructure/Mapper/AddressMapper.php';
         require_once __DIR__ . '/../Generated/Infrastructure/Mapper/CommentMapper.php';
     }
-
 }
