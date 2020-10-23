@@ -72,16 +72,6 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     public function rowCount(): int;
 
     /**
-     * Get value from EntityInterface instance based on field value
-     *
-     * @param  EntityInterface $entity
-     * @param  string $field
-     * @return mixed
-     * @throws \DomainException
-     */
-    public function getEntityValue(EntityInterface $entity, string $field);
-
-    /**
      * Return autoincrement id of the last insert query.
      *
      * @return int

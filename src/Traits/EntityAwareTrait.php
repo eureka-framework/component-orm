@@ -23,7 +23,7 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  */
 trait EntityAwareTrait
 {
-    /** @var string $entityClass Name of class use to instance DataMapper Data class. */
+    /** @var string $entityClass Name of class use to instance entity class. */
     protected string $entityClass = '';
 
     /** @var bool $ignoreNotMappedFields If true, does not throw an exception for not mapped fields (ie : COUNT()) in setDataValue */
@@ -69,10 +69,10 @@ trait EntityAwareTrait
      */
     public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface
     {
-        $entity = new $this->entityClass($this, $this->getValidatorFactory());
+        $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
         if (!($entity instanceof EntityInterface)) {
-            throw new \LogicException('Entity object is not an instance of EntityInterface class!');
+            throw new \LogicException('Entity object is not an instance of EntityInterface class!'); // @codeCoverageIgnore
         }
 
         if ($row instanceof \stdClass) {
@@ -116,11 +116,11 @@ trait EntityAwareTrait
      * Update entity from form data.
      * Form fields must be named as the entity properties name.
      *
-     * @param EntityInterface $data
+     * @param EntityInterface $entity
      * @param array $form
      * @return EntityInterface
      */
-    public function updateEntityFromArray(EntityInterface $data, array $form): EntityInterface
+    public function updateEntityFromArray(EntityInterface $entity, array $form): EntityInterface
     {
         foreach ($this->getFields() as $field) {
             $map = $this->getNamesMap($field);
@@ -129,10 +129,10 @@ trait EntityAwareTrait
                 continue;
             }
 
-            $this->setEntityValue($data, $field, $form[$map['property']]);
+            $this->setEntityValue($entity, $field, $form[$map['property']]);
         }
 
-        return $data;
+        return $entity;
     }
 
     /**
@@ -199,7 +199,7 @@ trait EntityAwareTrait
     public function isEntityUpdated(EntityInterface $entity, string $field): bool
     {
         if (!isset($this->entityNamesMap[$field]['property'])) {
-            throw new \DomainException('Cannot define field as updated: field have not mapping with Data instance (field: ' . $field . ')');
+            throw new \DomainException('Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')');
         }
 
         $property = $this->entityNamesMap[$field]['property'];
@@ -215,7 +215,7 @@ trait EntityAwareTrait
     public function getEntityValue(EntityInterface $entity, string $field)
     {
         if (!isset($this->entityNamesMap[$field]['get'])) {
-            throw new \DomainException('Cannot get field value: field have no mapping with Data instance (field: ' . $field . ')');
+            throw new \DomainException('Cannot get field value: field have no mapping with entity instance (field: ' . $field . ')');
         }
 
         $method = $this->entityNamesMap[$field]['get'];
@@ -257,7 +257,7 @@ trait EntityAwareTrait
                 return $this;
             }
 
-            throw new \DomainException('Field have not mapping with Data instance (field: ' . $field . ')');
+            throw new \DomainException('Field have not mapping with entity instance (field: ' . $field . ')');
         }
 
         $method = $this->entityNamesMap[$field]['set'];

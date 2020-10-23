@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Validation\Entity\GenericEntity;
-use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\Exception\ValidationException;
 use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
@@ -40,7 +39,7 @@ trait ValidatorAwareTrait
      */
     public function newGenericEntity(array $data = [], array $config = []): GenericEntity
     {
-        return $this->validatorEntityFactory->createGeneric($config ?? $this->getValidatorConfig(), $data);
+        return $this->getValidatorEntityFactory()->createGeneric(!empty($config) ?: $this->getValidatorConfig(), $data);
     }
 
     /**

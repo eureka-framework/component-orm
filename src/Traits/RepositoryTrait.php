@@ -33,9 +33,11 @@ trait RepositoryTrait
     public function findById(int $id)
     {
         if (count($this->getPrimaryKeys()) > 1) {
+            // @codeCoverageIgnoreStart
             throw new \LogicException(
                 __METHOD__ . '|Cannot use findById() method for table with multiple primary keys !'
             );
+            // @codeCoverageIgnoreEnd
         }
 
         $primaryKeys = $this->getPrimaryKeys();
@@ -101,7 +103,7 @@ trait RepositoryTrait
 
         //~ Clear
         $queryBuilder->clear();
-        $this->deleteCacheEntity($entity);
+        $this->deleteCacheEntity($entity->getCacheKey());
 
         return (bool) $result;
     }
@@ -134,9 +136,11 @@ trait RepositoryTrait
         $statement->execute($queryBuilder->getBind());
 
         if ($onDuplicateIgnore && $statement->rowCount() === 0) {
+            // @codeCoverageIgnoreStart
             throw new Exception\InsertFailedException(
                 __METHOD__ . 'INSERT IGNORE could not insert (duplicate key or error)'
             );
+            // @codeCoverageIgnoreEnd
         }
 
         //~ If has auto increment key (commonly, is a primary key), set value
@@ -153,7 +157,7 @@ trait RepositoryTrait
 
         //~ Clear
         $queryBuilder->clear();
-        $this->deleteCacheEntity($entity);
+        $this->deleteCacheEntity($entity->getCacheKey());
 
         return true;
     }
@@ -183,7 +187,7 @@ trait RepositoryTrait
 
         //~ Clear
         $queryBuilder->clear();
-        $this->deleteCacheEntity($entity);
+        $this->deleteCacheEntity($entity->getCacheKey());
 
         return $result;
     }

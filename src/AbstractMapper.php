@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm;
 
 use Eureka\Component\Database\Connection;
+use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\Traits;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
@@ -40,7 +41,8 @@ abstract class AbstractMapper implements RepositoryInterface
     /**
      * AbstractMapper constructor.
      *
-     * @param Connection $connection
+     * @param string $connectionName
+     * @param ConnectionFactory $connectionFactory
      * @param ValidatorFactoryInterface|null $validatorFactory
      * @param ValidatorEntityFactory|null $validatorEntityFactory
      * @param array $mappers
@@ -48,14 +50,16 @@ abstract class AbstractMapper implements RepositoryInterface
      * @param bool $enableCacheOnRead
      */
     public function __construct(
-        Connection $connection,
+        string $connectionName,
+        ConnectionFactory $connectionFactory,
         ValidatorFactoryInterface $validatorFactory = null,
         ValidatorEntityFactory $validatorEntityFactory = null,
         $mappers = [],
         CacheItemPoolInterface $cache = null,
         $enableCacheOnRead = false
     ) {
-        $this->setConnection($connection);
+        $this->setConnectionName($connectionName);
+        $this->setConnectionFactory($connectionFactory);
         $this->setCache($cache);
         $this->setValidatorFactories($validatorFactory, $validatorEntityFactory);
 
@@ -77,6 +81,8 @@ abstract class AbstractMapper implements RepositoryInterface
      * @param int $batchSize
      * @return void
      * @throws Exception\OrmException
+     *
+     * @codeCoverageIgnore
      */
     public function apply(
         callable $callback,
@@ -90,15 +96,15 @@ abstract class AbstractMapper implements RepositoryInterface
             throw new \UnexpectedValueException(__METHOD__ . ' | The key must be a primary key.');
         }
 
-        $statement = $this->connection->prepare(
-            'SELECT MIN(' . $key . ') AS MIN, MAX(' . $key . ') AS MAX FROM ' . $this->getTable()
+        $statement = $this->getConnection()->prepare(
+            'SELECT MIN(' . $key . ') AS min_value, MAX(' . $key . ') AS max_value FROM ' . $this->getTable()
         );
         $statement->execute();
 
         $bounds = $statement->fetch(Connection::FETCH_OBJ);
 
-        $minIndex          = max($start, $bounds->MIN);
-        $maxIndex          = $end < 0 ? $bounds->MAX : min($end, $bounds->MAX);
+        $minIndex          = max($start, $bounds->min_value);
+        $maxIndex          = $end < 0 ? $bounds->max_value : min($end, $bounds->max_value);
         $currentBatchIndex = $minIndex;
 
         while ($currentBatchIndex <= $maxIndex) {

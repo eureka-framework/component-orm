@@ -21,11 +21,6 @@ use Eureka\Component\Validation\Entity\GenericEntity;
 interface EntityInterface
 {
     /**
-     * @return bool
-     */
-    public function hasAutoIncrement(): bool;
-
-    /**
      * Set auto increment value.
      * Must be overridden to use internal property setter method, according to the data class definition.
      *

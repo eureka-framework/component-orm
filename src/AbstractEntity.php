@@ -23,9 +23,6 @@ abstract class AbstractEntity implements EntityInterface
 {
     use ValidatorAwareTrait;
 
-    /** @var bool $hasAutoIncrement If data has auto increment value. */
-    private bool $hasAutoIncrement = false;
-
     /** @var bool $exists If data already exists in db for example. */
     private bool $exists = false;
 
@@ -51,20 +48,11 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @param  int $id
      * @return $this
+     * @codeCoverageIgnore
      */
     public function setAutoIncrementId(int $id)
     {
         return $this;
-    }
-
-    /**
-     * If the dataset is new.
-     *
-     * @return bool
-     */
-    public function hasAutoIncrement(): bool
-    {
-        return $this->hasAutoIncrement;
     }
 
     /**
@@ -88,29 +76,6 @@ abstract class AbstractEntity implements EntityInterface
         $this->exists = (bool) $exists;
 
         return $this;
-    }
-
-    /**
-     * Flag entity as deleted.
-     *
-     * @param  bool $isDeleted
-     * @return $this
-     */
-    public function setIsDeleted(bool $isDeleted): EntityInterface
-    {
-        $this->isDeleted = (bool) $isDeleted;
-
-        return $this;
-    }
-
-    /**
-     * If entity is flagged as deleted.
-     *
-     * @return bool
-     */
-    public function isDeleted(): bool
-    {
-        return $this->isDeleted;
     }
 
     /**
@@ -181,7 +146,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function getGenericEntity()
     {
-        $genericEntity = $this->newGenericEntity([], $this->getValidatorConfig());
+        $genericEntity = $this->newGenericEntity([]);
         $repository    = $this->getRepository();
 
         foreach ($repository->getFields() as $field) {

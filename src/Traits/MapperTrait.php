@@ -283,7 +283,7 @@ trait MapperTrait
 
         if ($this->isCacheEnabledOnRead) {
             /** @var AbstractMapper $this */
-            $collection = $this->selectFromCache($this->connection, $this, $queryBuilder);
+            $collection = $this->selectFromCache($this->getConnection(), $this, $queryBuilder);
         }
 
         if ($this->cacheSkipMissingItemQuery) {
@@ -303,7 +303,7 @@ trait MapperTrait
             /** @var EntityInterface $entity */
             $entity                             = $this->newEntity($row, true);
             $collection[$entity->getCacheKey()] = $entity;
-            $this->setCacheEntity($entity);
+            $this->setCacheEntity($entity->getCacheKey(), $row);
         }
 
         $queryBuilder->clear();

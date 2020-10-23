@@ -90,14 +90,14 @@ trait CacheAwareTrait
         Query\SelectBuilder $queryBuilder
     ): array {
         if (!$this->isCacheEnabledOnRead) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         if (count($mapper->getPrimaryKeys()) === 0) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
-        $statement = $connection->prepare($queryBuilder->getQuery());
+        $statement = $connection->prepare($queryBuilder->getQuery(false, '', true));
         $statement->execute($queryBuilder->getBind());
 
         $queryBuilder->clear(true);
@@ -109,17 +109,14 @@ trait CacheAwareTrait
         $collection       = [];
 
         while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
-
             /** @var EntityInterface $entityIdInstance */
             $entityIdInstance = $mapper->newEntity($row, true);
 
             //~ Pre-fill collection to keep the order
             $collection[$entityIdInstance->getCacheKey()] = null;
 
-            $entity = $this->getCacheEntity($entityIdInstance);
-            if ($entity === null) {
-                $this->cacheSkipMissingItemQuery = true;
-
+            $entityRow = $this->getCacheEntity($entityIdInstance->getCacheKey());
+            if ($entityRow === null) {
                 $values = $mapper->getEntityPrimaryKeysValues($entityIdInstance);
                 if ($hasOnePrimaryKey) {
                     $addIn[] = current($values);
@@ -127,12 +124,17 @@ trait CacheAwareTrait
                     $queryBuilder->addWhereKeysOr($values);
                 }
             } else {
-                $collection[$entityIdInstance->getCacheKey()] = $entity;
+                $collection[$entityIdInstance->getCacheKey()] = $mapper->newEntity($entityRow, true);
             }
         }
 
         if (!empty($addIn) && !empty($values)) {
             $queryBuilder->addIn(key($values), $addIn);
+        }
+
+        //~ When retrieve all data from cache, skip missing cache item query.
+        if (count(array_filter($collection)) === count($collection)) {
+            $this->cacheSkipMissingItemQuery = true;
         }
 
         return $collection;
@@ -141,20 +143,20 @@ trait CacheAwareTrait
     /**
      * Get Data object from cache if is enabled.
      *
-     * @param  EntityInterface $entity
-     * @return null|EntityInterface
+     * @param string $cacheKey
+     * @return null|\stdClass
      * @throws OrmException
      */
-    protected function getCacheEntity(EntityInterface $entity): ?EntityInterface
+    protected function getCacheEntity(string $cacheKey): ?\stdClass
     {
         if (!$this->isCacheEnabledOnRead) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         try {
-            $cacheItem = $this->cache->getItem($entity->getCacheKey());
-        } catch (InvalidArgumentException $exception) {
-            throw new OrmException('Cannot delete cache', $exception->getCode(), $exception);
+            $cacheItem = $this->cache->getItem($cacheKey);
+        } catch (InvalidArgumentException $exception) { // @codeCoverageIgnore
+            throw new OrmException('Cannot delete cache', $exception->getCode(), $exception); // @codeCoverageIgnore
         }
 
         return $cacheItem->get();
@@ -163,20 +165,20 @@ trait CacheAwareTrait
     /**
      * Delete cache
      *
-     * @param  EntityInterface $entity
+     * @param string $cacheKey
      * @return self|RepositoryInterface
      * @throws OrmException
      */
-    protected function deleteCacheEntity(EntityInterface $entity): RepositoryInterface
+    protected function deleteCacheEntity(string $cacheKey): RepositoryInterface
     {
         if (!$this->cache instanceof CacheItemPoolInterface) {
             return $this;
         }
 
         try {
-            $this->cache->deleteItem($entity->getCacheKey());
-        } catch (InvalidArgumentException $exception) {
-            throw new OrmException('Cannot delete cache', $exception->getCode(), $exception);
+            $this->cache->deleteItem($cacheKey);
+        } catch (InvalidArgumentException $exception) { // @codeCoverageIgnore
+            throw new OrmException('Cannot delete cache', $exception->getCode(), $exception); // @codeCoverageIgnore
         }
 
         return $this;
@@ -185,24 +187,23 @@ trait CacheAwareTrait
     /**
      * Set data into cache if enabled.
      *
-     * @param  EntityInterface $entity
+     * @param string $cacheKey
+     * @param \stdClass $row
      * @return self|RepositoryInterface
      * @throws OrmException
      */
-    protected function setCacheEntity(EntityInterface $entity): RepositoryInterface
+    protected function setCacheEntity(string $cacheKey, \stdClass $row): RepositoryInterface
     {
         if (!$this->cache instanceof CacheItemPoolInterface) {
             return $this;
         }
 
         try {
-            $cacheItem = $this->cache->getItem($entity->getCacheKey());
-
-            $cacheItem->set($entity);
-
+            $cacheItem = $this->cache->getItem($cacheKey);
+            $cacheItem->set($row);
             $this->cache->save($cacheItem);
-        } catch (InvalidArgumentException $exception) {
-            throw new OrmException('Cannot save cache', $exception->getCode(), $exception);
+        } catch (InvalidArgumentException $exception) { // @codeCoverageIgnore
+            throw new OrmException('Cannot save cache', $exception->getCode(), $exception); // @codeCoverageIgnore
         }
 
         return $this;

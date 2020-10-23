@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Database\Connection;
+use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\RepositoryInterface;
 
 /**
@@ -21,15 +22,19 @@ use Eureka\Component\Orm\RepositoryInterface;
  */
 trait ConnectionAwareTrait
 {
-    /** @var Connection $connection Connection instance */
-    protected Connection $connection;
+    /** @var ConnectionFactory $connectionFactory Connection factory instance */
+    private ConnectionFactory $connectionFactory;
+
+    /** @var string $name Connection name */
+    private string $name;
 
     /**
+     * @param bool $forceReconnection
      * @return Connection
      */
-    public function getConnection(): Connection
+    public function getConnection(bool $forceReconnection = false): Connection
     {
-        return $this->connection;
+        return $this->connectionFactory->getConnection($this->name, $forceReconnection);
     }
 
     /**
@@ -40,7 +45,7 @@ trait ConnectionAwareTrait
      */
     public function quote($value): string
     {
-        return $this->connection->quote($value);
+        return $this->getConnection()->quote($value);
     }
 
     /**
@@ -50,7 +55,7 @@ trait ConnectionAwareTrait
      */
     public function beginTransaction(): void
     {
-        $this->connection->beginTransaction();
+        $this->getConnection()->beginTransaction();
     }
 
     /**
@@ -60,7 +65,7 @@ trait ConnectionAwareTrait
      */
     public function commit(): void
     {
-        $this->connection->commit();
+        $this->getConnection()->commit();
     }
 
     /**
@@ -70,7 +75,7 @@ trait ConnectionAwareTrait
      */
     public function rollBack(): void
     {
-        $this->connection->rollBack();
+        $this->getConnection()->rollBack();
     }
 
     /**
@@ -80,16 +85,27 @@ trait ConnectionAwareTrait
      */
     public function inTransaction(): bool
     {
-        return $this->connection->inTransaction();
+        return $this->getConnection()->inTransaction();
     }
 
     /**
-     * @param Connection $connection
+     * @param ConnectionFactory $connectionFactory
      * @return self|RepositoryInterface
      */
-    protected function setConnection(Connection $connection): RepositoryInterface
+    protected function setConnectionFactory(ConnectionFactory $connectionFactory): RepositoryInterface
     {
-        $this->connection = $connection;
+        $this->connectionFactory = $connectionFactory;
+
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return $this|RepositoryInterface
+     */
+    protected function setConnectionName(string $name): RepositoryInterface
+    {
+        $this->name = $name;
 
         return $this;
     }
