@@ -141,7 +141,7 @@ parameters:
 ~/path/to/your/project/$ bin/console Orm/Script/Generator
 ```
 
-> /!\ This command require to have "eureka/eurekon" installed & bin/console script in your application (with a kernel-console) 
+> /!\ This command require to have "eureka/component-console" installed & bin/console script in your application (with a kernel-console) 
 
 ## Entity
  Entities are "reflection" of the table data. When you retrieve data from database, each entity is representation of one
