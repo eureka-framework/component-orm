@@ -299,7 +299,7 @@ class Field
 
         switch ((string) $this->getType()) {
             case 'string':
-                $this->default = "'" . $default . "'";
+                $this->default = "'" . trim($default, "'") . "'";
                 break;
             case 'bool':
                 $this->default = var_export((bool) $default, true);

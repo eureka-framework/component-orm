@@ -42,9 +42,8 @@ class Generator extends Console\AbstractScript
     public function help(): void
     {
         $help = new Console\Help('...');
-        $help->addArgument('', 'config-dir', 'Config directory to inspect for config file', true, true);
-        $help->addArgument('', 'config-item', 'Config name in config file to generate.', true, false);
-        $help->addArgument('', 'db-service', 'Database service name (default: database.connection.common)', true, false);
+        $help->addArgument('', 'config-name', 'Generate config only for given config name', true, false);
+        $help->addArgument('', 'connection-name', 'Name of the connection to use for generation (default: common)', true, false);
         $help->addArgument('', 'without-repository', 'Do not generate repository interfaces', false, false);
 
         $help->display();
@@ -56,15 +55,15 @@ class Generator extends Console\AbstractScript
      */
     public function run(): void
     {
-        $argument      = Console\Argument\Argument::getInstance();
-        $configName    = (string) trim((string) $argument->get('config-item'));
-        $dbServiceName = (string) $argument->get('db-service', null, 'database.connection.common');
+        $argument       = Console\Argument\Argument::getInstance();
+        $configName     = (string) trim((string) $argument->get('config-name'));
+        $connectionName = (string) $argument->get('connection-name', null, 'common');
 
         /** @var ContainerInterface $container */
         $container = $this->getContainer();
 
         /** @var Connection $connection */
-        $connection = $container->get($dbServiceName);
+        $connection = $container->get('database.factory')->getConnection($connectionName);
         $configList = $container->getParameter('orm.configs');
 
         $generator = new GeneratorService();
