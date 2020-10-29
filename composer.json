@@ -28,15 +28,15 @@
   "require": {
     "php": ">=7.4.0",
 
-    "eureka/component-database": "@dev",
-    "eureka/component-validation": "@dev",
+    "eureka/component-database": "^3.0",
+    "eureka/component-validation": "^5.0",
 
     "psr/cache": "^1.0",
     "psr/log": "^1.1"
   },
 
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "^v0.6",
+    "dealerdirect/phpcodesniffer-composer-installer": "^v0.7",
     "phpcompatibility/php-compatibility": "^9.3",
     "phpunit/phpcov": "^8.2.0",
     "phpunit/phpunit": "^9.4.0",

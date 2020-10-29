@@ -5,11 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [5.0.0] - 2020 (unreleased)
+## [5.0.0] - 2020-10-29
 ### Changed
  * New require PHP 7.4+
  * All collections now use an abstract class (menu, breadcrumb, carousel & notifications)
  * Minor fixed & improvements
+ * Upgrade phpcodesniffer to v0.7 for composer 2.0
 ### Added
  * Session + trait for controller
  * Global collection abstract class
