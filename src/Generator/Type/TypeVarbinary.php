@@ -26,7 +26,7 @@ class TypeVarbinary extends TypeAbstract
         $this->type          = 'string';
         $this->castDb        = '(string)';
         $this->castMethod    = '(string)';
-        $this->emptyValue    = 'null';
+        $this->emptyValue    = "''";
         $this->validatorType = 'string';
     }
 }

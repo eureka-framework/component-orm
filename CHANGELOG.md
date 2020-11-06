@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [5.0.1] - 2020-11-06
+### Changed
+ * Fix empty value with varbinary fields (must be an empty string when field is not nullable)
+
 ## [5.0.0] - 2020-10-29
 ### Changed
  * Now require PHP 7.4
