@@ -27,6 +27,7 @@
 
   "require": {
     "php": ">=7.4.0",
+    "ext-pdo": "*",
 
     "eureka/component-database": "^3.0",
     "eureka/component-validation": "^5.0",
