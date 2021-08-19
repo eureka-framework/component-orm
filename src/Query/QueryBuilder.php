@@ -43,10 +43,10 @@ class QueryBuilder extends SelectBuilder
      * Count number of results for query.
      *
      * @param string $field
-     * @return int
+     * @return string
      * @throws
      */
-    public function getQueryCount($field = '*')
+    public function getQueryCount(string $field = '*'): string
     {
         return 'SELECT COUNT(' . $field . ') AS nb_results' .
             $this->getQueryFrom($this->repository) .

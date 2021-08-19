@@ -28,6 +28,8 @@ trait ConnectionAwareTrait
     /** @var string $name Connection name */
     private string $name;
 
+    private bool $inTransaction = false;
+
     /**
      * @param bool $forceReconnection
      * @return Connection
@@ -58,6 +60,7 @@ trait ConnectionAwareTrait
     public function beginTransaction(): void
     {
         $this->getConnection()->beginTransaction();
+        $this->inTransaction = true;
     }
 
     /**
@@ -69,6 +72,7 @@ trait ConnectionAwareTrait
     public function commit(): void
     {
         $this->getConnection()->commit();
+        $this->inTransaction = false;
     }
 
     /**
@@ -80,6 +84,7 @@ trait ConnectionAwareTrait
     public function rollBack(): void
     {
         $this->getConnection()->rollBack();
+        $this->inTransaction = false;
     }
 
     /**
@@ -113,5 +118,63 @@ trait ConnectionAwareTrait
         $this->name = $name;
 
         return $this;
+    }
+
+    /**
+     * @param string $query
+     * @param array|null $bind
+     * @return \PDOStatement
+     */
+    protected function execute(string $query, ?array $bind = null): \PDOStatement
+    {
+        $connection = $this->getConnection();
+        try {
+            $statement = $connection->prepare($query);
+            $statement->execute($bind);
+        } catch (\PDOException $exception) {
+            if (!$this->isConnectionLost($exception)) {
+                throw $exception;
+            }
+
+            //~ Force reconnection
+            $connection = $this->getConnection(true);
+            $statement  = $connection->prepare($query);
+            $statement->execute($bind);
+        }
+
+        return $statement;
+    }
+
+    /**
+     * @param string $query
+     * @param array|null $bind
+     * @return bool
+     */
+    protected function executeWithResult(string $query, ?array $bind = null): bool
+    {
+        $connection = $this->getConnection();
+        try {
+            $statement = $connection->prepare($query);
+            return $statement->execute($bind);
+        } catch (\PDOException $exception) {
+            if (!$this->isConnectionLost($exception)) {
+                throw $exception;
+            }
+
+            //~ Force reconnection
+            $connection = $this->getConnection(true);
+            $statement  = $connection->prepare($query);
+            return $statement->execute($bind);
+        }
+    }
+
+    /**
+     * @param \PDOException $exception
+     * @return bool
+     */
+    protected function isConnectionLost(\PDOException $exception): bool
+    {
+        // Only keep SQLState HY000 with ErrorCode 2006 | 2013 (MySQL server has gone away)
+        return ($exception->errorInfo[0] === 'HY000' && in_array($exception->errorInfo[1], [2006, 2013]));
     }
 }

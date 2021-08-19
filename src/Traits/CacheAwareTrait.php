@@ -17,6 +17,7 @@ use Eureka\Component\Orm\Exception\InvalidQueryException;
 use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\RepositoryInterface;
+use PDO;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 
@@ -77,7 +78,6 @@ trait CacheAwareTrait
      * Try to get all entities from cache.
      * Return list of entities (for found) / null (for not found in cache)
      *
-     * @param Connection $connection
      * @param RepositoryInterface $mapper
      * @param Query\SelectBuilder $queryBuilder
      * @return array
@@ -85,7 +85,6 @@ trait CacheAwareTrait
      * @throws OrmException
      */
     protected function selectFromCache(
-        Connection $connection,
         RepositoryInterface $mapper,
         Query\SelectBuilder $queryBuilder
     ): array {
@@ -97,8 +96,7 @@ trait CacheAwareTrait
             return []; // @codeCoverageIgnore
         }
 
-        $statement = $connection->prepare($queryBuilder->getQuery(false, '', true));
-        $statement->execute($queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery(false, '', true), $queryBuilder->getBind());
 
         $queryBuilder->clear(true);
 
@@ -108,7 +106,7 @@ trait CacheAwareTrait
         $hasOnePrimaryKey = count($mapper->getPrimaryKeys()) === 1;
         $collection       = [];
 
-        while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
+        while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
             /** @var EntityInterface $entityIdInstance */
             $entityIdInstance = $mapper->newEntity($row, true);
 

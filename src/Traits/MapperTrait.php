@@ -11,13 +11,13 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\AbstractMapper;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Exception;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\RepositoryInterface;
+use PDO;
 
 /**
  * DataMapper Mapper abstract class.
@@ -137,13 +137,11 @@ trait MapperTrait
 
         $field = reset($this->primaryKeys);
 
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
+        $query     = 'SELECT MAX(' . $field . ') AS ' . $field . ' FROM ' . $this->getTable();
 
-        $statement = $connection->prepare('SELECT MAX(' . $field . ') AS ' . $field . ' FROM ' . $this->getTable());
-        $statement->execute();
+        $statement = $this->execute($query);
 
-        return $statement->fetch(Connection::FETCH_OBJ)->{$field};
+        return $statement->fetch(PDO::FETCH_OBJ)->{$field};
     }
 
     /**
@@ -163,11 +161,7 @@ trait MapperTrait
      */
     public function count(Query\QueryBuilder $queryBuilder, string $field = '*'): int
     {
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
-
-        $statement = $connection->prepare($queryBuilder->getQueryCount($field));
-        $statement->execute($queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQueryCount($field), $queryBuilder->getBind());
 
         $queryBuilder->clear();
 
@@ -198,20 +192,15 @@ trait MapperTrait
      */
     public function query(Query\QueryBuilderInterface $queryBuilder): array
     {
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
-
-        /** @var Connection $this ->connection */
         $indexedBy = $queryBuilder->getListIndexedByField();
-        $statement = $connection->prepare($queryBuilder->getQuery());
-        $statement->execute($queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
 
         $collection = [];
 
         $queryBuilder->clear();
 
         $id = 0;
-        while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
+        while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
             if (!empty($indexedBy) && !isset($row->{$indexedBy})) {
                 throw new Exception\OrmException(
                     'List is supposed to be indexed by a column that does not exist: ' . $indexedBy
@@ -232,17 +221,13 @@ trait MapperTrait
      */
     public function queryRows(Query\QueryBuilderInterface $queryBuilder): array
     {
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
-
-        $statement = $connection->prepare($queryBuilder->getQuery());
-        $statement->execute($queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
 
         $queryBuilder->clear();
 
         $collection = [];
 
-        while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
+        while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
             $collection[] = $row;
         }
 
@@ -281,7 +266,7 @@ trait MapperTrait
 
         if ($this->isCacheEnabledOnRead) {
             /** @var AbstractMapper $this */
-            $collection = $this->selectFromCache($this->getConnection(), $this, $queryBuilder);
+            $collection = $this->selectFromCache($this, $queryBuilder);
         }
 
         if ($this->cacheSkipMissingItemQuery) {
@@ -291,14 +276,9 @@ trait MapperTrait
             return $collection;
         }
 
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
+        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
 
-        $statement = $connection->prepare($queryBuilder->getQuery());
-        $statement->execute($queryBuilder->getBind());
-
-        while (false !== ($row = $statement->fetch(Connection::FETCH_OBJ))) {
-            /** @var EntityInterface $entity */
+        while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
             $entity                             = $this->newEntity($row, true);
             $collection[$entity->getCacheKey()] = $entity;
             $this->setCacheEntity($entity->getCacheKey(), $row);
@@ -408,7 +388,7 @@ trait MapperTrait
      * @param  array $filters
      * @return array
      */
-    private function getJoinsConfig(array $filters = [])
+    private function getJoinsConfig(array $filters = []): array
     {
         $joins = [];
 

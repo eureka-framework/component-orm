@@ -27,8 +27,11 @@ use Eureka\Component\Orm\Tests\Generated\Repository\UserParentRepositoryInterfac
 use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
+use PHPUnit\Framework\MockObject\Stub\Exception;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+
+use function PHPUnit\Framework\exactly;
 
 /**
  * Class MapperTest
@@ -268,7 +271,7 @@ class MapperTest extends TestCase
 
         $this->expectException(OrmException::class);
         $this->expectExceptionMessage('List is supposed to be indexed by a column that does not exist: unknown_field');
-        $collection = $repository->query((new SelectBuilder($repository))->setListIndexedByField('unknown_field'));
+        $repository->query((new SelectBuilder($repository))->setListIndexedByField('unknown_field'));
     }
 
     /**
@@ -316,6 +319,33 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
+    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQuery()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindId1(), true, 2006);
+
+        $this->assertSame(1, $repository->getMaxId());
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
+    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQueryWithResult()
+    {
+        $entities = $this->getMockEntityFindId1();
+        $repository = $this->getUserRepository($entities, true, 2006);
+
+        /** @var User $entity */
+        $entity = $repository->newEntity($entities[2], true);
+        $entity->setExists(true);
+        $entity->setEmail('new@email.com');
+
+        $this->assertTrue($repository->persist($entity));
+    }
+
+    /**
+     * @return void
+     */
     public function testIHaveAnExceptionWhenITryToGetMaxPrimaryKeyIdOnRepositoryWithMultiPrimaryKeys()
     {
         $repository = $this->getUserParentRepository($this->getMockEntityNone());
@@ -351,14 +381,50 @@ class MapperTest extends TestCase
         $repository->getMapper('\Unknown\Mapper\ClassName');
     }
 
+    /**
+     * @return void
+     * @throws EntityNotExistsException
+     * @throws OrmException
+     */
+    public function testIHaveAnExceptionWhenITryToGetQueryWithAnError()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindId1(), false, 1);
+
+        $this->expectException(\PDOException::class);
+
+        $repository->findById(1);
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
+    public function testIHaveAnExceptionWhenITryToGetQueryWithResultWithAnError()
+    {
+        $entities = $this->getMockEntityFindId1();
+        $repository = $this->getUserRepository($entities, true, 1);
+
+        /** @var User $entity */
+        $entity = $repository->newEntity($entities[2], true);
+        $entity->setExists(true);
+        $entity->setEmail('new@email.com');
+
+        $this->expectException(\PDOException::class);
+
+        $repository->persist($entity);
+    }
 
     /**
      * @param array $entityMock
      * @param bool $includeCacheMock
+     * @param int $exceptionCode
      * @return ConnectionFactory
      */
-    private function getConnectionFactoryMock(array $entityMock = [], bool $includeCacheMock = true): ConnectionFactory
-    {
+    private function getConnectionFactoryMock(
+        array $entityMock = [],
+        bool $includeCacheMock = true,
+        int $exceptionCode = 0
+    ): ConnectionFactory {
         if (empty($entityMock)) {
             $entityMock = $this->getMockEntityNone();
         }
@@ -370,10 +436,21 @@ class MapperTest extends TestCase
         }
 
         $statementMock = $this->getMockBuilder(\PDOStatement::class)->getMock();
-        $statementMock->method('execute')->willReturn(true);
         $statementMock->method('rowCount')->willReturn($count);
         $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...$entityMock);
         $statementMock->method('fetchColumn')->willReturn($count);
+
+        if ($exceptionCode > 0) {
+            $exception = new \PDOException('Exception', $exceptionCode);
+            $exception->errorInfo = [0 => 'HY000', 1 => $exceptionCode, 2 => 'Exception'];
+            $statementMock->expects($this->exactly($exceptionCode === 2006 ? 2 : 1))->method('execute')->willReturnOnConsecutiveCalls(...
+                [
+                    new Exception($exception),
+                    true,
+                ]);
+        } else {
+            $statementMock->method('execute')->willReturn(true);
+        }
 
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();
         $connection  = $mockBuilder->getMock();
@@ -390,11 +467,15 @@ class MapperTest extends TestCase
     /**
      * @param array $entityMock
      * @param bool $includeCacheMock
+     * @param int $exceptionCode
      * @return UserRepositoryInterface
      */
-    private function getUserRepository(array $entityMock = [], bool $includeCacheMock = true): UserRepositoryInterface
-    {
-        $connectionFactory = $this->getConnectionFactoryMock($entityMock, $includeCacheMock);
+    private function getUserRepository(
+        array $entityMock = [],
+        bool $includeCacheMock = true,
+        int $exceptionCode = 0
+    ): UserRepositoryInterface {
+        $connectionFactory = $this->getConnectionFactoryMock($entityMock, $includeCacheMock, $exceptionCode);
         return new UserMapper(
             'common',
             $connectionFactory,

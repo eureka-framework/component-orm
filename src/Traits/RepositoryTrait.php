@@ -91,11 +91,7 @@ trait RepositoryTrait
         /** @var RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_DELETE, $this, $entity);
 
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
-
-        $statement = $connection->prepare($queryBuilder->getQuery());
-        $result    = $statement->execute($queryBuilder->getBind());
+        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getBind());
 
         //~ Reset some data
         $entity->setExists(false);
@@ -132,8 +128,7 @@ trait RepositoryTrait
         $connection = $this->getConnection();
 
         /** @var Query\InsertBuilder $queryBuilder */
-        $statement = $connection->prepare($queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore));
-        $statement->execute($queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore), $queryBuilder->getBind());
 
         if ($onDuplicateIgnore && $statement->rowCount() === 0) {
             // @codeCoverageIgnoreStart
@@ -176,11 +171,7 @@ trait RepositoryTrait
         /** @var RepositoryInterface $this */
         $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_UPDATE, $this, $entity);
 
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
-
-        $statement = $connection->prepare($queryBuilder->getQuery());
-        $result    = $statement->execute($queryBuilder->getBind());
+        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getBind());
 
         //~ Reset some data
         $entity->resetUpdated();
