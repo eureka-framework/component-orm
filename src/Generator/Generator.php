@@ -33,7 +33,7 @@ class Generator
      * @return void
      * @throws GeneratorException
      */
-    public function generate(Connection $connection, array $configList, string $configName = '', $isVerbose = true): void
+    public function generate(Connection $connection, array $configList, string $configName = '', bool $isVerbose = true): void
     {
         $configs = $this->buildConfigs($configList, $configName);
 
@@ -59,6 +59,7 @@ class Generator
             ;
         }
     }
+
     /**
      * Find configs.
      *
