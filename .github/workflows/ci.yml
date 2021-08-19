@@ -30,6 +30,9 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make install
 
+      - name: PHP Version
+        run: php -v
+
       - name: Tests Statics (Code Style check)
         run: make phpcs
 
