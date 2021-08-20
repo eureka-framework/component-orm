@@ -13,6 +13,7 @@ namespace Eureka\Component\Orm\Traits;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
+use Eureka\Component\Orm\Exception\ConnectionLostDuringTransactionException;
 use Eureka\Component\Orm\RepositoryInterface;
 
 /**
@@ -27,8 +28,6 @@ trait ConnectionAwareTrait
 
     /** @var string $name Connection name */
     private string $name;
-
-    private bool $inTransaction = false;
 
     /**
      * @param bool $forceReconnection
@@ -60,7 +59,6 @@ trait ConnectionAwareTrait
     public function beginTransaction(): void
     {
         $this->getConnection()->beginTransaction();
-        $this->inTransaction = true;
     }
 
     /**
@@ -68,11 +66,20 @@ trait ConnectionAwareTrait
      *
      * @return void
      * @codeCoverageIgnore
+     * @throws ConnectionLostDuringTransactionException
      */
     public function commit(): void
     {
-        $this->getConnection()->commit();
-        $this->inTransaction = false;
+        try {
+            $this->getConnection()->commit();
+        } catch (\PDOException $exception) {
+            if ($this->isConnectionLost($exception)) {
+                $this->getConnection(true);
+                throw new ConnectionLostDuringTransactionException('Cannot commit, connection lost', 1_002);
+            }
+
+            throw $exception;
+        }
     }
 
     /**
@@ -80,11 +87,20 @@ trait ConnectionAwareTrait
      *
      * @return void
      * @codeCoverageIgnore
+     * @throws ConnectionLostDuringTransactionException
      */
     public function rollBack(): void
     {
-        $this->getConnection()->rollBack();
-        $this->inTransaction = false;
+        try {
+            $this->getConnection()->rollBack();
+        } catch (\PDOException $exception) {
+            if ($this->isConnectionLost($exception)) {
+                $this->getConnection(true);
+                throw new ConnectionLostDuringTransactionException('Cannot rollback, connection lost', 1_003);
+            }
+
+            throw $exception;
+        }
     }
 
     /**
@@ -124,6 +140,7 @@ trait ConnectionAwareTrait
      * @param string $query
      * @param array|null $bind
      * @return \PDOStatement
+     * @throws ConnectionLostDuringTransactionException
      */
     protected function execute(string $query, ?array $bind = null): \PDOStatement
     {
@@ -136,8 +153,13 @@ trait ConnectionAwareTrait
                 throw $exception;
             }
 
-            //~ Force reconnection
-            $connection = $this->getConnection(true);
+            if ($this->inTransaction()) {
+                //~ Force reconnection to reset "inTransaction()" status & throw error specific error
+                $this->getConnection(true); // @codeCoverageIgnore
+                throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_000); // @codeCoverageIgnore
+            }
+
+            $connection = $this->getConnection(true); // Force reconnection
             $statement  = $connection->prepare($query);
             $statement->execute($bind);
         }
@@ -149,6 +171,7 @@ trait ConnectionAwareTrait
      * @param string $query
      * @param array|null $bind
      * @return bool
+     * @throws ConnectionLostDuringTransactionException
      */
     protected function executeWithResult(string $query, ?array $bind = null): bool
     {
@@ -161,8 +184,13 @@ trait ConnectionAwareTrait
                 throw $exception;
             }
 
-            //~ Force reconnection
-            $connection = $this->getConnection(true);
+            if ($this->inTransaction()) {
+                //~ Force reconnection to reset "inTransaction()" status & throw error specific error
+                $this->getConnection(true); // @codeCoverageIgnore
+                throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_001); // @codeCoverageIgnore
+            }
+
+            $connection = $this->getConnection(true); // Force reconnection
             $statement  = $connection->prepare($query);
             return $statement->execute($bind);
         }
@@ -175,6 +203,8 @@ trait ConnectionAwareTrait
     protected function isConnectionLost(\PDOException $exception): bool
     {
         // Only keep SQLState HY000 with ErrorCode 2006 | 2013 (MySQL server has gone away)
-        return ($exception->errorInfo[0] === 'HY000' && in_array($exception->errorInfo[1], [2006, 2013]));
+        $sqlState = $exception->errorInfo[0] ?? 'UNKNW';
+        $sqlCode  = $exception->errorInfo[1] ?? 1;
+        return ($sqlState === 'HY000' && in_array($sqlCode, [2006, 2013]));
     }
 }

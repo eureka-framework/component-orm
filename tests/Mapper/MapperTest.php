@@ -456,6 +456,7 @@ class MapperTest extends TestCase
         $connection  = $mockBuilder->getMock();
         $connection->method('prepare')->willReturn($statementMock);
         $connection->method('lastInsertId')->willReturn(1);
+        $connection->method('inTransaction')->willReturn(false);
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
         $connectionFactory = $mockBuilder->getMock();
