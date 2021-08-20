@@ -4,12 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+```
+## [template]
+[template]: https://github.com/eureka-framework/component-orm/compare/5.1.0...master
+### Changed
+### Added
+### Removed
+```
+
+
+
+## [5.1.0] - 2021-08-20
+[5.1.0]: https://github.com/eureka-framework/component-orm/compare/5.0.1...5.1.0
+### Added
+ * Now Support auto-reconnection when connection is lost when execute a query
+ * When connection is lost during a transaction, auto-reconnection is done, but a 
+   `ConnectionLostDuringTransactionException` is thrown
+ * Added tests according to new code
 
 ## [5.0.1] - 2020-11-06
+[5.0.1]: https://github.com/eureka-framework/component-orm/compare/5.0.0...5.0.1
 ### Changed
  * Fix empty value with varbinary fields (must be an empty string when field is not nullable)
 
 ## [5.0.0] - 2020-10-29
+[5.0.0]: https://github.com/eureka-framework/component-orm/compare/4.3.0...5.0.0
 ### Changed
  * Now require PHP 7.4
  * Fix all headers
@@ -22,7 +41,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  * Remove unused code
 
-## [4.3]
+---
+
+## [4.3.0]
 ### Changed
  * Now add validation configuration also in mappers
  * Fix overriding for extended validation
