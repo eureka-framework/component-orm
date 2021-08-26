@@ -6,13 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ```
 ## [template]
-[template]: https://github.com/eureka-framework/component-orm/compare/5.1.0...master
+[template]: https://github.com/eureka-framework/component-orm/compare/5.1.1...master
 ### Changed
 ### Added
 ### Removed
 ```
 
 
+## [5.1.1] - 2021-08-26
+[5.1.1]: https://github.com/eureka-framework/component-orm/compare/5.1.0...5.1.1
+### Added
+ * Add missing binary type for ORM generator
 
 ## [5.1.0] - 2021-08-20
 [5.1.0]: https://github.com/eureka-framework/component-orm/compare/5.0.1...5.1.0

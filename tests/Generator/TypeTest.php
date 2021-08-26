@@ -69,6 +69,7 @@ class TypeTest extends TestCase
     {
         return [
             'bigint'     => ['bigint(20)', Type\TypeBigint::class],
+            'binary'     => ['binary(2)', Type\TypeBinary::class],
             'blob'       => ['blob', Type\TypeBlob::class],
             'bool'       => ['tinyint(1)', Type\TypeBool::class],
             'char'       => ['char(2)', Type\TypeChar::class],
@@ -91,7 +92,7 @@ class TypeTest extends TestCase
             'tinyint'    => ['tinyint(3)', Type\TypeTinyint::class],
             'tinytext'   => ['tinytext', Type\TypeTinytext::class],
             'varbinary'  => ['varbinary(50)', Type\TypeVarbinary::class],
-            'VARCHAR'    => ['varchar(50)', Type\TypeVarchar::class],
+            'varchar'    => ['varchar(50)', Type\TypeVarchar::class],
         ];
     }
 
