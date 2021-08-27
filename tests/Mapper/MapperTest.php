@@ -265,6 +265,34 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
+    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteSelect()
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindAll());
+        $builder    = new SelectBuilder($repository);
+        $builder->addWhere('user_id', 1)->setListIndexedByField('user_id');
+
+        /** @var User[] $users */
+        $users = $repository->select($builder);
+        $ids   = array_keys($users);
+
+        $this->assertCount(2, $users);
+        $this->assertSame($ids[0], $users[$ids[0]]->getId());
+        $this->assertSame($ids[1], $users[$ids[1]]->getId());
+
+        //~ Also test when retrieve all entities from cache
+        $builder = new SelectBuilder($repository);
+        $builder->addWhere('user_id', 1)->setListIndexedByField('user_id');
+        $users = $repository->select($builder);
+
+        $this->assertCount(2, $users);
+        $this->assertSame($ids[0], $users[$ids[0]]->getId());
+        $this->assertSame($ids[1], $users[$ids[1]]->getId());
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
     public function testIHaveAnExceptionWhenITryToExecuteQueryAndIndexResultByNonExistingField()
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll(false), false);

@@ -128,6 +128,7 @@ trait MapperTrait
 
     /**
      * @return int
+     * @throws Exception\ConnectionLostDuringTransactionException
      */
     public function getMaxId(): int
     {
@@ -155,9 +156,10 @@ trait MapperTrait
     /**
      * Count number of rows corresponding to the query.
      *
-     * @param  Query\QueryBuilder $queryBuilder
-     * @param  string $field
+     * @param Query\QueryBuilder $queryBuilder
+     * @param string $field
      * @return int
+     * @throws Exception\ConnectionLostDuringTransactionException
      */
     public function count(Query\QueryBuilder $queryBuilder, string $field = '*'): int
     {
@@ -262,7 +264,8 @@ trait MapperTrait
      */
     public function select(Query\SelectBuilder $queryBuilder): array
     {
-        $collection = [];
+        $collection         = [];
+        $listIndexedByField = $queryBuilder->getListIndexedByField();
 
         if ($this->isCacheEnabledOnRead) {
             /** @var AbstractMapper $this */
@@ -273,6 +276,10 @@ trait MapperTrait
             $this->cacheSkipMissingItemQuery = false;
             $queryBuilder->clear();
 
+            if (!empty($listIndexedByField)) {
+                $collection = $this->setIndexFieldsOnCollection($listIndexedByField, $collection);
+            }
+
             return $collection;
         }
 
@@ -282,6 +289,10 @@ trait MapperTrait
             $entity                             = $this->newEntity($row, true);
             $collection[$entity->getCacheKey()] = $entity;
             $this->setCacheEntity($entity->getCacheKey(), $row);
+        }
+
+        if (!empty($listIndexedByField)) {
+            $collection = $this->setIndexFieldsOnCollection($listIndexedByField, $collection);
         }
 
         $queryBuilder->clear();
@@ -508,5 +519,22 @@ trait MapperTrait
         $this->disableIgnoreNotMappedFields();
 
         return [$collection, $relations];
+    }
+
+    /**
+     * @param string $listIndexedBy
+     * @param array $rawCollection
+     * @return array
+     */
+    private function setIndexFieldsOnCollection(string $listIndexedBy, array $rawCollection): array
+    {
+        $collection = [];
+        $nameMap = $this->getNamesMap($listIndexedBy);
+        $getter = $nameMap['get'];
+        foreach ($rawCollection as $item) {
+            $collection[$item->$getter()] = $item;
+        }
+
+        return $collection;
     }
 }
