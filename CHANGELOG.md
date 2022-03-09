@@ -12,10 +12,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
+## [5.2.0] - 2021-08-26
+[5.2.0]: https://github.com/eureka-framework/component-orm/compare/5.1.2...5.2.0
+### Changed
+ * CI improvements (php compatibility check, makefile, github workflow)
+ * Now compatible with PHP 7.4, 8.0 & 8.1
+ * Fix phpdoc + some return type according to phpstan analysis
+ * Fix binding prefix with some specific chars: `(`, `)`, `,` and ` `
+### Added
+ * phpstan for static analysis
+### Removed
+ * phpcompatibility (no more maintained)
+
+
 ## [5.1.2] - 2021-08-26
 [5.1.2]: https://github.com/eureka-framework/component-orm/compare/5.1.1...5.1.2
 ### Added
-* Now allow indexing collection by specified field when use `select()`
+ * Now allow indexing collection by specified field when use `select()`
 
 ## [5.1.1] - 2021-08-26
 [5.1.1]: https://github.com/eureka-framework/component-orm/compare/5.1.0...5.1.1

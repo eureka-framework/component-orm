@@ -85,7 +85,7 @@ class FieldValidatorService
                 $options = array_merge($this->getStringOptions(get_class($type), $type, $isNullable), $options);
                 break;
             case Type\TypeBool::class:
-            case Type\TypeDateTime::class:
+            case Type\TypeDatetime::class:
             case Type\TypeDate::class:
             case Type\TypeTime::class:
             case Type\TypeTimestamp::class:

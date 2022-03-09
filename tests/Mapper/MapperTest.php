@@ -205,7 +205,6 @@ class MapperTest extends TestCase
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
-        /** @var User $user */
         $this->expectException(EntityNotExistsException::class);
         $repository->findById(1);
     }
@@ -218,7 +217,6 @@ class MapperTest extends TestCase
     {
         $repository = $this->getUserRepositoryNoCache($this->getMockEntityFindAll());
 
-        /** @var User $user */
         $users = $repository->findAllByKeys(['user_id' => 1]);
 
         $this->assertCount(2, $users);
@@ -282,6 +280,8 @@ class MapperTest extends TestCase
         //~ Also test when retrieve all entities from cache
         $builder = new SelectBuilder($repository);
         $builder->addWhere('user_id', 1)->setListIndexedByField('user_id');
+
+        /** @var User[] $users */
         $users = $repository->select($builder);
 
         $this->assertCount(2, $users);

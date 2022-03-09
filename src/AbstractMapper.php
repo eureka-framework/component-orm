@@ -26,11 +26,11 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 abstract class AbstractMapper implements RepositoryInterface
 {
+    use Traits\CacheAwareTrait;
     use Traits\ConnectionAwareTrait;
+    use Traits\EntityAwareTrait;
     use Traits\MapperTrait;
     use Traits\RepositoryTrait;
-    use Traits\EntityAwareTrait;
-    use Traits\CacheAwareTrait;
     use Traits\ValidatorAwareTrait;
 
     /**
@@ -54,9 +54,9 @@ abstract class AbstractMapper implements RepositoryInterface
         ConnectionFactory $connectionFactory,
         ValidatorFactoryInterface $validatorFactory = null,
         ValidatorEntityFactory $validatorEntityFactory = null,
-        $mappers = [],
+        array $mappers = [],
         CacheItemPoolInterface $cache = null,
-        $enableCacheOnRead = false
+        bool $enableCacheOnRead = false
     ) {
         $this->setConnectionName($connectionName);
         $this->setConnectionFactory($connectionFactory);

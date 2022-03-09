@@ -46,7 +46,7 @@ class MapperJoinTest extends TestCase
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne());
         $addressRepository = $this->getAddressRepository($this->getMockEntityAddressFindOne());
 
-        /** @var User $user */
+        /** @var User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserAddress', 'Unknown']);
         /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
@@ -89,7 +89,7 @@ class MapperJoinTest extends TestCase
     {
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne(false));
 
-        /** @var User $user */
+        /** @var User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserComment']);
         /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
@@ -131,8 +131,8 @@ class MapperJoinTest extends TestCase
             true
         );
 
-        /** @var Comment $expectedComment */
         $commentRepository = $this->getCommentRepository();
+        /** @var Comment $expectedComment */
         $expectedComment   = $commentRepository->newEntity(
             (object) [
                 'comment_id'       => 1,

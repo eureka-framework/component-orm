@@ -118,12 +118,16 @@ trait MapperTrait
         return $this->mappers[$name];
     }
 
-    /**
-     * @return int
-     */
     public function getLastId(): int
     {
         return $this->lastId;
+    }
+
+    public function setLastId(int $lastId): self
+    {
+        $this->lastId = $lastId;
+
+        return $this;
     }
 
     /**
