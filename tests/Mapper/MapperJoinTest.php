@@ -46,7 +46,7 @@ class MapperJoinTest extends TestCase
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne());
         $addressRepository = $this->getAddressRepository($this->getMockEntityAddressFindOne());
 
-        /** @var User $user */
+        /** @var User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserAddress', 'Unknown']);
         /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
@@ -89,7 +89,7 @@ class MapperJoinTest extends TestCase
     {
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne(false));
 
-        /** @var User $user */
+        /** @var User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserComment']);
         /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
@@ -131,8 +131,8 @@ class MapperJoinTest extends TestCase
             true
         );
 
-        /** @var Comment $expectedComment */
         $commentRepository = $this->getCommentRepository();
+        /** @var Comment $expectedComment */
         $expectedComment   = $commentRepository->newEntity(
             (object) [
                 'comment_id'       => 1,
@@ -167,7 +167,7 @@ class MapperJoinTest extends TestCase
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();
         $connection  = $mockBuilder->getMock();
         $connection->method('prepare')->willReturn($statementMock);
-        $connection->method('lastInsertId')->willReturn(1);
+        $connection->method('lastInsertId')->willReturn('1');
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
         $connectionFactory = $mockBuilder->getMock();

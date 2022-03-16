@@ -138,10 +138,10 @@ trait RepositoryTrait
             // @codeCoverageIgnoreEnd
         }
 
-        //~ If has auto increment key (commonly, is a primary key), set value
+        //~ If we have auto increment key (commonly, is a primary key), set value
         $lastInsertId = (int) $connection->lastInsertId();
         if ($lastInsertId > 0) {
-            $this->lastId = $lastInsertId;
+            $this->setLastId($lastInsertId);
 
             $entity->setAutoIncrementId($this->getLastId());
         }

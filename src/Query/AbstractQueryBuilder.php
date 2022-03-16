@@ -78,7 +78,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     public function addBind(string $field, $value, bool $isUnique = false): string
     {
         $suffix = ($isUnique ? '_' . uniqid() : '');
-        $name   = ':' . strtolower($field . $suffix);
+        $name   = ':' . strtolower(str_replace(['(', ')', ',', ' '], ['', '', '', '_'], $field . $suffix));
 
         if (is_bool($value)) {
             $value = (int) $value;

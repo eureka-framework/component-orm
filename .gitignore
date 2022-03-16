@@ -3,8 +3,15 @@ composer.phar
 composer.lock
 /vendor/
 
-#~ CI
-/build/
+#~ Tests
+/build/*
 .phpunit.result.cache
 /tests/Generated/*
 !/tests/Generated/.gitkeep
+
+#~ Misc
+.idea
+
+#~ Overridden condigs
+phpstan.neon
+phpunit.xml

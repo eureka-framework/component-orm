@@ -35,7 +35,7 @@ interface EntityAwareInterface
      *
      * @param  \stdClass|null $row
      * @param  bool $exists
-     * @return $this
+     * @return EntityInterface
      */
     public function newEntity(\stdClass $row = null, bool $exists = false);
 

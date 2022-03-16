@@ -37,7 +37,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnErrorWhenITryToUseQueryBuilderFactoryWithUnknownType()
+    public function testIHaveAnErrorWhenITryToUseQueryBuilderFactoryWithUnknownType(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
@@ -51,7 +51,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanInstantiateQueryBuilderWithFactory()
+    public function testICanInstantiateQueryBuilderWithFactory(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
@@ -67,7 +67,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetWellFormattedInsertQueryFromInsertQueryBuilder()
+    public function testICanGetWellFormattedInsertQueryFromInsertQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
@@ -98,7 +98,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetWellFormattedInsertQueryFromInsertQueryBuilderWithEntity()
+    public function testICanGetWellFormattedInsertQueryFromInsertQueryBuilderWithEntity(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
         $user       = $repository->newEntity(
@@ -112,6 +112,7 @@ class QueryBuilderTest extends TestCase
             ]
         );
 
+        /** @var InsertBuilder $queryBuilder */
         $queryBuilder = Factory::getBuilder(Factory::TYPE_INSERT, $repository, $user);
         $query = $queryBuilder->getQuery(true);
 
@@ -122,7 +123,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetQueryFromQueryBuilder()
+    public function testICanGetQueryFromQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -138,7 +139,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanUseQueryFieldsPersonalizedParameters()
+    public function testICanUseQueryFieldsPersonalizedParameters(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -151,7 +152,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetQueryFields()
+    public function testICanGetQueryFields(): void
     {
         $repository   = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -165,7 +166,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetQueryFieldsWithOnlyPrefixedPrimaryKeys()
+    public function testICanGetQueryFieldsWithOnlyPrefixedPrimaryKeys(): void
     {
         $repository   = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -178,7 +179,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetQueryFieldsWithOnlyCustomPrefixedPrimaryKeys()
+    public function testICanGetQueryFieldsWithOnlyCustomPrefixedPrimaryKeys(): void
     {
         $repository   = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -191,7 +192,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanEnableAndDisableRowFoundCalculationForQuery()
+    public function testICanEnableAndDisableRowFoundCalculationForQuery(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -210,7 +211,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanAddOrderToQueryBuilder()
+    public function testICanAddOrderToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -223,7 +224,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanAddGroupByToQueryBuilder()
+    public function testICanAddGroupByToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -236,7 +237,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanAddHavingClauseToQueryBuilder()
+    public function testICanAddHavingClauseToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -251,7 +252,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanAddJoinToQueryBuilder()
+    public function testICanAddJoinToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -265,7 +266,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanAddWhereWithRegexpTypeToQueryBuilder()
+    public function testICanAddWhereWithRegexpTypeToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -278,7 +279,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanAddWhereRawToQueryBuilder()
+    public function testICanAddWhereRawToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -292,7 +293,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanAddWhereKeysOrToQueryBuilder()
+    public function testICanAddWhereKeysOrToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -308,7 +309,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToSetAddInWithAnEmptyArray()
+    public function testIHaveAnExceptionWhenITryToSetAddInWithAnEmptyArray(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -322,7 +323,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryGetQueryWhereWithoutWhereAdded()
+    public function testIHaveAnExceptionWhenITryGetQueryWhereWithoutWhereAdded(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
@@ -334,7 +335,7 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryGetQuerySetWithoutSetAdded()
+    public function testIHaveAnExceptionWhenITryGetQuerySetWithoutSetAdded(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
         $queryBuilder = Factory::getBuilder(Factory::TYPE_INSERT, $repository);
@@ -363,7 +364,7 @@ class QueryBuilderTest extends TestCase
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();
         $connection  = $mockBuilder->getMock();
         $connection->method('prepare')->willReturn($statementMock);
-        $connection->method('lastInsertId')->willReturn(1);
+        $connection->method('lastInsertId')->willReturn('1');
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
         $connectionFactory = $mockBuilder->getMock();

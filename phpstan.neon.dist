@@ -1,0 +1,12 @@
+parameters:
+  phpVersion: 70400 # PHP 7.4 - Current minimal version supported
+  level: 1
+  paths:
+    - ./src
+    - ./tests
+
+  bootstrapFiles:
+    - ./vendor/autoload.php
+
+  ignoreErrors:
+    - '`Call to an undefined method Eureka\\Component\\Orm\\RepositoryInterface::.+`'
