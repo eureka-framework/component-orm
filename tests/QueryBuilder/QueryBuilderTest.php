@@ -364,7 +364,7 @@ class QueryBuilderTest extends TestCase
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();
         $connection  = $mockBuilder->getMock();
         $connection->method('prepare')->willReturn($statementMock);
-        $connection->method('lastInsertId')->willReturn(1);
+        $connection->method('lastInsertId')->willReturn('1');
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
         $connectionFactory = $mockBuilder->getMock();

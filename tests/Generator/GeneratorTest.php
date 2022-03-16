@@ -108,99 +108,109 @@ class GeneratorTest extends TestCase
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();
         $connection  = $mockBuilder->getMock();
 
+        $map = [
+            [
+                'SHOW FULL COLUMNS FROM user',
+                null,
+                $this->getPDOStatementMock(
+                    [
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_is_enabled', 'Type' => 'tinyint(1) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_email', 'Type' => 'varchar(200)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_password', 'Type' => 'varchar(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'autoincrement', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_is_enabled', 'Type' => 'tinyint(1) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_email', 'Type' => 'varchar(200)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_password', 'Type' => 'varchar(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                    ]
+                )
+            ],
+            [
+                'SHOW FULL COLUMNS FROM address',
+                null,
+                $this->getPDOStatementMock(
+                    [
+                        (object) ['Field' => 'address_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'address_number', 'Type' => 'varchar(50)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'address_text', 'Type' => 'text', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                        (object) ['Field' => 'address_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'address_number', 'Type' => 'varchar(50)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'address_text', 'Type' => 'text', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                    ]
+                ),
+            ],
+            [
+                'SHOW FULL COLUMNS FROM comment',
+                null,
+                $this->getPDOStatementMock(
+                    [
+                        (object) ['Field' => 'comment_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'comment_text', 'Type' => 'varchar(140)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                        (object) ['Field' => 'comment_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'comment_text', 'Type' => 'varchar(140)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                    ]
+                ),
+            ],
+            [
+                'SHOW FULL COLUMNS FROM user_parent',
+                null,
+                $this->getPDOStatementMock(
+                    [
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_id_parent', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_in_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_has_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_comment', 'Type' => 'varchar(100)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'no comment', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_bigint', 'Type' => 'bigint(20)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_mediumint', 'Type' => 'mediumint(8)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_smallint', 'Type' => 'smallint(5)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_tinyint', 'Type' => 'tinyint(3)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_float', 'Type' => 'float(5,2)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0.0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_tinytext', 'Type' => 'tinytext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                        (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_id_parent', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_in_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_has_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_comment', 'Type' => 'varchar(100)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'no comment', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_bigint', 'Type' => 'bigint(20)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_mediumint', 'Type' => 'mediumint(8)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_smallint', 'Type' => 'smallint(5)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_tinyint', 'Type' => 'tinyint(3)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_float', 'Type' => 'float(5,2)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0.0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_tinytext', 'Type' => 'tinytext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        false,
+                    ]
+                ),
+            ],
+        ];
+
+        if (PHP_VERSION_ID < 80000) {
+            foreach ($map as $index => $data) {
+                unset($map[$index][1]); // remove 'null' parameter from query mock parameters
+            }
+        }
+
         $connection->method('query')->will(
-            $this->returnValueMap(
-                [
-                    [
-                        'SHOW FULL COLUMNS FROM user',
-                        $this->getPDOStatementMock(
-                            [
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_is_enabled', 'Type' => 'tinyint(1) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_email', 'Type' => 'varchar(200)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_password', 'Type' => 'varchar(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'autoincrement', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_is_enabled', 'Type' => 'tinyint(1) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_email', 'Type' => 'varchar(200)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_password', 'Type' => 'varchar(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                            ]
-                        )
-                    ],
-                    [
-                        'SHOW FULL COLUMNS FROM address',
-                        $this->getPDOStatementMock(
-                            [
-                                (object) ['Field' => 'address_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'address_number', 'Type' => 'varchar(50)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'address_text', 'Type' => 'text', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                                (object) ['Field' => 'address_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'address_number', 'Type' => 'varchar(50)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'address_text', 'Type' => 'text', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                            ]
-                        ),
-                    ],
-                    [
-                        'SHOW FULL COLUMNS FROM comment',
-                        $this->getPDOStatementMock(
-                            [
-                                (object) ['Field' => 'comment_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'comment_text', 'Type' => 'varchar(140)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                                (object) ['Field' => 'comment_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'comment_text', 'Type' => 'varchar(140)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                            ]
-                        ),
-                    ],
-                    [
-                        'SHOW FULL COLUMNS FROM user_parent',
-                        $this->getPDOStatementMock(
-                            [
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_id_parent', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_in_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_has_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_comment', 'Type' => 'varchar(100)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'no comment', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_bigint', 'Type' => 'bigint(20)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_mediumint', 'Type' => 'mediumint(8)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_smallint', 'Type' => 'smallint(5)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_tinyint', 'Type' => 'tinyint(3)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_float', 'Type' => 'float(5,2)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0.0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_tinytext', 'Type' => 'tinytext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                                (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_id_parent', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_in_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_has_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_comment', 'Type' => 'varchar(100)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'no comment', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_bigint', 'Type' => 'bigint(20)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_mediumint', 'Type' => 'mediumint(8)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_smallint', 'Type' => 'smallint(5)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_tinyint', 'Type' => 'tinyint(3)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_float', 'Type' => 'float(5,2)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0.0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                (object) ['Field' => 'user_parent_tinytext', 'Type' => 'tinytext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                                false,
-                            ]
-                        ),
-                    ],
-                ]
-            )
+            $this->returnValueMap($map)
         );
 
         return $connection;
