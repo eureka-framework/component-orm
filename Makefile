@@ -1,4 +1,4 @@
-.PHONY: validate install update phpcs phpcbf php74compatibility php83compatibility phpstan analyze tests testdox ci clean
+.PHONY: validate install update phpcs phpcbf php81compatibility php82compatibility phpstan analyze tests testdox ci clean
 
 PHP_FILES := $(shell find src tests -type f -name '*.php')
 define header =
@@ -45,13 +45,13 @@ phpcbf: vendor/bin/phpcbf
 	$(call header,Fixing Code Style)
 	@./vendor/bin/phpcbf --standard=./ci/phpcs/eureka.xml src/ tests/
 
-php74compatibility: vendor/bin/phpstan build/reports/phpstan
-	$(call header,Checking PHP 7.4 compatibility)
-	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php74-compatibility.neon --error-format=table
+php81compatibility: vendor/bin/phpstan build/reports/phpstan
+	$(call header,Checking PHP 8.1 compatibility)
+	@./vendor/bin/phpstan analyse --xdebug --configuration=./ci/php81-compatibility.neon --error-format=table
 
-php83compatibility: vendor/bin/phpstan build/reports/phpstan
-	$(call header,Checking PHP 8.3 compatibility)
-	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php83-compatibility.neon --error-format=table
+php82compatibility: vendor/bin/phpstan build/reports/phpstan
+	$(call header,Checking PHP 8.2 compatibility)
+	@./vendor/bin/phpstan analyse --xdebug --configuration=./ci/php82-compatibility.neon --error-format=table
 
 analyze: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Running Static Analyze - Pretty tty format)
@@ -73,4 +73,4 @@ clean:
 	$(call header,Cleaning previous build)
 	@if [ "$(shell ls -A ./build)" ]; then rm -rf ./build/*; fi; echo " done"
 
-ci: clean validate install phpcs tests php74compatibility php83compatibility analyze
+ci: clean validate install phpcs tests php81compatibility php82compatibility analyze

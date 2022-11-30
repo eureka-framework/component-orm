@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
+use Eureka\Component\Orm\Traits\EntityAwareTrait;
 use Eureka\Component\Orm\Traits\ValidatorAwareTrait;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
@@ -21,12 +22,13 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  */
 abstract class AbstractEntity implements EntityInterface
 {
+    use EntityAwareTrait;
     use ValidatorAwareTrait;
 
     /** @var bool $exists If data already exists in db for example. */
     private bool $exists = false;
 
-    /** @var array $updated List of updated field */
+    /** @var bool[] $updated List of updated field */
     private array $updated = [];
 
     /** @var RepositoryInterface $repository Entity repository */
@@ -70,7 +72,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function setExists(bool $exists): EntityInterface
     {
-        $this->exists = (bool) $exists;
+        $this->exists = $exists;
 
         return $this;
     }
@@ -138,7 +140,6 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Get form entity container.
      *
-     * @param  void
      * @return GenericEntity
      */
     public function getGenericEntity()

@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\Traits;
@@ -101,7 +100,7 @@ abstract class AbstractMapper implements RepositoryInterface
         );
         $statement->execute();
 
-        $bounds = $statement->fetch(Connection::FETCH_OBJ);
+        $bounds = $statement->fetch(\PDO::FETCH_OBJ);
 
         $minIndex          = max($start, $bounds->min_value);
         $maxIndex          = $end < 0 ? $bounds->max_value : min($end, $bounds->max_value);
