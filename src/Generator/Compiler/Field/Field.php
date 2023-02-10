@@ -67,10 +67,10 @@ class Field
         $this->setData($field);
 
         $this->dbPrefixes = $dbPrefixes;
-        $this->validation = isset($validationConfig['extended_validation'][$field->Field]) ? $validationConfig['extended_validation'][$field->Field] : [];
+        $this->validation = $validationConfig['extended_validation'][$field->Field] ?? [];
 
-        $this->hasValidation     = (isset($validationConfig['enabled']) && (bool) $validationConfig['enabled']);
-        $this->hasValidationAuto = $this->hasValidation && (isset($validationConfig['auto']) && (bool) $validationConfig['auto']);
+        $this->hasValidation     = (bool) ($validationConfig['enabled'] ?? false);
+        $this->hasValidationAuto = $this->hasValidation && (bool) ($validationConfig['auto'] ?? false);
     }
 
     /**
@@ -282,11 +282,15 @@ class Field
     {
         $isTimeType = ($this->getType() instanceof Type\TypeTimestamp || $this->getType() instanceof Type\TypeDatetime);
 
-        if (
-            $this->isNullable() && $default === null ||
-            ($isTimeType && ($default === 'CURRENT_TIMESTAMP' || $default === 'CURRENT_TIMESTAMP()'))
-        ) {
+        if ($this->isNullable() && $default === null) {
             $this->default = 'null';
+
+            return $this;
+        }
+
+        //~ Handle date time that have default value as current timestamp but not nullable
+        if ($isTimeType && ($default === 'CURRENT_TIMESTAMP' || $default === 'CURRENT_TIMESTAMP()')) {
+            $this->default = $this->getType()->getEmptyValue();
 
             return $this;
         }

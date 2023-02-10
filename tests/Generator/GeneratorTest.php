@@ -183,6 +183,7 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_tinytext', 'Type' => 'tinytext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => 'CURRENT_TIMESTAMP', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
                         (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_id_parent', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
@@ -197,6 +198,7 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_tinytext', 'Type' => 'tinytext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => 'CURRENT_TIMESTAMP', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
                     ]
                 ),

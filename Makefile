@@ -47,19 +47,19 @@ phpcbf: vendor/bin/phpcbf
 
 php74compatibility: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Checking PHP 7.4 compatibility)
-	@./vendor/bin/phpstan analyse --configuration=./ci/php74-compatibility.neon --error-format=table
+	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php74-compatibility.neon --error-format=table
 
 php81compatibility: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Checking PHP 8.1 compatibility)
-	@./vendor/bin/phpstan analyse --configuration=./ci/php81-compatibility.neon --error-format=table
+	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php81-compatibility.neon --error-format=table
 
 analyze: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Running Static Analyze - Pretty tty format)
-	@./vendor/bin/phpstan analyse --error-format=table
+	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --error-format=table
 
 phpstan: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Running Static Analyze)
-	@./vendor/bin/phpstan analyse --error-format=checkstyle > ./build/reports/phpstan/phpstan.xml
+	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --error-format=checkstyle > ./build/reports/phpstan/phpstan.xml
 
 tests: vendor/bin/phpunit build/reports/phpunit $(PHP_FILES)
 	$(call header,Running Unit Tests)
