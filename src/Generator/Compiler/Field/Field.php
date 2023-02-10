@@ -286,7 +286,7 @@ class Field
             $this->isNullable() && $default === null ||
             ($isTimeType && ($default === 'CURRENT_TIMESTAMP' || $default === 'CURRENT_TIMESTAMP()'))
         ) {
-            $this->default = 'null';
+            $this->default = $isTimeType ? $this->getType()->getEmptyValue() : 'null';
 
             return $this;
         }
