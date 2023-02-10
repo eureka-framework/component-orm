@@ -282,11 +282,15 @@ class Field
     {
         $isTimeType = ($this->getType() instanceof Type\TypeTimestamp || $this->getType() instanceof Type\TypeDatetime);
 
-        if (
-            $this->isNullable() && $default === null ||
-            ($isTimeType && ($default === 'CURRENT_TIMESTAMP' || $default === 'CURRENT_TIMESTAMP()'))
-        ) {
+        if ($this->isNullable() && $default === null) {
             $this->default = 'null';
+
+            return $this;
+        }
+
+        //~ Handle date time that have default value as current timestamp but not nullable
+        if ($isTimeType && ($default === 'CURRENT_TIMESTAMP' || $default === 'CURRENT_TIMESTAMP()')) {
+            $this->default = $this->getType();
 
             return $this;
         }
