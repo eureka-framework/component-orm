@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Database\Connection;
+use Eureka\Component\Orm\AbstractMapper;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\InvalidQueryException;
 use Eureka\Component\Orm\Exception\OrmException;
@@ -25,6 +25,9 @@ use Psr\Cache\InvalidArgumentException;
  * Cache trait to manage cache part in Data Mapper.
  *
  * @author Romain Cottard
+ *
+ * @template TEntity of EntityInterface
+ * @template TRepository of RepositoryInterface
  */
 trait CacheAwareTrait
 {
@@ -40,9 +43,9 @@ trait CacheAwareTrait
     /**
      * Enable cache on read queries.
      *
-     * @return self|RepositoryInterface
+     * @return static
      */
-    public function enableCacheOnRead(): RepositoryInterface
+    public function enableCacheOnRead(): static
     {
         $this->isCacheEnabledOnRead = true;
 
@@ -52,9 +55,9 @@ trait CacheAwareTrait
     /**
      * Disable cache on read query.
      *
-     * @return self|RepositoryInterface
+     * @return static
      */
-    public function disableCacheOnRead(): RepositoryInterface
+    public function disableCacheOnRead(): static
     {
         $this->isCacheEnabledOnRead = false;
 
@@ -65,9 +68,9 @@ trait CacheAwareTrait
      * Set cache instance.
      *
      * @param CacheItemPoolInterface|null $cache
-     * @return self|RepositoryInterface
+     * @return static
      */
-    protected function setCache(CacheItemPoolInterface $cache = null): RepositoryInterface
+    protected function setCache(CacheItemPoolInterface $cache = null): static
     {
         $this->cache = $cache;
 
@@ -78,21 +81,21 @@ trait CacheAwareTrait
      * Try to get all entities from cache.
      * Return list of entities (for found) / null (for not found in cache)
      *
-     * @param RepositoryInterface $mapper
-     * @param Query\SelectBuilder $queryBuilder
-     * @return array
+     * @param AbstractMapper<TEntity, TRepository> $repository
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @return array<TEntity|null>
      * @throws InvalidQueryException
      * @throws OrmException
      */
     protected function selectFromCache(
-        RepositoryInterface $mapper,
+        AbstractMapper $repository,
         Query\SelectBuilder $queryBuilder
     ): array {
         if (!$this->isCacheEnabledOnRead) {
             return []; // @codeCoverageIgnore
         }
 
-        if (count($mapper->getPrimaryKeys()) === 0) {
+        if (count($repository->getPrimaryKeys()) === 0) {
             return []; // @codeCoverageIgnore
         }
 
@@ -103,26 +106,25 @@ trait CacheAwareTrait
         //~ Save total number of row from query
         $this->rowCount = $statement->rowCount();
 
-        $hasOnePrimaryKey = count($mapper->getPrimaryKeys()) === 1;
+        $hasOnePrimaryKey = count($repository->getPrimaryKeys()) === 1;
         $collection       = [];
 
         while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
-            /** @var EntityInterface $entityIdInstance */
-            $entityIdInstance = $mapper->newEntity($row, true);
+            $entityIdInstance = $repository->newEntity($row, true);
 
             //~ Pre-fill collection to keep the order
             $collection[$entityIdInstance->getCacheKey()] = null;
 
             $entityRow = $this->getCacheEntity($entityIdInstance->getCacheKey());
             if ($entityRow === null) {
-                $values = $mapper->getEntityPrimaryKeysValues($entityIdInstance);
+                $values = $repository->getEntityPrimaryKeysValues($entityIdInstance);
                 if ($hasOnePrimaryKey) {
                     $addIn[] = current($values);
                 } else {
                     $queryBuilder->addWhereKeysOr($values);
                 }
             } else {
-                $collection[$entityIdInstance->getCacheKey()] = $mapper->newEntity($entityRow, true);
+                $collection[$entityIdInstance->getCacheKey()] = $repository->newEntity($entityRow, true);
             }
         }
 
@@ -142,7 +144,7 @@ trait CacheAwareTrait
      * Get Data object from cache if is enabled.
      *
      * @param string $cacheKey
-     * @return null|\stdClass
+     * @return \stdClass|null
      * @throws OrmException
      */
     protected function getCacheEntity(string $cacheKey): ?\stdClass
@@ -164,10 +166,10 @@ trait CacheAwareTrait
      * Delete cache
      *
      * @param string $cacheKey
-     * @return self|RepositoryInterface
+     * @return static
      * @throws OrmException
      */
-    protected function deleteCacheEntity(string $cacheKey): RepositoryInterface
+    protected function deleteCacheEntity(string $cacheKey): static
     {
         if (!$this->cache instanceof CacheItemPoolInterface) {
             return $this;
@@ -187,10 +189,10 @@ trait CacheAwareTrait
      *
      * @param string $cacheKey
      * @param \stdClass $row
-     * @return self|RepositoryInterface
+     * @return static
      * @throws OrmException
      */
-    protected function setCacheEntity(string $cacheKey, \stdClass $row): RepositoryInterface
+    protected function setCacheEntity(string $cacheKey, \stdClass $row): static
     {
         if (!$this->cache instanceof CacheItemPoolInterface) {
             return $this;

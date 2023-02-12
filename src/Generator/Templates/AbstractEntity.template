@@ -25,6 +25,9 @@ use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
  * You can add your specific code in child class: {{ class.name }}
  *
  * @author {{ comment.author }}
+ *
+ * @template TRepository of RepositoryInterface
+ * @extends AbstractEntity<TRepository>
  */
 abstract class Abstract{{ class.name }} extends AbstractEntity
 {
@@ -32,12 +35,12 @@ abstract class Abstract{{ class.name }} extends AbstractEntity
     /**
      * AbstractEntity constructor.
      *
-     * @param RepositoryInterface $repository
+     * @param {{ class.repository }} $repository
      * @param ValidatorFactoryInterface|null $validatorFactory
      * @param ValidatorEntityFactoryInterface|null $validatorEntityFactory
      */
     public function __construct(
-        RepositoryInterface $repository,
+        {{ class.repository }} $repository,
         ?ValidatorFactoryInterface $validatorFactory = null,
         ?ValidatorEntityFactoryInterface $validatorEntityFactory = null
     ) {

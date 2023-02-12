@@ -19,25 +19,29 @@ use Eureka\Component\Orm\Exception\OrmException;
  * Interface RepositoryInterface
  *
  * @author Romain Cottard
+ *
+ * @template TEntity of EntityInterface
+ * @template TRepository of RepositoryInterface
+ * @extends MapperInterface<TEntity, TRepository>
  */
-interface RepositoryInterface extends MapperInterface
+interface RepositoryInterface extends MapperInterface, TableInterface
 {
     /**
      * Get first row corresponding of the primary keys.
      *
      * @param  int $id
-     * @return EntityInterface
+     * @return TEntity
      * @throws OrmException
      * @throws EntityNotExistsException
      * @throws \LogicException
      */
-    public function findById(int $id);
+    public function findById(int $id): EntityInterface;
 
     /**
      * Get rows corresponding of the keys.
      *
-     * @param  string[] $keys
-     * @return EntityInterface[] List of row
+     * @param  array<string, string|int|float|bool|null> $keys
+     * @return array<TEntity> List of row
      * @throws OrmException
      */
     public function findAllByKeys(array $keys): array;
@@ -45,29 +49,33 @@ interface RepositoryInterface extends MapperInterface
     /**
      * Get first row corresponding of the primary keys.
      *
-     * @param  string[] $primaryKeys
-     * @return EntityInterface
+     * @param  array<string, string|int|float|bool|null> $primaryKeys
+     * @return TEntity
      * @throws \UnexpectedValueException
      * @throws EntityNotExistsException
      * @throws OrmException
      */
-    public function findByKeys(array $primaryKeys);
+    public function findByKeys(array $primaryKeys): EntityInterface;
 
     /**
      * Either insert or update an entity
      *
-     * @param  EntityInterface $entity
+     * @param  TEntity $entity
      * @param  bool $onDuplicateUpdate If true, add on duplicate update clause to the insert query.
      * @param  bool $onDuplicateIgnore If true, add IGNORE on insert query to avoid SQL errors if duplicate
      * @return bool
      * @throws OrmException
      */
-    public function persist(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool;
+    public function persist(
+        EntityInterface $entity,
+        bool $onDuplicateUpdate = false,
+        bool $onDuplicateIgnore = false
+    ): bool;
 
     /**
      * Delete data from database.
      *
-     * @param  EntityInterface $entity
+     * @param  TEntity $entity
      * @return bool
      * @throws OrmException
      * @throws \LogicException
@@ -77,7 +85,7 @@ interface RepositoryInterface extends MapperInterface
     /**
      * Insert active row (or update row if it possible).
      *
-     * @param  EntityInterface $entity
+     * @param  TEntity $entity
      * @param  bool $onDuplicateUpdate If true, add on duplicate update clause to the insert query.
      * @param  bool $onDuplicateIgnore If true, add IGNORE on insert query to avoid SQL errors if duplicate
      * @return bool State of insert
@@ -85,12 +93,16 @@ interface RepositoryInterface extends MapperInterface
      * @throws OrmException
      * @throws \LogicException
      */
-    public function insert(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool;
+    public function insert(
+        EntityInterface $entity,
+        bool $onDuplicateUpdate = false,
+        bool $onDuplicateIgnore = false
+    ): bool;
 
     /**
      * Update data into database
      *
-     * @param  EntityInterface $entity
+     * @param  TEntity $entity
      * @return bool
      * @throws OrmException
      * @throws \LogicException

@@ -11,14 +11,15 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
-use Eureka\Component\Orm\Query\QueryBuilderInterface;
+use Eureka\Component\Orm\Enumerator\ClauseConcat;
+use Eureka\Component\Orm\Enumerator\Operator;
 
 /**
  * Class GroupTrait
  *
  * @author Romain Cottard
  */
-trait GroupTrait
+trait GroupAwareTrait
 {
     /** @var string[] $groupList List of groupBy for current query */
     protected array $groupList = [];
@@ -27,20 +28,9 @@ trait GroupTrait
     protected array $havingList = [];
 
     /**
-     * @param  string $field
-     * @param  mixed $value
-     * @param  bool $isUnique
-     * @return string Return bind name field
-     */
-    abstract public function addBind(string $field, $value, bool $isUnique = false): string;
-
-    /**
      * Add groupBy clause.
-     *
-     * @param  string $field
-     * @return self|QueryBuilderInterface
      */
-    public function addGroupBy(string $field): QueryBuilderInterface
+    public function addGroupBy(string $field): static
     {
         $this->groupList[] = $field;
 
@@ -49,27 +39,23 @@ trait GroupTrait
 
     /**
      * Add having clause.
-     *
-     * @param  string $field
-     * @param  string|int $value
-     * @param  string $sign
-     * @param  string $havingConcat
-     * @return self|QueryBuilderInterface
      */
-    public function addHaving(string $field, $value, string $sign = '=', string $havingConcat = 'AND'): QueryBuilderInterface
-    {
-        $fieldHaving = (0 < count($this->havingList) ? ' ' . $havingConcat . ' ' . $field : $field);
+    public function addHaving(
+        string $field,
+        string|int|float|bool|null $value,
+        Operator $operator = Operator::Equal,
+        ClauseConcat $clauseConcat = ClauseConcat::And
+    ): static {
+        $fieldHaving = (0 < count($this->havingList) ? ' ' . $clauseConcat->value . ' ' . $field : $field);
 
         $bindName = $this->addBind($field, $value, true);
-        $this->havingList[] = $fieldHaving . ' ' . $sign . ' ' . $bindName;
+        $this->havingList[] = $fieldHaving . ' ' . $operator->value . ' ' . $bindName;
 
         return $this;
     }
 
     /**
      * Get GroupBy clause.
-     *
-     * @return string
      */
     public function getQueryGroupBy(): string
     {
@@ -78,8 +64,6 @@ trait GroupTrait
 
     /**
      * Get Having clause.
-     *
-     * @return string
      */
     public function getQueryHaving(): string
     {
@@ -95,10 +79,7 @@ trait GroupTrait
         return $return;
     }
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    public function resetGroup(): QueryBuilderInterface
+    public function resetGroup(): static
     {
         $this->havingList = [];
         $this->groupList  = [];

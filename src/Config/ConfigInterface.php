@@ -105,14 +105,14 @@ interface ConfigInterface
     /**
      * Get validation config.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getValidation(): array;
 
     /**
      * Get Config object(s) for "joined" tables
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getAllJoin(): array;
 

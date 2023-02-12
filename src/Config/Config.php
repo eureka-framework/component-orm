@@ -21,7 +21,7 @@ class Config extends AbstractConfig
     /**
      * Initialize config.
      *
-     * @param  array $config
+     * @param  array<mixed> $config
      * @return $this
      */
     protected function init(array $config): ConfigInterface

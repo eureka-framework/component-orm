@@ -12,27 +12,41 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Query;
 
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
+use Eureka\Component\Orm\Query\Interfaces\FieldAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\GroupAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\JoinAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\LimitAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\OrderAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\WhereAwareInterface;
 use Eureka\Component\Orm\Query\Traits;
 
 /**
  * Class SelectBuilder
  *
  * @author Romain Cottard
+ *
+ * @template TRepository of \Eureka\Component\Orm\RepositoryInterface
+ * @template TEntity of \Eureka\Component\Orm\EntityInterface
+ * @implements FieldAwareInterface<TRepository>
+ * @extends AbstractQueryBuilder<TRepository, TEntity>
  */
-class SelectBuilder extends AbstractQueryBuilder
+class SelectBuilder extends AbstractQueryBuilder implements
+    FieldAwareInterface,
+    GroupAwareInterface,
+    JoinAwareInterface,
+    LimitAwareInterface,
+    OrderAwareInterface,
+    WhereAwareInterface
 {
-    use Traits\FieldTrait;
-    use Traits\GroupTrait;
-    use Traits\LimitTrait;
-    use Traits\OrderTrait;
-    use Traits\WhereTrait;
-    use Traits\JoinTrait;
+    /** @use Traits\FieldAwareTrait<TRepository> */
+    use Traits\FieldAwareTrait;
+    use Traits\GroupAwareTrait;
+    use Traits\JoinAwareTrait;
+    use Traits\LimitAwareTrait;
+    use Traits\OrderAwareTrait;
+    use Traits\WhereAwareTrait;
 
-    /**
-     * @param bool $forNotCached
-     * @return QueryBuilderInterface
-     */
-    public function clear(bool $forNotCached = false): QueryBuilderInterface
+    public function clear(bool $forNotCached = false): static
     {
         if (!$forNotCached) {
             $this->resetFields();

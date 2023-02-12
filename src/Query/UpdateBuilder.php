@@ -13,23 +13,29 @@ namespace Eureka\Component\Orm\Query;
 
 use Eureka\Component\Orm\Exception\EmptySetClauseException;
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
+use Eureka\Component\Orm\Exception\InvalidQueryException;
+use Eureka\Component\Orm\Query\Interfaces\FieldAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\WhereAwareInterface;
 use Eureka\Component\Orm\Query\Traits;
 
 /**
  * Class UpdateBuilder
  *
  * @author Romain Cottard
+ *
+ * @template TRepository of \Eureka\Component\Orm\RepositoryInterface
+ * @template TEntity of \Eureka\Component\Orm\EntityInterface
+ * @implements FieldAwareInterface<TRepository>
+ * @extends AbstractQueryBuilder<TRepository, TEntity>
  */
-class UpdateBuilder extends AbstractQueryBuilder
+class UpdateBuilder extends AbstractQueryBuilder implements FieldAwareInterface, WhereAwareInterface
 {
-    use Traits\WhereTrait;
-    use Traits\FieldTrait;
-    use Traits\SetTrait;
+    /** @use Traits\FieldAwareTrait<TRepository> */
+    use Traits\FieldAwareTrait;
+    use Traits\SetAwareTrait;
+    use Traits\WhereAwareTrait;
 
-    /**
-     * @return QueryBuilderInterface
-     */
-    public function clear(): QueryBuilderInterface
+    public function clear(): static
     {
         $this->resetBind();
         $this->resetFields();
@@ -43,9 +49,14 @@ class UpdateBuilder extends AbstractQueryBuilder
      * @return string
      * @throws EmptySetClauseException
      * @throws EmptyWhereClauseException
+     * @throws InvalidQueryException
      */
     public function getQuery(): string
     {
+        if ($this->entity === null) {
+            throw new InvalidQueryException('Entity must be given to perform an update!');
+        }
+
         //~ List of fields to update.
         $primaryKeys = $this->repository->getPrimaryKeys();
 

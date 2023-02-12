@@ -23,7 +23,7 @@ use Eureka\Component\Orm\Generator\Compiler\Field\Field;
  */
 class JoinCompiler extends AbstractMethodCompiler
 {
-    /** @var array $joinConfig */
+    /** @var array{instance: ConfigInterface, relation: string, keys: array<bool|string>} $joinConfig */
     private array $joinConfig;
 
     /** @var Field[] $fields */
@@ -39,13 +39,18 @@ class JoinCompiler extends AbstractMethodCompiler
      * JoinCompiler constructor.
      *
      * @param ConfigInterface $config
-     * @param array $joinConfig
+     * @param array{instance: ConfigInterface, relation: string, keys: array<string, bool|string>} $joinConfig
      * @param Field[] $fields
      * @param Context $mainContext
      * @param string $name
      */
-    public function __construct(ConfigInterface $config, array $joinConfig, array $fields, Context $mainContext, string $name = '')
-    {
+    public function __construct(
+        ConfigInterface $config,
+        array $joinConfig,
+        array $fields,
+        Context $mainContext,
+        string $name = ''
+    ) {
         if ($joinConfig['relation'] === 'many') {
             $templates = [
                 __DIR__ . '/../Templates/MethodJoinMany.template' => false,
@@ -74,7 +79,6 @@ class JoinCompiler extends AbstractMethodCompiler
      */
     public function updateContext(Context $context, bool $isAbstract = false): Context
     {
-        /** @var ConfigInterface $config */
         $config = $this->joinConfig['instance'];
 
         $className = $config->getClassname();
@@ -95,7 +99,6 @@ class JoinCompiler extends AbstractMethodCompiler
      */
     public function updateGlobalContext(): self
     {
-        /** @var ConfigInterface $config */
         $config    = $this->joinConfig['instance'];
         $className = $config->getClassname();
         $name      = !empty($this->name) ? $this->name : $className;
@@ -108,7 +111,7 @@ class JoinCompiler extends AbstractMethodCompiler
                 $compiler        = new PropertyCompiler(
                     'joinManyCache' . $name,
                     '?array',
-                    $className . '[]|EntityInterface[]|null',
+                    $className . '[]|null',
                     'null'
                 );
 
@@ -120,7 +123,7 @@ class JoinCompiler extends AbstractMethodCompiler
                 $compiler = new PropertyCompiler(
                     'joinOneCache' . $name,
                     '?' . $className,
-                    $className . '|EntityInterface|null',
+                    $className . '|null',
                     'null'
                 );
 
@@ -147,9 +150,6 @@ class JoinCompiler extends AbstractMethodCompiler
         return $this;
     }
 
-    /**
-     * @return string
-     */
     private function buildKeys(): string
     {
         $joinKeys = $this->joinConfig['keys'];

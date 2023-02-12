@@ -29,12 +29,12 @@ trait ValidatorAwareTrait
     /** @var ValidatorEntityFactoryInterface|null $validatorEntityFactory */
     private ?ValidatorEntityFactoryInterface $validatorEntityFactory;
 
-    /** @var array $validationConfig */
+    /** @var array<mixed> $validationConfig */
     private array $validationConfig = [];
 
     /**
-     * @param array $data
-     * @param array $config
+     * @param array<mixed> $data
+     * @param array<mixed> $config
      * @return GenericEntity
      */
     public function newGenericEntity(array $data = [], array $config = []): GenericEntity
@@ -45,12 +45,12 @@ trait ValidatorAwareTrait
     /**
      * @param ValidatorFactoryInterface|null $validatorFactory
      * @param ValidatorEntityFactoryInterface|null $validatorEntityFactory
-     * @return self
+     * @return static
      */
     protected function setValidatorFactories(
         ?ValidatorFactoryInterface $validatorFactory,
         ?ValidatorEntityFactoryInterface $validatorEntityFactory
-    ): self {
+    ): static {
         $this->validatorFactory       = $validatorFactory;
         $this->validatorEntityFactory = $validatorEntityFactory;
 
@@ -74,7 +74,7 @@ trait ValidatorAwareTrait
     }
 
     /**
-     * @return array
+     * @return array<mixed>
      */
     public function getValidatorConfig(): array
     {
@@ -82,7 +82,7 @@ trait ValidatorAwareTrait
     }
 
     /**
-     * @param array $config
+     * @param array<mixed> $config
      * @return void
      */
     protected function setValidatorConfig(array $config): void
@@ -92,25 +92,29 @@ trait ValidatorAwareTrait
 
     /**
      * @param string $field
-     * @param $data
+     * @param mixed $data
      * @return void
      * @throws ValidationException
      */
-    protected function validateInput(string $field, $data): void
+    protected function validateInput(string $field, mixed $data): void
     {
         if (empty($this->validationConfig[$field])) {
-            throw new ValidationException('No validation config defined for given field! (field: ' . $field . ')'); // @codeCoverageIgnore
+            // @codeCoverageIgnoreStart
+            throw new ValidationException('No validation config defined for given field! (field: ' . $field . ')');
+            // @codeCoverageIgnoreEnd
         }
 
         $config = $this->validationConfig[$field];
         if (empty($config['type'])) {
-            throw new ValidationException('No validation type defined for given field! (field: ' . $field . ')'); // @codeCoverageIgnore
+            // @codeCoverageIgnoreStart
+            throw new ValidationException('No validation type defined for given field! (field: ' . $field . ')');
+            // @codeCoverageIgnoreEnd
         }
 
         $validatorType    = $config['type'];
         $validatorOptions = $config['options'] ?? [];
 
-        if (strpos($validatorType, '\\') !== false) {
+        if (str_contains($validatorType, '\\')) {
             //~ Custom class validator
             $validator = new $validatorType(); // @codeCoverageIgnore
         } else {

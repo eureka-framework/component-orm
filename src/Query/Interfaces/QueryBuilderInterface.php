@@ -9,26 +9,27 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm\Query;
+namespace Eureka\Component\Orm\Query\Interfaces;
 
 use Eureka\Component\Orm\Exception\OrmException;
 
-/**
- * QueryBuilderInterface
- *
- * @author Romain Cottard
- */
 interface QueryBuilderInterface
 {
     /**
      * Clear query params
-     *
-     * @return QueryBuilderInterface
      */
-    public function clear(): QueryBuilderInterface;
+    public function clear(): static;
 
     /**
-     * @return array
+     * @param  string $field
+     * @param  string|int|float|bool|null $value
+     * @param  bool $isUnique
+     * @return string Return bind name field
+     */
+    public function addBind(string $field, string|int|float|bool|null $value, bool $isUnique = false): string;
+
+    /**
+     * @return array<string|int|float|bool|null>
      */
     public function getBind(): array;
 
@@ -49,7 +50,7 @@ interface QueryBuilderInterface
      * Set indexed by
      *
      * @param  string $field
-     * @return QueryBuilderInterface
+     * @return static
      */
-    public function setListIndexedByField(string $field): QueryBuilderInterface;
+    public function setListIndexedByField(string $field): static;
 }

@@ -11,58 +11,31 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Orm\Query\QueryBuilder;
-use Eureka\Component\Orm\Query\QueryBuilderInterface;
-use Eureka\Component\Orm\Query\SelectBuilder;
+use Eureka\Component\Orm\Query;
 
 /**
  * DataMapper Mapper abstract class.
  *
  * @author  Romain Cottard
+ *
+ * @template TEntity of EntityInterface
+ * @template TRepository of RepositoryInterface
+ * @extends EntityAwareInterface<TEntity>
  */
 interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface, EntityAwareInterface
 {
     /**
-     * @param  AbstractMapper[] $mappers
-     * @return RepositoryInterface
+     * @param  TRepository[] $mappers
+     * @return static
      */
-    public function addMappers(array $mappers): RepositoryInterface;
+    public function addMappers(array $mappers): static;
 
     /**
-     * @param string $name
-     * @return RepositoryInterface
+     * @template TRepositoryJoin of RepositoryInterface
+     * @phpstan-param class-string<TRepositoryJoin> $name
+     * @return TRepositoryJoin
      */
     public function getMapper(string $name): RepositoryInterface;
-
-    /**
-     * Return fields for current table.
-     *
-     * @return string[]
-     */
-    public function getFields(): array;
-
-    /**
-     * Return the primary keys
-     *
-     * @return string[]
-     */
-    public function getPrimaryKeys(): array;
-
-    /**
-     * Return a map of names (set, get and property) for a db field
-     *
-     * @param  string $field
-     * @return string[]
-     * @throws \OutOfRangeException
-     */
-    public function getNamesMap(string $field): array;
-
-    /**
-     * Return fields for current table.
-     *
-     * @return string
-     */
-    public function getTable(): string;
 
     /**
      *  Returns the number of rows affected by the last SQL statement
@@ -89,56 +62,56 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Count number of results for query.
      *
-     * @param  QueryBuilder $queryBuilder
+     * @param  Query\QueryBuilder<TRepository, TEntity> $queryBuilder
      * @param  string $field
      * @return int
      * @throws \DomainException
      */
-    public function count(QueryBuilder $queryBuilder, string $field = '*'): int;
+    public function count(Query\QueryBuilder $queryBuilder, string $field = '*'): int;
 
     /**
-     * Check if value row exists in database..
+     * Check if value row exists in database.
      *
-     * @param  SelectBuilder $queryBuilder
+     * @param  Query\SelectBuilder<TRepository, TEntity> $queryBuilder
      * @return bool
      * @throws Exception\OrmException
      */
-    public function rowExists(SelectBuilder $queryBuilder): bool;
+    public function rowExists(Query\SelectBuilder $queryBuilder): bool;
 
     /**
      * Fetch rows for specified query.
      *
-     * @param  QueryBuilderInterface $queryBuilder
-     * @return EntityInterface[] Array of EntityInterface object for query.
+     * @param  Query\Interfaces\QueryBuilderInterface $queryBuilder
+     * @return TEntity[] Array of EntityInterface object for query.
      * @throws Exception\OrmException
      */
-    public function query(QueryBuilderInterface $queryBuilder): array;
+    public function query(Query\Interfaces\QueryBuilderInterface $queryBuilder): array;
 
     /**
      * Fetch rows for specified query.
      *
-     * @param  QueryBuilderInterface $queryBuilder
+     * @param  Query\Interfaces\QueryBuilderInterface $queryBuilder
      * @return \stdClass[] Array of stdClass object for query.
      * @throws Exception\OrmException
      */
-    public function queryRows(QueryBuilderInterface $queryBuilder): array;
+    public function queryRows(Query\Interfaces\QueryBuilderInterface $queryBuilder): array;
 
     /**
      * Select all rows corresponding of where clause.
      *
-     * @param  SelectBuilder $queryBuilder
-     * @return EntityInterface[] List of row.
+     * @param  Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @return TEntity[] List of row.
      * @throws Exception\OrmException
      */
-    public function select(SelectBuilder $queryBuilder): array;
+    public function select(Query\SelectBuilder $queryBuilder): array;
 
     /**
      * Select all rows corresponding of where clause.
      * Use eager loading to select joined entities.
      *
-     * @param Query\SelectBuilder $queryBuilder
-     * @param array $filters
-     * @return array
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param string[] $filters
+     * @return TEntity[]
      * @throws Exception\OrmException
      * @throws Exception\UndefinedMapperException
      */
@@ -147,11 +120,11 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Select first rows corresponding to where clause.
      *
-     * @param  SelectBuilder $queryBuilder
-     * @return EntityInterface
+     * @param  Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @return TEntity
      * @throws Exception\EntityNotExistsException
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
      */
-    public function selectOne(SelectBuilder $queryBuilder);
+    public function selectOne(Query\SelectBuilder $queryBuilder): EntityInterface;
 }

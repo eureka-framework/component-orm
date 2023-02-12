@@ -1,12 +1,9 @@
 parameters:
   phpVersion: 80100 # PHP 8.1 - Current minimal version supported
-  level: 1
+  level: 6
   paths:
     - ./src
     - ./tests
 
   bootstrapFiles:
     - ./vendor/autoload.php
-
-  ignoreErrors:
-    - '`Call to an undefined method Eureka\\Component\\Orm\\RepositoryInterface::.+`'

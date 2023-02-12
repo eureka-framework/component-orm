@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm;
 
 use Eureka\Component\Database\ConnectionFactory;
+use Eureka\Component\Orm\Enumerator\Operator;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\Traits;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
@@ -22,14 +23,22 @@ use Psr\Cache\CacheItemPoolInterface;
  * DataMapper Mapper abstract class.
  *
  * @author Romain Cottard
+ *
+ * @template TEntity of EntityInterface
+ * @template TRepository of RepositoryInterface
  */
-abstract class AbstractMapper implements RepositoryInterface
+abstract class AbstractMapper
 {
+    /** @use Traits\CacheAwareTrait<TEntity, TRepository> */
     use Traits\CacheAwareTrait;
     use Traits\ConnectionAwareTrait;
+    /** @use Traits\EntityAwareTrait<TEntity> */
     use Traits\EntityAwareTrait;
+    /** @use Traits\MapperTrait<TEntity, TRepository> */
     use Traits\MapperTrait;
+    /** @use Traits\RepositoryTrait<TEntity, TRepository> */
     use Traits\RepositoryTrait;
+    use Traits\TableTrait;
     use Traits\ValidatorAwareTrait;
 
     /**
@@ -44,7 +53,7 @@ abstract class AbstractMapper implements RepositoryInterface
      * @param ConnectionFactory $connectionFactory
      * @param ValidatorFactoryInterface|null $validatorFactory
      * @param ValidatorEntityFactory|null $validatorEntityFactory
-     * @param array $mappers
+     * @param TRepository[] $mappers
      * @param CacheItemPoolInterface|null $cache
      * @param bool $enableCacheOnRead
      */
@@ -73,7 +82,7 @@ abstract class AbstractMapper implements RepositoryInterface
 
     /**
      * @param callable $callback
-     * @param Query\SelectBuilder $queryBuilder
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
      * @param string $key
      * @param int $start
      * @param int $end
@@ -101,24 +110,26 @@ abstract class AbstractMapper implements RepositoryInterface
         $statement->execute();
 
         $bounds = $statement->fetch(\PDO::FETCH_OBJ);
+        if (!($bounds instanceof \stdClass)) {
+            return;
+        }
 
-        $minIndex          = max($start, $bounds->min_value);
+        $minIndex          = (int) max($start, $bounds->min_value);
         $maxIndex          = $end < 0 ? $bounds->max_value : min($end, $bounds->max_value);
         $currentBatchIndex = $minIndex;
 
         while ($currentBatchIndex <= $maxIndex) {
-            /** @var RepositoryInterface $this */
-            $clonedQueryBuilder = clone Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
+            $clonedQueryBuilder = clone $queryBuilder;
             $clonedQueryBuilder
-                ->addWhere($key, $currentBatchIndex, '>=')
+                ->addWhere($key, $currentBatchIndex, Operator::GreaterThanOrEqual)
                 ->addWhere(
                     $key,
                     $currentBatchIndex + $batchSize,
-                    '<'
+                    Operator::LesserThan
                 )
             ;
 
-            $batch = $this->query($clonedQueryBuilder);
+            $batch = $this->query($queryBuilder);
 
             foreach ($batch as $item) {
                 call_user_func($callback, $item);

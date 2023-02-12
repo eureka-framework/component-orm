@@ -22,11 +22,6 @@ use Eureka\Component\Orm\Generator\Type;
  */
 class FieldSetterCompiler extends AbstractFieldCompiler
 {
-    /**
-     * FieldSetterCompiler constructor.
-     *
-     * @param Field $field
-     */
     public function __construct(Field $field)
     {
         parent::__construct(
@@ -37,11 +32,6 @@ class FieldSetterCompiler extends AbstractFieldCompiler
         );
     }
 
-    /**
-     * @param Context $context
-     * @param bool $isAbstract
-     * @return Context
-     */
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
         $exception  = '';
@@ -61,8 +51,6 @@ class FieldSetterCompiler extends AbstractFieldCompiler
     }
 
     /**
-     * @param  Type\TypeInterface $type
-     * @param  string $varname
      * @return string[]
      */
     private function getValidations(Type\TypeInterface $type, string $varname): array
@@ -70,7 +58,7 @@ class FieldSetterCompiler extends AbstractFieldCompiler
         $validations      = [];
         $validationConfig = $this->field->getValidation();
 
-        if ($this->field->hasValidation() && !empty($validationConfig)) {
+        if ($this->field->hasValidation() && !empty($validationConfig['type'])) {
             $validatorType = $validationConfig['type'];
         } elseif ($this->field->hasValidationAuto() && !empty($type->getValidatorType())) {
             $validatorType = $type->getValidatorType();

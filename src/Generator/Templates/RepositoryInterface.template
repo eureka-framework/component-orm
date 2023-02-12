@@ -17,6 +17,8 @@ use {{ orm.namespace }}\RepositoryInterface;
  * {{ class.name }} repository interface.
  *
  * @author {{ comment.author }}
+ *
+ * @extends RepositoryInterface<\{{ entity.namespace }}\{{ class.entity }}, {{ class.repository }}>
  */
 interface {{ class.repository }} extends RepositoryInterface
 {

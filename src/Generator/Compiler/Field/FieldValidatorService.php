@@ -23,10 +23,9 @@ class FieldValidatorService
 {
     /**
      * @param Field $field
-     * @param bool $toString
-     * @return array|mixed|string
+     * @return array<mixed>
      */
-    public function getValidatorOptions(Field $field, bool $toString = false)
+    public function getValidatorOptions(Field $field): array
     {
         $validationConfig = $field->getValidation();
 
@@ -36,9 +35,12 @@ class FieldValidatorService
             $options = $this->getValidatorOptionsFromType($field, $field->getType(), $options);
         }
 
-        if (!$toString) {
-            return $options; // @codeCoverageIgnore
-        }
+        return $options;
+    }
+
+    public function getValidatorOptionsAsString(Field $field): string
+    {
+        $options = $this->getValidatorOptions($field);
 
         $return = [];
         foreach ($options as $name => $value) {
@@ -51,8 +53,8 @@ class FieldValidatorService
     /**
      * @param Field $field
      * @param Type\TypeInterface $type
-     * @param array $options
-     * @return array
+     * @param array<mixed> $options
+     * @return array<mixed>
      */
     private function getValidatorOptionsFromType(Field $field, Type\TypeInterface $type, array $options = []): array
     {
@@ -105,36 +107,33 @@ class FieldValidatorService
     /**
      * @param string $typeClass
      * @param bool $isUnsigned
-     * @return array
+     * @return int[]
      */
     private function getIntegerOptions(string $typeClass, bool $isUnsigned): array
     {
-        switch ($typeClass) {
-            case Type\TypeBigint::class:
-                $options = $isUnsigned ? IntegerValidator::BIGINT_UNSIGNED : IntegerValidator::BIGINT_SIGNED;
-                break;
-            case Type\TypeInt::class:
-                $options = $isUnsigned ? IntegerValidator::INT_UNSIGNED : IntegerValidator::INT_SIGNED;
-                break;
-            case Type\TypeMediumint::class:
-                $options = $isUnsigned ? IntegerValidator::MEDIUMINT_UNSIGNED : IntegerValidator::MEDIUMINT_SIGNED;
-                break;
-            case Type\TypeSmallint::class:
-                $options = $isUnsigned ? IntegerValidator::SMALLINT_UNSIGNED : IntegerValidator::SMALLINT_SIGNED;
-                break;
-            case Type\TypeTinyint::class:
-                $options = $isUnsigned ? IntegerValidator::TINYINT_UNSIGNED : IntegerValidator::TINYINT_SIGNED;
-                break;
-            default: // should not happened
-                $options = []; // @codeCoverageIgnore
-        }
-
-        return $options;
+        return match ($typeClass) {
+            Type\TypeBigint::class => $isUnsigned ?
+                IntegerValidator::BIGINT_UNSIGNED :
+                IntegerValidator::BIGINT_SIGNED,
+            Type\TypeInt::class => $isUnsigned ?
+                IntegerValidator::INT_UNSIGNED :
+                IntegerValidator::INT_SIGNED,
+            Type\TypeMediumint::class => $isUnsigned ?
+                IntegerValidator::MEDIUMINT_UNSIGNED :
+                IntegerValidator::MEDIUMINT_SIGNED,
+            Type\TypeSmallint::class => $isUnsigned ?
+                IntegerValidator::SMALLINT_UNSIGNED :
+                IntegerValidator::SMALLINT_SIGNED,
+            Type\TypeTinyint::class => $isUnsigned ?
+                IntegerValidator::TINYINT_UNSIGNED :
+                IntegerValidator::TINYINT_SIGNED,
+            default => [],
+        };
     }
 
     /**
      * @param bool $isUnsigned
-     * @return array
+     * @return float[]
      */
     private function getDecimalOptions(bool $isUnsigned): array
     {
@@ -145,7 +144,7 @@ class FieldValidatorService
      * @param string $typeClass
      * @param Type\TypeInterface $type
      * @param bool $isNullable
-     * @return array
+     * @return int[]
      */
     private function getStringOptions(string $typeClass, Type\TypeInterface $type, bool $isNullable): array
     {

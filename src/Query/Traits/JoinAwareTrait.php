@@ -11,27 +11,16 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
-use Eureka\Component\Orm\Query\QueryBuilderInterface;
-
 /**
  * Trait JoinTrait
  *
  * @author Romain Cottard
  */
-trait JoinTrait
+trait JoinAwareTrait
 {
-    /** @var string[] $joinList List of [LEFT|RIGHT] JOIN table ON ... */
+    /** @var string[] $joinList List of (LEFT|RIGHT|INNER) JOIN table ON ... */
     protected array $joinList = [];
 
-    /**
-     * @param string $joinType
-     * @param string $joinTable
-     * @param string $mainField
-     * @param string $mainAlias
-     * @param string $joinField
-     * @param string $joinAlias
-     * @return $this|QueryBuilderInterface
-     */
     public function addJoin(
         string $joinType,
         string $joinTable,
@@ -39,7 +28,7 @@ trait JoinTrait
         string $mainAlias,
         string $joinField,
         string $joinAlias
-    ): QueryBuilderInterface {
+    ): static {
 
         $using    = 'ON ' . $mainAlias . '.' . $mainField . ' = ' . $joinAlias . '.' . $joinField;
         $this->joinList[]  = ' ' . $joinType . ' JOIN ' . $joinTable . ' AS ' . $joinAlias . ' ' . $using;
@@ -47,19 +36,11 @@ trait JoinTrait
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasJoin(): bool
     {
         return (count($this->joinList) > 0);
     }
 
-    /**
-     * Get Set clause.
-     *
-     * @return string
-     */
     public function getQueryJoin(): string
     {
         if (!$this->hasJoin()) {
@@ -69,10 +50,7 @@ trait JoinTrait
         return implode(' ', $this->joinList) . ' ';
     }
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    public function resetJoin(): QueryBuilderInterface
+    public function resetJoin(): static
     {
         $this->joinList = [];
 

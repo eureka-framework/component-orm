@@ -22,6 +22,10 @@ use {{ entity.namespace }}\{{ class.entity }};
  * You can add your specific code in child class: {{ class.child }}
  *
  * @author {{ comment.author }}
+
+ * @template TEntity of \{{ orm.namespace }}\EntityInterface
+ * @template TRepository of \{{ orm.namespace }}\RepositoryInterface
+ * @extends AbstractMapper<TEntity, TRepository>
  */
 abstract class Abstract{{ class.mapper }} extends AbstractMapper
 {

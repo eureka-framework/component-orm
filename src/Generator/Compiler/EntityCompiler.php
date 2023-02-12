@@ -18,7 +18,6 @@ use Eureka\Component\Orm\Generator\Compiler\Field\FieldGetterCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldPropertyCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterAutoIncrementCompiler;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldSetterCompiler;
-use Eureka\Component\Orm\Generator\Compiler\Field\FieldValidatorService;
 
 /**
  * Class EntityCompiler
@@ -52,12 +51,18 @@ class EntityCompiler extends AbstractClassCompiler
      */
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
-        $context->add('class.namespace', $this->config->getBaseNamespaceForEntity() . ($isAbstract ? '\Abstracts' : ''));
+        $context->add('repository.namespace', $this->config->getBaseNamespaceForRepository());
+        $context->add(
+            'class.namespace',
+            $this->config->getBaseNamespaceForEntity() . ($isAbstract ? '\Abstracts' : '')
+        );
         $context->add('cache.key.prefix', rtrim($this->config->getCachePrefix(), '.'));
         $context->add('cache.key.suffix', $this->buildCacheSuffix());
         $context->add('validator.config', $this->buildValidatorConfig());
 
-        $context->add('entity.uses', []);
+        $context->add('entity.uses', [
+            'use ' . $this->config->getBaseNamespaceForRepository() . '\\' . $context->get('class.repository') . ';',
+        ]);
 
         $compiledTemplate = [
             'properties' => [],
@@ -68,12 +73,26 @@ class EntityCompiler extends AbstractClassCompiler
 
         //~ Compile templates about fields
         foreach ($this->fields as $field) {
-            $compiledTemplate['properties'] = array_merge($compiledTemplate['properties'], (new FieldPropertyCompiler($field))->compile());
-            $compiledTemplate['getters']    = array_merge($compiledTemplate['getters'], (new FieldGetterCompiler($field))->compile());
-            $compiledTemplate['setters']    = array_merge($compiledTemplate['setters'], (new FieldSetterCompiler($field))->compile());
+            $compiledTemplate['properties'] = array_merge(
+                $compiledTemplate['properties'],
+                (new FieldPropertyCompiler($field))->compile()
+            );
+
+            $compiledTemplate['getters'] = array_merge(
+                $compiledTemplate['getters'],
+                (new FieldGetterCompiler($field))->compile()
+            );
+
+            $compiledTemplate['setters'] = array_merge(
+                $compiledTemplate['setters'],
+                (new FieldSetterCompiler($field))->compile()
+            );
 
             if ($field->isAutoIncrement()) {
-                $compiledTemplate['setters'] = array_merge($compiledTemplate['setters'], (new FieldSetterAutoIncrementCompiler($field))->compile());
+                $compiledTemplate['setters'] = array_merge(
+                    $compiledTemplate['setters'],
+                    (new FieldSetterAutoIncrementCompiler($field))->compile()
+                );
             }
         }
 
@@ -98,9 +117,6 @@ class EntityCompiler extends AbstractClassCompiler
         return $context;
     }
 
-    /**
-     * @return string
-     */
     private function buildCacheSuffix(): string
     {
         $getters = [];
@@ -114,10 +130,6 @@ class EntityCompiler extends AbstractClassCompiler
         return implode(' . ', $getters);
     }
 
-    /**
-     * @param Context $context
-     * @return void
-     */
     private function appendClassUseOrmException(Context $context): void
     {
         $classUses = $context->get('entity.uses');

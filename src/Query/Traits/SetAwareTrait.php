@@ -12,37 +12,21 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Query\Traits;
 
 use Eureka\Component\Orm\Exception\EmptySetClauseException;
-use Eureka\Component\Orm\Query\QueryBuilderInterface;
 
 /**
  * Class SetTrait
  *
  * @author Romain Cottard
  */
-trait SetTrait
+trait SetAwareTrait
 {
     /** @var string[] $setList List of set for current query (update or insert) */
     protected array $setList = [];
 
-    /** @var string[] $setList List of set for current query (update or insert) */
+    /** @var string[] $updateList List of set for current query (update or insert) */
     protected array $updateList = [];
 
-    /**
-     * @param  string $field
-     * @param  mixed $value
-     * @param  bool $isUnique
-     * @return string Return bind name field
-     */
-    abstract public function addBind(string $field, $value, bool $isUnique = false): string;
-
-    /**
-     * Add set clause.
-     *
-     * @param string $field
-     * @param string|int|null $value
-     * @return self|QueryBuilderInterface
-     */
-    public function addSet(string $field, $value): QueryBuilderInterface
+    public function addSet(string $field, string|int|float|bool|null $value): static
     {
         $bindName = $this->addBind($field, $value, true);
 
@@ -51,14 +35,7 @@ trait SetTrait
         return $this;
     }
 
-    /**
-     * Add set clause.
-     *
-     * @param  string $field
-     * @param  string|int|null $value
-     * @return self|QueryBuilderInterface
-     */
-    public function addUpdate(string $field, $value): QueryBuilderInterface
+    public function addUpdate(string $field, string|int|float|bool|null $value): static
     {
         $bindName = $this->addBind($field, $value, true);
 
@@ -68,9 +45,6 @@ trait SetTrait
     }
 
     /**
-     * Get Set clause.
-     *
-     * @return string
      * @throws EmptySetClauseException
      */
     public function getQuerySet(): string
@@ -84,8 +58,6 @@ trait SetTrait
 
     /**
      * Get on duplicate update clause.
-     *
-     * @return string
      */
     public function getQueryDuplicateUpdate(): string
     {
@@ -96,10 +68,7 @@ trait SetTrait
         return ' ON DUPLICATE KEY UPDATE ' . implode(', ', $this->updateList);
     }
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    public function resetSet(): QueryBuilderInterface
+    public function resetSet(): static
     {
         $this->setList    = [];
         $this->updateList = [];

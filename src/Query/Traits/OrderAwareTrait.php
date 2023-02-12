@@ -11,46 +11,31 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
-use Eureka\Component\Orm\Query\QueryBuilderInterface;
+use Eureka\Component\Orm\Enumerator\Order;
 
 /**
  * Class OrderTrait
  *
  * @author Romain Cottard
  */
-trait OrderTrait
+trait OrderAwareTrait
 {
     /** @var string[] $orderList List of order by restriction for current query */
     private array $orderList = [];
 
-    /**
-     * Add order clause.
-     *
-     * @param  string $field
-     * @param  string $dir
-     * @return self|QueryBuilderInterface
-     */
-    public function addOrder(string $field, string $dir = 'ASC'): QueryBuilderInterface
+    public function addOrder(string $field, Order $dir = Order::Asc): static
     {
-        $this->orderList[] = $field . ' ' . $dir;
+        $this->orderList[] = $field . ' ' . $dir->value;
 
         return $this;
     }
 
-    /**
-     * Get OrderBy clause.
-     *
-     * @return string
-     */
     public function getQueryOrderBy(): string
     {
         return (0 < count($this->orderList) ? ' ORDER BY ' . implode(',', $this->orderList) : '');
     }
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    public function resetOrder(): QueryBuilderInterface
+    public function resetOrder(): static
     {
         $this->orderList = [];
 

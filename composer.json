@@ -21,7 +21,7 @@
 
   "autoload-dev": {
     "psr-4": {
-      "Eureka\\Component\\Orm\\Tests\\": "./src"
+      "Eureka\\Component\\Orm\\Tests\\": "./tests"
     }
   },
 

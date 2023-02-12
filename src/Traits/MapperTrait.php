@@ -16,6 +16,7 @@ use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Exception;
 use Eureka\Component\Orm\Query;
+use Eureka\Component\Orm\Query\Interfaces\QueryBuilderInterface;
 use Eureka\Component\Orm\RepositoryInterface;
 use PDO;
 
@@ -23,81 +24,29 @@ use PDO;
  * DataMapper Mapper abstract class.
  *
  * @author Romain Cottard
+ *
+ * @template TEntity of EntityInterface
+ * @template TRepository of RepositoryInterface
  */
 trait MapperTrait
 {
-    /** @var string $table */
-    protected string $table = '';
-
-    /** @var string[] $fields */
-    protected array $fields = [];
-
-    /** @var string[] $primaryKeys */
-    protected array $primaryKeys = [];
-
-    /** @var string[][] $entityNamesMap */
-    protected array $entityNamesMap = [];
-
     /** @var int $lastId */
     protected int $lastId = 0;
 
     /** @var int $rowCount The number of rows affected by the last SQL statement */
     protected int $rowCount = 0;
 
-    /** @var RepositoryInterface[] $mappers */
+    /** @var array<TRepository> $mappers */
     protected array $mappers = [];
 
-    /** @var array $joinConfigs */
+    /** @var array<mixed> $joinConfigs */
     protected array $joinConfigs = [];
 
     /**
-     * Get fields for Mapper
-     *
-     * @return array
+     * @param  TRepository[] $mappers
+     * @return static
      */
-    public function getFields(): array
-    {
-        return $this->fields;
-    }
-
-    /**
-     * Get primary keys.
-     *
-     * @return string[]
-     */
-    public function getPrimaryKeys(): array
-    {
-        return $this->primaryKeys;
-    }
-
-    /**
-     * Get table name.
-     *
-     * @return string
-     */
-    public function getTable(): string
-    {
-        return $this->table;
-    }
-
-    /**
-     * @param  string $field
-     * @return array
-     */
-    public function getNamesMap(string $field): array
-    {
-        if (!isset($this->entityNamesMap[$field])) {
-            throw new \OutOfRangeException('Specified field does not exist in data names map');
-        }
-
-        return $this->entityNamesMap[$field];
-    }
-
-    /**
-     * @param  RepositoryInterface[] $mappers
-     * @return self|RepositoryInterface
-     */
-    public function addMappers(array $mappers): RepositoryInterface
+    public function addMappers(array $mappers): static
     {
         $this->mappers = array_merge($this->mappers, $mappers);
 
@@ -105,8 +54,9 @@ trait MapperTrait
     }
 
     /**
-     * @param string $name
-     * @return RepositoryInterface
+     * @template TRepositoryJoin of RepositoryInterface
+     * @phpstan-param class-string<TRepositoryJoin> $name
+     * @return TRepositoryJoin
      * @throws Exception\UndefinedMapperException
      */
     public function getMapper(string $name): RepositoryInterface
@@ -123,7 +73,7 @@ trait MapperTrait
         return $this->lastId;
     }
 
-    public function setLastId(int $lastId): self
+    public function setLastId(int $lastId): static
     {
         $this->lastId = $lastId;
 
@@ -160,10 +110,10 @@ trait MapperTrait
     /**
      * Count number of rows corresponding to the query.
      *
-     * @param Query\QueryBuilder $queryBuilder
+     * @param Query\QueryBuilder<TRepository, TEntity> $queryBuilder
      * @param string $field
      * @return int
-     * @throws Exception\ConnectionLostDuringTransactionException
+     * @throws Exception\ConnectionLostDuringTransactionException|Exception\EmptyWhereClauseException
      */
     public function count(Query\QueryBuilder $queryBuilder, string $field = '*'): int
     {
@@ -171,11 +121,11 @@ trait MapperTrait
 
         $queryBuilder->clear();
 
-        return (int) $statement->fetchColumn(0);
+        return (int) $statement->fetchColumn();
     }
 
     /**
-     * @param Query\SelectBuilder $queryBuilder
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
      * @return bool
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
@@ -186,17 +136,17 @@ trait MapperTrait
             $this->selectOne($queryBuilder);
 
             return true;
-        } catch (Exception\EntityNotExistsException $exception) {
+        } catch (Exception\EntityNotExistsException) {
             return false;
         }
     }
 
     /**
-     * @param Query\QueryBuilderInterface $queryBuilder
-     * @return array
+     * @param QueryBuilderInterface $queryBuilder
+     * @return TEntity[]
      * @throws Exception\OrmException
      */
-    public function query(Query\QueryBuilderInterface $queryBuilder): array
+    public function query(QueryBuilderInterface $queryBuilder): array
     {
         $indexedBy = $queryBuilder->getListIndexedByField();
         $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
@@ -221,11 +171,11 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\QueryBuilderInterface $queryBuilder
-     * @return array
+     * @param QueryBuilderInterface $queryBuilder
+     * @return \stdClass[]
      * @throws Exception\OrmException
      */
-    public function queryRows(Query\QueryBuilderInterface $queryBuilder): array
+    public function queryRows(QueryBuilderInterface $queryBuilder): array
     {
         $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
 
@@ -241,8 +191,8 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\SelectBuilder $queryBuilder
-     * @return EntityInterface
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @return TEntity
      * @throws Exception\EntityNotExistsException
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
@@ -261,8 +211,8 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\SelectBuilder $queryBuilder
-     * @return array
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @return TEntity[]
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
      */
@@ -272,13 +222,15 @@ trait MapperTrait
         $listIndexedByField = $queryBuilder->getListIndexedByField();
 
         if ($this->isCacheEnabledOnRead) {
-            /** @var AbstractMapper $this */
             $collection = $this->selectFromCache($this, $queryBuilder);
         }
 
         if ($this->cacheSkipMissingItemQuery) {
             $this->cacheSkipMissingItemQuery = false;
             $queryBuilder->clear();
+
+            /** @var TEntity[] $collection */
+            $collection = array_filter($collection);
 
             if (!empty($listIndexedByField)) {
                 $collection = $this->setIndexFieldsOnCollection($listIndexedByField, $collection);
@@ -295,6 +247,9 @@ trait MapperTrait
             $this->setCacheEntity($entity->getCacheKey(), $row);
         }
 
+        /** @var TEntity[] $collection */
+        $collection = array_filter($collection);
+
         if (!empty($listIndexedByField)) {
             $collection = $this->setIndexFieldsOnCollection($listIndexedByField, $collection);
         }
@@ -308,9 +263,9 @@ trait MapperTrait
      * Select all rows corresponding of where clause.
      * Use eager loading to select joined entities.
      *
-     * @param Query\SelectBuilder $queryBuilder
-     * @param array $filters
-     * @return array
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param string[] $filters
+     * @return TEntity[]
      * @throws Exception\OrmException
      * @throws Exception\UndefinedMapperException
      */
@@ -339,10 +294,10 @@ trait MapperTrait
     /**
      * Set fields for mapper.
      *
-     * @param  array $fields
-     * @return self|RepositoryInterface
+     * @param  string[] $fields
+     * @return static
      */
-    protected function setFields(array $fields = []): RepositoryInterface
+    protected function setFields(array $fields = []): static
     {
         $this->fields = $fields;
 
@@ -352,10 +307,10 @@ trait MapperTrait
     /**
      * Set primary keys.
      *
-     * @param  array $primaryKeys
-     * @return self|RepositoryInterface
+     * @param  string[] $primaryKeys
+     * @return static
      */
-    protected function setPrimaryKeys(array $primaryKeys): RepositoryInterface
+    protected function setPrimaryKeys(array $primaryKeys): static
     {
         $this->primaryKeys = $primaryKeys;
 
@@ -366,9 +321,9 @@ trait MapperTrait
      * Set table name.
      *
      * @param  string $table
-     * @return self|RepositoryInterface
+     * @return static
      */
-    protected function setTable(string $table): RepositoryInterface
+    protected function setTable(string $table): static
     {
         $this->table = $table;
 
@@ -376,10 +331,10 @@ trait MapperTrait
     }
 
     /**
-     * @param array $nameMap
-     * @return self|RepositoryInterface
+     * @param array<mixed> $nameMap
+     * @return static
      */
-    protected function setNamesMap(array $nameMap): RepositoryInterface
+    protected function setNamesMap(array $nameMap): static
     {
         $this->entityNamesMap = $nameMap;
 
@@ -387,10 +342,10 @@ trait MapperTrait
     }
 
     /**
-     * @param array $joinConfigs
-     * @return self|RepositoryInterface
+     * @param array<mixed> $joinConfigs
+     * @return static
      */
-    protected function setJoinConfigs(array $joinConfigs): RepositoryInterface
+    protected function setJoinConfigs(array $joinConfigs): static
     {
         $this->joinConfigs = $joinConfigs;
 
@@ -400,8 +355,8 @@ trait MapperTrait
     /**
      * Get list of joins config filters if filters is provided.
      *
-     * @param  array $filters
-     * @return array
+     * @param  string[] $filters
+     * @return array<mixed>
      */
     private function getJoinsConfig(array $filters = []): array
     {
@@ -419,9 +374,9 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\SelectBuilder $queryBuilder
-     * @param array $joinConfigs
-     * @return array
+     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param array<mixed> $joinConfigs
+     * @return \stdClass[]
      * @throws Exception\OrmException
      * @throws Exception\UndefinedMapperException
      */
@@ -467,8 +422,8 @@ trait MapperTrait
 
     /**
      * @param \stdClass[] $list
-     * @param array $joinConfigs
-     * @return array
+     * @param array<mixed> $joinConfigs
+     * @return array<object>
      * @throws Exception\UndefinedMapperException
      */
     private function getCollectionAndRelations(array $list, array $joinConfigs): array
@@ -527,15 +482,15 @@ trait MapperTrait
 
     /**
      * @param string $listIndexedBy
-     * @param array $rawCollection
-     * @return array
+     * @param TEntity[] $rawCollection
+     * @return TEntity[]
      */
     private function setIndexFieldsOnCollection(string $listIndexedBy, array $rawCollection): array
     {
         $collection = [];
         $nameMap = $this->getNamesMap($listIndexedBy);
         $getter = $nameMap['get'];
-        foreach ($rawCollection as $item) {
+        foreach ($rawCollection as $index => $item) {
             $collection[$item->$getter()] = $item;
         }
 

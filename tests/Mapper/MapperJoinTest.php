@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Validation\Tests;
+namespace Eureka\Component\Orm\Tests\Mapper;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
@@ -27,6 +27,7 @@ use Eureka\Component\Orm\Tests\Generated\Repository\CommentRepositoryInterface;
 use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -41,7 +42,7 @@ class MapperJoinTest extends TestCase
      * @throws OrmException
      * @throws UndefinedMapperException
      */
-    public function testICanRetrieveUserWithJoinedData()
+    public function testICanRetrieveUserWithJoinedData(): void
     {
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne());
         $addressRepository = $this->getAddressRepository($this->getMockEntityAddressFindOne());
@@ -85,7 +86,7 @@ class MapperJoinTest extends TestCase
      * @throws OrmException
      * @throws UndefinedMapperException
      */
-    public function testICanRetrieveUserWithoutJoinedLeftData()
+    public function testICanRetrieveUserWithoutJoinedLeftData(): void
     {
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne(false));
 
@@ -112,7 +113,7 @@ class MapperJoinTest extends TestCase
      * @throws OrmException
      * @throws UndefinedMapperException
      */
-    public function testICanRetrieveUserWithJoinedLeftData()
+    public function testICanRetrieveUserWithJoinedLeftData(): void
     {
         $userRepository = $this->getUserRepository($this->getMockEntityFindOne(true));
 
@@ -147,7 +148,7 @@ class MapperJoinTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @return ConnectionFactory
      */
     private function getConnectionFactoryMock(array $entityMock = []): ConnectionFactory
@@ -170,6 +171,7 @@ class MapperJoinTest extends TestCase
         $connection->method('lastInsertId')->willReturn('1');
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
+        /** @var ConnectionFactory&MockObject $connectionFactory */
         $connectionFactory = $mockBuilder->getMock();
         $connectionFactory->method('getConnection')->willReturn($connection);
 
@@ -177,7 +179,7 @@ class MapperJoinTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @return UserRepositoryInterface
      */
     private function getUserRepository(array $entityMock = []): UserRepositoryInterface
@@ -198,7 +200,7 @@ class MapperJoinTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @return AddressRepositoryInterface
      */
     private function getAddressRepository(array $entityMock = []): AddressRepositoryInterface
@@ -216,7 +218,7 @@ class MapperJoinTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @return CommentRepositoryInterface
      */
     private function getCommentRepository(array $entityMock = []): CommentRepositoryInterface
@@ -243,7 +245,7 @@ class MapperJoinTest extends TestCase
 
     /**
      * @param bool $withMockComment
-     * @return array
+     * @return array<\stdClass|bool>
      */
     private function getMockEntityFindOne(bool $withMockComment = false): array
     {
@@ -274,7 +276,7 @@ class MapperJoinTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return array<\stdClass|bool>
      */
     private function getMockEntityAddressFindOne(): array
     {
@@ -290,7 +292,7 @@ class MapperJoinTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return array<\stdClass|bool>
      */
     private function getMockEntityAddressFindAll(): array
     {

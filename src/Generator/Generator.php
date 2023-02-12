@@ -27,14 +27,18 @@ class Generator
 {
     /**
      * @param Connection $connection
-     * @param array $configList
+     * @param array<mixed> $configList
      * @param string $configName
      * @param bool $isVerbose
      * @return void
      * @throws GeneratorException
      */
-    public function generate(Connection $connection, array $configList, string $configName = '', bool $isVerbose = true): void
-    {
+    public function generate(
+        Connection $connection,
+        array $configList,
+        string $configName = '',
+        bool $isVerbose = true
+    ): void {
         $configs = $this->buildConfigs($configList, $configName);
 
         foreach ($configs as $config) {
@@ -63,7 +67,7 @@ class Generator
     /**
      * Find configs.
      *
-     * @param array $configList
+     * @param array<string|string[]|string[][]> $configList
      * @param string $configName Filter on name
      * @return Config[]
      */
@@ -96,7 +100,9 @@ class Generator
                 }
 
                 if (!isset($baseConfig[$join['config']])) {
-                    throw new \RuntimeException('Invalid config. Joined config "' . $join['config'] . '" does not exist!');
+                    throw new \RuntimeException(
+                        'Invalid config. Joined config "' . $join['config'] . '" does not exist!'
+                    );
                 }
 
                 $joins[$key]['instance'] = clone $baseConfig[$join['config']];
@@ -120,7 +126,9 @@ class Generator
     {
         foreach ($paths as $path) {
             if (!is_dir($path) && !mkdir($path, 0755, true)) {
-                throw new \RuntimeException('Cannot created output directory! (dir:' . $path . ')'); // @codeCoverageIgnore
+                // @codeCoverageIgnoreStart
+                throw new \RuntimeException('Cannot created output directory! (dir:' . $path . ')');
+                // @codeCoverageIgnoreEnd
             }
         }
     }

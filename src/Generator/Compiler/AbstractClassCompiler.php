@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Generator\Compiler;
 
-use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Config;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Compiler\Field\Field;
@@ -42,14 +41,14 @@ class AbstractClassCompiler extends AbstractCompiler
      *
      * @param Config\ConfigInterface $config
      * @param string $type
-     * @param array $templates
+     * @param array<string, bool> $templates
      */
     public function __construct(Config\ConfigInterface $config, string $type, array $templates)
     {
         parent::__construct($templates);
 
-        $this->config    = $config;
-        $this->type      = $type;
+        $this->config = $config;
+        $this->type   = $type;
     }
 
     /**
@@ -61,7 +60,7 @@ class AbstractClassCompiler extends AbstractCompiler
         $statement = $this->connection->query('SHOW FULL COLUMNS FROM ' . $this->config->getDbTable());
 
         $this->fields = [];
-        while (false !== ($column = $statement->fetch(Connection::FETCH_OBJ))) {
+        while (false !== ($column = $statement->fetch(\PDO::FETCH_OBJ))) {
             $this->fields[] = new Field($column, $this->config->getDbPrefix(), $this->config->getValidation());
         }
 
@@ -85,7 +84,6 @@ class AbstractClassCompiler extends AbstractCompiler
 
             //~ Get context
             $context = $this->updateContext($this->getContext(), $isAbstract);
-
             //~ Render template
             $rendered = $this->renderTemplate($template, $context);
 
@@ -147,7 +145,11 @@ class AbstractClassCompiler extends AbstractCompiler
         }
 
         if (!is_dir($basePath) && !mkdir($basePath, 0755, true)) {
-            throw new \RuntimeException('Cannot created output directory! (dir:' . $basePath . ')'); // @codeCoverageIgnore
+            // @codeCoverageIgnoreStart
+            throw new \RuntimeException(
+                'Cannot created output directory! (dir:' . $basePath . ')'
+            );
+            // @codeCoverageIgnoreEnd
         }
 
         return $filePathName;
@@ -165,7 +167,7 @@ class AbstractClassCompiler extends AbstractCompiler
             $config[$field->getName()] = "
             '" . $field->getName() . "' => [
                 'type'      => '" . $field->getType()->getValidatorType() . "',
-                'options'   => " . $fieldValidatorService->getValidatorOptions($field, true) . ",
+                'options'   => " . $fieldValidatorService->getValidatorOptionsAsString($field) . ",
             ],";
         }
 

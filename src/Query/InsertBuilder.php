@@ -13,25 +13,28 @@ namespace Eureka\Component\Orm\Query;
 
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\EmptySetClauseException;
+use Eureka\Component\Orm\Query\Interfaces\FieldAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\SetAwareInterface;
 use Eureka\Component\Orm\Query\Traits;
 
 /**
  * Class InsertBuilder
  *
  * @author Romain Cottard
+ *
+ * @template TRepository of \Eureka\Component\Orm\RepositoryInterface
+ * @template TEntity of EntityInterface
+ *
+ * @implements FieldAwareInterface<TRepository>
+ * @extends AbstractQueryBuilder<TRepository, TEntity>
  */
-class InsertBuilder extends AbstractQueryBuilder
+class InsertBuilder extends AbstractQueryBuilder implements FieldAwareInterface, SetAwareInterface
 {
-    use Traits\WhereTrait;
-    use Traits\FieldTrait;
-    use Traits\SetTrait;
+    /** @use Traits\FieldAwareTrait<TRepository> */
+    use Traits\FieldAwareTrait;
+    use Traits\SetAwareTrait;
 
-    /**
-     * Clear query params
-     *
-     * @return QueryBuilderInterface
-     */
-    public function clear(): QueryBuilderInterface
+    public function clear(): static
     {
         $this->resetBind();
         $this->resetFields();
@@ -66,15 +69,19 @@ class InsertBuilder extends AbstractQueryBuilder
             $this->appendUpdateValues();
         }
 
-        return 'INSERT ' . $onDuplicateIgnoreClause . 'INTO ' . $this->repository->getTable() . $this->getQuerySet() . $this->getQueryDuplicateUpdate();
+        return 'INSERT ' . $onDuplicateIgnoreClause .
+            'INTO ' . $this->repository->getTable() .
+            $this->getQuerySet() .
+            $this->getQueryDuplicateUpdate()
+        ;
     }
 
     /**
      * Append update values
      *
-     * @return QueryBuilderInterface
+     * @return static
      */
-    private function appendUpdateValues(): QueryBuilderInterface
+    private function appendUpdateValues(): static
     {
         //~ if entity is not set, skip auto append update value
         if ($this->entity === null) {

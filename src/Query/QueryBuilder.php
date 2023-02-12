@@ -17,6 +17,10 @@ use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
  * Class QueryBuilder
  *
  * @author Romain Cottard
+ *
+ * @template TRepository of \Eureka\Component\Orm\RepositoryInterface
+ * @template TEntity of \Eureka\Component\Orm\EntityInterface
+ * @extends SelectBuilder<TRepository, TEntity>
  */
 class QueryBuilder extends SelectBuilder
 {
@@ -44,7 +48,7 @@ class QueryBuilder extends SelectBuilder
      *
      * @param string $field
      * @return string
-     * @throws
+     * @throws EmptyWhereClauseException
      */
     public function getQueryCount(string $field = '*'): string
     {

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * Copyright (c) Romain Cottard
  *
@@ -9,13 +7,14 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Eureka\Component\Orm\Script;
 
-use Eureka\Component\Database\Connection;
+use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Generator as GeneratorService;
 use Eureka\Component\Console;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class Generator
@@ -26,45 +25,52 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class Generator extends Console\AbstractScript
 {
     /**
-     * Generator constructor.
+     * @param ConnectionFactory $factory
+     * @param array<mixed> $ormConfigs
      */
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ConnectionFactory $factory,
+        private readonly array $ormConfigs
+    ) {
         $this->setDescription('Orm generator');
-        $this->setExecutable(true);
+        $this->setExecutable();
     }
 
-    /**
-     * Display help.
-     *
-     * @return void
-     */
     public function help(): void
     {
-        $help = new Console\Help('...');
-        $help->addArgument('', 'config-name', 'Generate config only for given config name', true, false);
-        $help->addArgument('', 'connection-name', 'Name of the connection to use for generation (default: common)', true, false);
-        $help->addArgument('', 'without-repository', 'Do not generate repository interfaces', false, false);
-
-        $help->display();
+        (new Console\Help('...'))
+            ->addArgument(
+                '',
+                'config-name',
+                'Generate config only for given config name',
+                true
+            )
+            ->addArgument(
+                '',
+                'connection-name',
+                'Name of the connection to use for generation (default: common)',
+                true
+            )
+            ->addArgument(
+                '',
+                'without-repository',
+                'Do not generate repository interfaces'
+            )
+            ->display()
+        ;
     }
 
     /**
-     * @return void
      * @throws GeneratorException
      */
     public function run(): void
     {
         $argument       = Console\Argument\Argument::getInstance();
-        $configName     = (string) trim((string) $argument->get('config-name'));
+        $configName     = trim((string) $argument->get('config-name'));
         $connectionName = (string) $argument->get('connection-name', null, 'common');
 
-        /** @var ContainerInterface $container */
-        $container = $this->getContainer();
-
-        /** @var Connection $connection */
-        $connection = $container->get('database.factory')->getConnection($connectionName);
-        $configList = $container->getParameter('orm.configs');
+        $connection = $this->factory->getConnection($connectionName);
+        $configList = $this->ormConfigs;
 
         $generator = new GeneratorService();
         $generator->generate($connection, $configList, $configName);

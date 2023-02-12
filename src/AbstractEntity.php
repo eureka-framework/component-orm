@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Orm\Traits\EntityAwareTrait;
 use Eureka\Component\Orm\Traits\ValidatorAwareTrait;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
@@ -19,10 +18,12 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  * DataMapper Data abstract class.
  *
  * @author Romain Cottard
+ *
+ * @template TRepository of RepositoryInterface
+ * @implements EntityInterface<TRepository>
  */
 abstract class AbstractEntity implements EntityInterface
 {
-    use EntityAwareTrait;
     use ValidatorAwareTrait;
 
     /** @var bool $exists If data already exists in db for example. */
@@ -31,7 +32,7 @@ abstract class AbstractEntity implements EntityInterface
     /** @var bool[] $updated List of updated field */
     private array $updated = [];
 
-    /** @var RepositoryInterface $repository Entity repository */
+    /** @var TRepository $repository Entity repository */
     private RepositoryInterface $repository;
 
     /**
@@ -46,10 +47,10 @@ abstract class AbstractEntity implements EntityInterface
      * Must be overridden to use internal property setter method, according to the data class definition.
      *
      * @param  int $id
-     * @return $this
+     * @return static
      * @codeCoverageIgnore
      */
-    public function setAutoIncrementId(int $id)
+    public function setAutoIncrementId(int $id): static
     {
         return $this;
     }
@@ -70,7 +71,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param  bool $exists
      * @return $this
      */
-    public function setExists(bool $exists): EntityInterface
+    public function setExists(bool $exists): static
     {
         $this->exists = $exists;
 
@@ -81,10 +82,10 @@ abstract class AbstractEntity implements EntityInterface
      * If at least one data has been updated.
      * If property name is specified, check only property.
      *
-     * @param  ?string $property
+     * @param  string|null $property
      * @return bool
      */
-    public function isUpdated(string $property = null): bool
+    public function isUpdated(?string $property = null): bool
     {
         if (null === $property) {
             return (count($this->updated) > 0);
@@ -107,9 +108,9 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Reset updated list of properties
      *
-     * @return $this
+     * @return static
      */
-    public function resetUpdated(): EntityInterface
+    public function resetUpdated(): static
     {
         $this->updated = [];
 
@@ -123,14 +124,14 @@ abstract class AbstractEntity implements EntityInterface
     {
         $attributes = get_object_vars($this);
         foreach ($attributes as $attribute => $value) {
-            if (strpos($attribute, 'join') === 0) {
+            if (str_starts_with($attribute, 'join')) {
                 $this->$attribute = null;
             }
         }
     }
 
     /**
-     * @return RepositoryInterface
+     * @return TRepository
      */
     public function getRepository(): RepositoryInterface
     {
@@ -142,7 +143,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @return GenericEntity
      */
-    public function getGenericEntity()
+    public function getGenericEntity(): GenericEntity
     {
         $genericEntity = $this->newGenericEntity([]);
         $repository    = $this->getRepository();
@@ -162,9 +163,9 @@ abstract class AbstractEntity implements EntityInterface
      * Hydrate entity with form entity values
      *
      * @param  GenericEntity $genericEntity
-     * @return $this
+     * @return static
      */
-    public function hydrateFromGenericEntity(GenericEntity $genericEntity)
+    public function hydrateFromGenericEntity(GenericEntity $genericEntity): static
     {
         $repository = $this->getRepository();
         foreach ($repository->getFields() as $field) {
@@ -182,7 +183,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * @param RepositoryInterface $repository
+     * @param TRepository $repository
      * @return void
      */
     protected function setRepository(RepositoryInterface $repository): void

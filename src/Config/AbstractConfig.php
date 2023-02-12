@@ -57,13 +57,13 @@ abstract class AbstractConfig implements ConfigInterface
     /** @var ConfigInterface[] $joinList List of joined config. */
     protected array $joinList = [];
 
-    /** @var array $validation Validation config. */
+    /** @var array<mixed> $validation Validation config. */
     protected array $validation = [];
 
     /**
      * Initialize config.
      *
-     * @param  array $config
+     * @param  array<mixed> $config
      * @return $this
      */
     abstract protected function init(array $config): ConfigInterface;
@@ -71,7 +71,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * Init config & validate it.
      *
-     * @param  array $config
+     * @param  array<mixed> $config
      * @throws \InvalidArgumentException
      */
     public function __construct(array $config)
@@ -143,7 +143,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * Get validation config.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getValidation(): array
     {
@@ -153,7 +153,7 @@ abstract class AbstractConfig implements ConfigInterface
     /**
      * Get Config object(s) for "joined" tables
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getAllJoin(): array
     {

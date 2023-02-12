@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Validation\Tests;
+namespace Eureka\Component\Orm\Tests\Mapper;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
@@ -27,11 +27,10 @@ use Eureka\Component\Orm\Tests\Generated\Repository\UserParentRepositoryInterfac
 use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub\Exception;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-
-use function PHPUnit\Framework\exactly;
 
 /**
  * Class MapperTest
@@ -43,7 +42,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testICanInstantiateUserMapper()
+    public function testICanInstantiateUserMapper(): void
     {
         $repository = $this->getUserRepository();
         $repository->disableCacheOnRead();
@@ -59,7 +58,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanInsertEntity()
+    public function testICanInsertEntity(): void
     {
         $repository = $this->getUserRepository();
 
@@ -85,7 +84,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanInsertUpdateEntity()
+    public function testICanInsertUpdateEntity(): void
     {
         $repository = $this->getUserRepository();
 
@@ -114,7 +113,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanDeleteEntity()
+    public function testICanDeleteEntity(): void
     {
         $repository = $this->getUserRepository();
 
@@ -140,7 +139,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanFindEntityById()
+    public function testICanFindEntityById(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
@@ -172,7 +171,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanFindEntityByIdWithoutCacheEnabledNorCache()
+    public function testICanFindEntityByIdWithoutCacheEnabledNorCache(): void
     {
         $repository = $this->getUserRepositoryNoCache($this->getMockEntityFindId1(false));
 
@@ -201,7 +200,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToFindNotExistingEntity()
+    public function testIHaveAnExceptionWhenITryToFindNotExistingEntity(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
@@ -213,7 +212,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanFindEntitiesByKeys()
+    public function testICanFindEntitiesByKeys(): void
     {
         $repository = $this->getUserRepositoryNoCache($this->getMockEntityFindAll());
 
@@ -226,7 +225,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteQuery()
+    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteQuery(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll(false), false);
         $collection = $repository->query((new SelectBuilder($repository))->setListIndexedByField('user_email'));
@@ -263,13 +262,12 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteSelect()
+    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteSelect(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
         $builder    = new SelectBuilder($repository);
         $builder->addWhere('user_id', 1)->setListIndexedByField('user_id');
 
-        /** @var User[] $users */
         $users = $repository->select($builder);
         $ids   = array_keys($users);
 
@@ -293,7 +291,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToExecuteQueryAndIndexResultByNonExistingField()
+    public function testIHaveAnExceptionWhenITryToExecuteQueryAndIndexResultByNonExistingField(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll(false), false);
 
@@ -306,7 +304,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanCheckIfRowExists()
+    public function testICanCheckIfRowExists(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
@@ -316,7 +314,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCountRows()
+    public function testICanCountRows(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
@@ -327,7 +325,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanCheckIfRowDoesNotExists()
+    public function testICanCheckIfRowDoesNotExists(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
@@ -337,7 +335,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testICanGetMaxPrimaryKeyIdForARepository()
+    public function testICanGetMaxPrimaryKeyIdForARepository(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
@@ -347,7 +345,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQuery()
+    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQuery(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1(), true, 2006);
 
@@ -358,9 +356,10 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQueryWithResult()
+    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQueryWithResult(): void
     {
-        $entities = $this->getMockEntityFindId1();
+        /** @var \stdClass[] $entities */
+        $entities   = $this->getMockEntityFindId1();
         $repository = $this->getUserRepository($entities, true, 2006);
 
         /** @var User $entity */
@@ -374,7 +373,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveAnExceptionWhenITryToGetMaxPrimaryKeyIdOnRepositoryWithMultiPrimaryKeys()
+    public function testIHaveAnExceptionWhenITryToGetMaxPrimaryKeyIdOnRepositoryWithMultiPrimaryKeys(): void
     {
         $repository = $this->getUserParentRepository($this->getMockEntityNone());
 
@@ -386,7 +385,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveAnExceptionWhenITryToGetNamesMapForNonExistingField()
+    public function testIHaveAnExceptionWhenITryToGetNamesMapForNonExistingField(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
@@ -399,7 +398,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveAnExceptionWhenITryToGetNonExistingMapper()
+    public function testIHaveAnExceptionWhenITryToGetNonExistingMapper(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
@@ -414,7 +413,7 @@ class MapperTest extends TestCase
      * @throws EntityNotExistsException
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToGetQueryWithAnError()
+    public function testIHaveAnExceptionWhenITryToGetQueryWithAnError(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1(), false, 1);
 
@@ -427,7 +426,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToGetQueryWithResultWithAnError()
+    public function testIHaveAnExceptionWhenITryToGetQueryWithResultWithAnError(): void
     {
         $entities = $this->getMockEntityFindId1();
         $repository = $this->getUserRepository($entities, true, 1);
@@ -443,7 +442,7 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @param bool $includeCacheMock
      * @param int $exceptionCode
      * @return ConnectionFactory
@@ -487,6 +486,7 @@ class MapperTest extends TestCase
         $connection->method('inTransaction')->willReturn(false);
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
+        /** @var ConnectionFactory&MockObject $connectionFactory */
         $connectionFactory = $mockBuilder->getMock();
         $connectionFactory->method('getConnection')->willReturn($connection);
 
@@ -494,7 +494,7 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @param bool $includeCacheMock
      * @param int $exceptionCode
      * @return UserRepositoryInterface
@@ -517,7 +517,7 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @return UserParentRepositoryInterface
      */
     private function getUserParentRepository(array $entityMock = []): UserParentRepositoryInterface
@@ -533,7 +533,7 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @return UserRepositoryInterface
      */
     private function getUserRepositoryNoCache(array $entityMock = []): UserRepositoryInterface
@@ -560,7 +560,7 @@ class MapperTest extends TestCase
 
     /**
      * @param bool $includeCacheMock
-     * @return array
+     * @return array<mixed>
      */
     private function getMockEntityFindId1(bool $includeCacheMock = true): array
     {
@@ -595,7 +595,7 @@ class MapperTest extends TestCase
 
     /**
      * @param bool $includeCacheMock
-     * @return array
+     * @return array<mixed>
      */
     private function getMockEntityFindAll(bool $includeCacheMock = true): array
     {
