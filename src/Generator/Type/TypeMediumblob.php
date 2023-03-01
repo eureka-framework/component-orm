@@ -26,6 +26,6 @@ class TypeMediumblob extends TypeAbstract
         $this->type       = 'string';
         $this->castDb     = '(string)';
         $this->castMethod = '(string)';
-        $this->emptyValue = 'null';
+        $this->emptyValue = "''";
     }
 }
