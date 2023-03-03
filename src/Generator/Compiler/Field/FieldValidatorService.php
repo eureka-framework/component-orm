@@ -82,6 +82,11 @@ class FieldValidatorService
             case Type\TypeVarchar::class:
             case Type\TypeVarbinary::class:
             case Type\TypeChar::class:
+            case Type\TypeBinary::class:
+            case Type\TypeBlob::class:
+            case Type\TypeMediumblob::class:
+            case Type\TypeLongblob::class:
+            case Type\TypeTinyblob::class:
                 $options = array_merge($this->getStringOptions(get_class($type), $type, $isNullable), $options);
                 break;
             case Type\TypeBool::class:
