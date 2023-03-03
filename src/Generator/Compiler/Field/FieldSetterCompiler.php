@@ -83,6 +83,8 @@ class FieldSetterCompiler extends AbstractFieldCompiler
             $validations[] = '}';
         } elseif (!empty($validatorType)) {
             $validations[] = '$this->validateInput(\'' . $this->field->getName() . '\', ' . $varname . ');';
+        } else {
+            $validations[] = '//No validator available';
         }
 
         return $validations;
