@@ -12,11 +12,11 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Generator\Type;
 
 /**
- * Mapping type for LONGBLOB SQL values
+ * Mapping type for TINYBLOB SQL values
  *
  * @author Romain Cottard
  */
-class TypeLongblob extends TypeAbstract
+class TypeTinyblob extends TypeAbstract
 {
     /**
      * Class constructor.

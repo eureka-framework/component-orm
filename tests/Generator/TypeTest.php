@@ -89,6 +89,7 @@ class TypeTest extends TestCase
             'text'       => ['text', Type\TypeText::class],
             'time'       => ['time', Type\TypeTime::class],
             'timestamp'  => ['timestamp', Type\TypeTimestamp::class],
+            'tinyblob'   => ['tinyblob', Type\TypeTinyblob::class],
             'tinyint'    => ['tinyint(3)', Type\TypeTinyint::class],
             'tinytext'   => ['tinytext', Type\TypeTinytext::class],
             'varbinary'  => ['varbinary(50)', Type\TypeVarbinary::class],

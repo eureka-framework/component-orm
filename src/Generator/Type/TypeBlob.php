@@ -23,9 +23,10 @@ class TypeBlob extends TypeAbstract
      */
     public function __construct()
     {
-        $this->type       = 'string';
-        $this->castDb     = '(string)';
-        $this->castMethod = '(string)';
-        $this->emptyValue = "''";
+        $this->type          = 'string';
+        $this->castDb        = '(string)';
+        $this->castMethod    = '(string)';
+        $this->emptyValue    = "''";
+        $this->validatorType = 'string';
     }
 }
