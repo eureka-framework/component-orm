@@ -1,4 +1,4 @@
-.PHONY: validate install update phpcs phpcbf php74compatibility php81compatibility phpstan analyze tests testdox ci clean
+.PHONY: validate install update phpcs phpcbf php74compatibility php81compatibility php82compatibility phpstan analyze tests testdox ci clean
 
 PHP_FILES := $(shell find src tests -type f -name '*.php')
 define header =
@@ -21,10 +21,10 @@ update:
 composer.lock: install
 
 #~ Vendor binaries dependencies
-vendor/bin/phpcbf: composer.lock
-vendor/bin/phpcs: composer.lock
-vendor/bin/phpstan: composer.lock
-vendor/bin/phpunit: composer.lock
+vendor/bin/phpcbf:
+vendor/bin/phpcs:
+vendor/bin/phpstan:
+vendor/bin/phpunit:
 
 #~ Report directories dependencies
 build/reports/phpunit:
@@ -53,6 +53,10 @@ php81compatibility: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Checking PHP 8.1 compatibility)
 	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php81-compatibility.neon --error-format=table
 
+php82compatibility: vendor/bin/phpstan build/reports/phpstan
+	$(call header,Checking PHP 8.2 compatibility)
+	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php82-compatibility.neon --error-format=table
+
 analyze: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Running Static Analyze - Pretty tty format)
 	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --error-format=table
@@ -73,4 +77,4 @@ clean:
 	$(call header,Cleaning previous build)
 	@if [ "$(shell ls -A ./build)" ]; then rm -rf ./build/*; fi; echo " done"
 
-ci: clean validate install phpcs tests php74compatibility php81compatibility analyze
+ci: clean validate install phpcs tests php74compatibility php82compatibility analyze

@@ -1,0 +1,12 @@
+parameters:
+  phpVersion: 80200 # PHP 8.2
+  level: 0
+  paths:
+    - ./../src
+    - ./../tests
+
+  bootstrapFiles:
+    - ./../vendor/autoload.php
+
+  ignoreErrors:
+    - '`Call to an undefined method Eureka\\Component\\Orm\\RepositoryInterface::.+`'
