@@ -26,24 +26,24 @@
   },
 
   "require": {
-    "php": "7.4.*|8.0.*|8.1.*",
+    "php": "7.4.*||8.0.*||8.1.*||8.2.*",
     "ext-pdo": "*",
 
-    "eureka/component-database": "^3.1",
-    "eureka/component-validation": "^5.1",
+    "eureka/component-database": "^3.2",
+    "eureka/component-validation": "^5.2",
 
-    "psr/cache": "^1.0",
-    "psr/log": "^1.1"
+    "psr/cache": "^1.0||^2.0||^3.0",
+    "psr/log": "^1.1||^2.0||^3.0"
   },
 
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "^v0.7",
-    "eureka/component-console": "^5.1",
-    "phpstan/phpstan": "^1.4",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "eureka/component-console": "^5.3",
+    "phpstan/phpstan": "^1.10",
     "phpunit/phpcov": "^8.2",
-    "phpunit/phpunit": "^9.4",
-    "squizlabs/php_codesniffer": "^3.5",
-    "symfony/cache": "^v5.4"
+    "phpunit/phpunit": "^9.6",
+    "squizlabs/php_codesniffer": "^3.7",
+    "symfony/cache": "^5.4||^6.3"
   },
 
   "config": {
