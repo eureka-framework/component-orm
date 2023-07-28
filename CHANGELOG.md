@@ -6,11 +6,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ```
 ## [template]
-[template]: https://github.com/eureka-framework/component-orm/compare/5.3.0...master
+[template]: https://github.com/eureka-framework/component-orm/compare/6.0.0...master
 ### Changed
 ### Added
 ### Removed
 ```
+
+## [6.0.0] - 2023-07
+[6.0.0]: https://github.com/eureka-framework/component-orm/compare/5.4.0...6.0.0
+### Removed
+- Drop support of PHP 7.4 & PHP 8.0
+### Changed
+- Improve Generator & compiler
+- Improve QueryBuilder, Repository, Mapper & Entity parts with phpdoc / phpstan types
+- Lot of phpdoc fixes for phpstan
+- Move Generator script file
+- Update & Add some tests
+- Update Makefile
+- Update composer.json
+- Update GitHub workflow
+### Added
+- Add Some Enum classes
+- Add missing types (binary)
+- New interface for Query Builder
+
+--- 
+
 ## [5.5.0] - 2024-02-06
 [5.5.0]: https://github.com/eureka-framework/component-orm/compare/5.4.0...5.5.0
 ### Changed

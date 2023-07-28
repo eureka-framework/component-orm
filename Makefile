@@ -47,11 +47,11 @@ phpcbf: vendor/bin/phpcbf
 
 php81compatibility: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Checking PHP 8.1 compatibility)
-	@./vendor/bin/phpstan analyse --xdebug --configuration=./ci/php81-compatibility.neon --error-format=table
+	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php81-compatibility.neon --error-format=table
 
 php82compatibility: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Checking PHP 8.2 compatibility)
-	@./vendor/bin/phpstan analyse --xdebug --configuration=./ci/php82-compatibility.neon --error-format=table
+	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/php82-compatibility.neon --error-format=table
 
 analyze: vendor/bin/phpstan build/reports/phpstan
 	$(call header,Running Static Analyze - Pretty tty format)

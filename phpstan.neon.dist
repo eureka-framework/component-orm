@@ -1,9 +1,20 @@
+includes:
+  - ./vendor/phpstan/phpstan-phpunit/extension.neon
+  - ./vendor/phpstan/phpstan-phpunit/rules.neon
+
 parameters:
   phpVersion: 80100 # PHP 8.1 - Current minimal version supported
-  level: 6
+  level: max
   paths:
     - ./src
     - ./tests
 
+  checkGenericClassInNonGenericObjectType: false
+
   bootstrapFiles:
     - ./vendor/autoload.php
+
+  ignoreErrors:
+    #~ Ignore some voluntary broken phpdoc for testing wrong cases
+    - path:    'tests/Generator/GeneratorTest.php'
+      message: '`Method .+GeneratorTest::getInvalidJoinConfig\(\) should return array.+`'

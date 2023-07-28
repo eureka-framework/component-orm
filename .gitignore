@@ -6,6 +6,7 @@ composer.lock
 #~ Tests
 /build/*
 .phpunit.result.cache
+.phpunit.cache
 /tests/Generated/*
 !/tests/Generated/.gitkeep
 
