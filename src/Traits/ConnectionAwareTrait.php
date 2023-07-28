@@ -46,7 +46,7 @@ trait ConnectionAwareTrait
      */
     public function quote(int|float|string|bool|null $value): string
     {
-        return $this->getConnection()->quote($value);
+        return $this->getConnection()->quote((string) $value);
     }
 
     /**
@@ -208,6 +208,6 @@ trait ConnectionAwareTrait
         // Only keep SQLState HY000 with ErrorCode 2006 | 2013 (MySQL server has gone away)
         $sqlState = $exception->errorInfo[0] ?? 'UNKNW';
         $sqlCode  = $exception->errorInfo[1] ?? 1;
-        return ($sqlState === 'HY000' && in_array($sqlCode, [2006, 2013]));
+        return $sqlState === 'HY000' && in_array($sqlCode, [2006, 2013]);
     }
 }

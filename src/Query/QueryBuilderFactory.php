@@ -25,8 +25,7 @@ use Eureka\Component\Orm\RepositoryInterface;
 class QueryBuilderFactory
 {
     /**
-     * @param TRepository $repository
-     * @return QueryBuilder<TRepository, TEntity>
+     * @phpstan-param TRepository $repository
      */
     public function newQueryBuilder(RepositoryInterface $repository): QueryBuilder
     {
@@ -34,8 +33,7 @@ class QueryBuilderFactory
     }
 
     /**
-     * @param TRepository $repository
-     * @return SelectBuilder<TRepository, TEntity>
+     * @phpstan-param TRepository $repository
      */
     public function newSelectBuilder(RepositoryInterface $repository): SelectBuilder
     {
@@ -43,9 +41,8 @@ class QueryBuilderFactory
     }
 
     /**
-     * @param TRepository $repository
-     * @param TEntity|null $entity
-     * @return DeleteBuilder<TRepository,TEntity>
+     * @phpstan-param TRepository $repository
+     * @phpstan-param TEntity|null $entity
      */
     public function newDeleteBuilder(RepositoryInterface $repository, ?EntityInterface $entity = null): DeleteBuilder
     {
@@ -53,9 +50,8 @@ class QueryBuilderFactory
     }
 
     /**
-     * @param TRepository $repository
-     * @param TEntity|null $entity
-     * @return InsertBuilder<TRepository,TEntity>
+     * @phpstan-param TRepository $repository
+     * @phpstan-param TEntity|null $entity
      */
     public function newInsertBuilder(RepositoryInterface $repository, ?EntityInterface $entity = null): InsertBuilder
     {
@@ -63,9 +59,8 @@ class QueryBuilderFactory
     }
 
     /**
-     * @param TRepository $repository
-     * @param TEntity|null $entity
-     * @return UpdateBuilder<TRepository,TEntity>
+     * @phpstan-param TRepository $repository
+     * @phpstan-param TEntity|null $entity
      */
     public function newUpdateBuilder(RepositoryInterface $repository, ?EntityInterface $entity = null): UpdateBuilder
     {

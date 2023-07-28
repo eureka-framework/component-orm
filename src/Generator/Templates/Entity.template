@@ -11,13 +11,17 @@ declare(strict_types=1);
 
 namespace {{ class.namespace }};
 
+use {{ orm.namespace }}\EntityInterface;
+use {{ repository.namespace }}\{{ class.repository }};
+
 /**
  * DataMapper Data class for table "{{ database.table }}"
  *
  * @author {{ comment.author }}
  *
- * @extends Abstracts\Abstract{{ class.name }}<\{{ repository.namespace }}\{{ class.repository }}>
+ * @implements EntityInterface<{{ class.repository }}, {{ class.name }}>
+ * @extends Abstracts\Abstract{{ class.name }}<{{ class.repository }}, {{ class.name }}>
  */
-class {{ class.name }} extends Abstracts\Abstract{{ class.name }}
+class {{ class.name }} extends Abstracts\Abstract{{ class.name }} implements EntityInterface
 {
 }

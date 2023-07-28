@@ -23,7 +23,14 @@ use Eureka\Component\Orm\Generator\Compiler\Field\Field;
  */
 class JoinCompiler extends AbstractMethodCompiler
 {
-    /** @var array{instance: ConfigInterface, relation: string, keys: array<bool|string>} $joinConfig */
+    /** @var array{
+     *     eager_loading?: bool,
+     *     config: string,
+     *     relation: string,
+     *     type: string,
+     *     keys: array<bool|string>,
+     *     instance: ConfigInterface
+     * } $joinConfig */
     private array $joinConfig;
 
     /** @var Field[] $fields */
@@ -39,7 +46,14 @@ class JoinCompiler extends AbstractMethodCompiler
      * JoinCompiler constructor.
      *
      * @param ConfigInterface $config
-     * @param array{instance: ConfigInterface, relation: string, keys: array<string, bool|string>} $joinConfig
+     * @param array{
+     *     eager_loading?: bool,
+     *     config: string,
+     *     relation: string,
+     *     type: string,
+     *     keys: array<bool|string>,
+     *     instance: ConfigInterface
+     * } $joinConfig
      * @param Field[] $fields
      * @param Context $mainContext
      * @param string $name
@@ -104,6 +118,7 @@ class JoinCompiler extends AbstractMethodCompiler
         $name      = !empty($this->name) ? $this->name : $className;
 
         //~ Update class properties
+        /** @var string $classProperties */
         $classProperties = $this->mainContext->get('class.properties');
 
         if (!empty($classProperties)) {
@@ -114,11 +129,6 @@ class JoinCompiler extends AbstractMethodCompiler
                     $className . '[]|null',
                     'null'
                 );
-
-                $this->mainContext->add(
-                    'class.properties',
-                    $classProperties . "\n" . implode("\n", $compiler->compile())
-                );
             } else {
                 $compiler = new PropertyCompiler(
                     'joinOneCache' . $name,
@@ -126,15 +136,15 @@ class JoinCompiler extends AbstractMethodCompiler
                     $className . '|null',
                     'null'
                 );
-
-                $this->mainContext->add(
-                    'class.properties',
-                    $classProperties . "\n" . implode("\n", $compiler->compile())
-                );
             }
+            $this->mainContext->add(
+                'class.properties',
+                $classProperties . "\n" . implode("\n", $compiler->compile())
+            );
         }
 
         //~ Update class "uses"
+        /** @var array<string, string> $classUses */
         $classUses = $this->mainContext->get('entity.uses');
 
         $useEntityClassName = $config->getBaseNamespaceForEntity() . '\\' . $className;

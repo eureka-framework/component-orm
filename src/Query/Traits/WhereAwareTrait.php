@@ -46,16 +46,16 @@ trait WhereAwareTrait
             throw new InvalidQueryException('Values for addIn must be non empty!');
         }
 
-        $field = (0 < count($this->whereList) ? ' ' . $whereConcat->value . ' ' . $field : $field);
+        $field = (0 < \count($this->whereList) ? ' ' . $whereConcat->value . ' ' . $field : $field);
 
         //~ Bind values (more safety)
         $fields = [];
         foreach ($values as $value) {
-            $bindName = $this->addBind('value', $value, true);
+            $bindName = $this->bind('value', $value, true);
             $fields[] = $bindName;
         }
 
-        $this->whereList[] = $field . ($not ? ' NOT' : '') . ' IN (' . implode(',', $fields) . ')';
+        $this->whereList[] = $field . ($not ? ' NOT' : '') . ' IN (' . \implode(',', $fields) . ')';
 
         return $this;
     }
@@ -78,19 +78,19 @@ trait WhereAwareTrait
         string $prefix = ''
     ): static {
         $fieldWithPrefix = !empty($prefix) ? $prefix . '.' . $field : $field;
-        if (0 < count($this->whereList)) {
-            $fieldWhere = ' ' . $whereConcat->value . ' ' . $fieldWithPrefix;
+        if (0 < \count($this->whereList)) {
+            $fieldWhere = $whereConcat->value . ' ' . $fieldWithPrefix;
         } else {
             $fieldWhere = $fieldWithPrefix;
         }
 
         if ($operator === Operator::Regexp) {
-            $bindName = " '" . addslashes($value) . "'";
+            $bindName = "'" . \addslashes((string) $value) . "'";
         } else {
-            $bindName = $this->addBind($field, $value, true);
+            $bindName = $this->bind($field, $value, true);
         }
 
-        $this->whereList[] = $fieldWhere . ' ' . $operator->value . $bindName;
+        $this->whereList[] = $fieldWhere . ' ' . $operator->value . ' ' . $bindName;
 
         return $this;
     }
@@ -104,7 +104,7 @@ trait WhereAwareTrait
      */
     public function addWhereRaw(string $where, ClauseConcat $whereConcat = ClauseConcat::And): static
     {
-        $fieldWhere        = (0 < count($this->whereList) ? ' ' . $whereConcat->value . ' ' . $where : $where);
+        $fieldWhere        = (0 < \count($this->whereList) ? ' ' . $whereConcat->value . ' ' . $where : $where);
         $this->whereList[] = $fieldWhere;
 
         return $this;
@@ -126,12 +126,12 @@ trait WhereAwareTrait
         $whereList = [];
 
         foreach ($keys as $field => $value) {
-            $bindName = $this->addBind($field, $value, true);
+            $bindName = $this->bind($field, $value, true);
 
             $whereList[] = $field . ' ' . $operator->value . ' ' . $bindName;
         }
 
-        $fieldWhere = ' (' . implode(' AND ', $whereList) . ') ';
+        $fieldWhere = ' (' . \implode(' AND ', $whereList) . ') ';
         $fieldWhere = (0 < count($this->whereList) ? ' ' . $whereConcat->value . ' ' . $fieldWhere : $fieldWhere);
 
         $this->whereList[] = $fieldWhere;
@@ -150,11 +150,8 @@ trait WhereAwareTrait
     {
         $return = '';
 
-        if (0 < count($this->whereList)) {
-            $return = ' WHERE ';
-            foreach ($this->whereList as $where) {
-                $return .= $where . ' ';
-            }
+        if (0 < \count($this->whereList)) {
+            $return = ' WHERE ' . implode(' ', $this->whereList) . ' ';
         } elseif ($throwExceptionForEmptyWhere) {
             throw new EmptyWhereClauseException();
         }

@@ -28,7 +28,7 @@ trait SetAwareTrait
 
     public function addSet(string $field, string|int|float|bool|null $value): static
     {
-        $bindName = $this->addBind($field, $value, true);
+        $bindName = $this->bind($field, $value, true);
 
         $this->setList[] = '`' . $field . '` = ' . $bindName;
 
@@ -37,7 +37,7 @@ trait SetAwareTrait
 
     public function addUpdate(string $field, string|int|float|bool|null $value): static
     {
-        $bindName = $this->addBind($field, $value, true);
+        $bindName = $this->bind($field, $value, true);
 
         $this->updateList[] = '`' . $field . '` = ' . $bindName;
 
@@ -49,11 +49,11 @@ trait SetAwareTrait
      */
     public function getQuerySet(): string
     {
-        if (0 === count($this->setList)) {
+        if (0 === \count($this->setList)) {
             throw new EmptySetClauseException();
         }
 
-        return ' SET ' . implode(', ', $this->setList);
+        return ' SET ' . \implode(', ', $this->setList);
     }
 
     /**
@@ -65,7 +65,7 @@ trait SetAwareTrait
             return '';
         }
 
-        return ' ON DUPLICATE KEY UPDATE ' . implode(', ', $this->updateList);
+        return ' ON DUPLICATE KEY UPDATE ' . \implode(', ', $this->updateList);
     }
 
     public function resetSet(): static

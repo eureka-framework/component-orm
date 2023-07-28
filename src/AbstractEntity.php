@@ -20,7 +20,8 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  * @author Romain Cottard
  *
  * @template TRepository of RepositoryInterface
- * @implements EntityInterface<TRepository>
+ * @template TEntity of EntityInterface
+ * @implements EntityInterface<TRepository, TEntity>
  */
 abstract class AbstractEntity implements EntityInterface
 {
@@ -32,7 +33,7 @@ abstract class AbstractEntity implements EntityInterface
     /** @var bool[] $updated List of updated field */
     private array $updated = [];
 
-    /** @var TRepository $repository Entity repository */
+    /** @phpstan-var TRepository $repository Entity repository */
     private RepositoryInterface $repository;
 
     /**
@@ -88,10 +89,10 @@ abstract class AbstractEntity implements EntityInterface
     public function isUpdated(?string $property = null): bool
     {
         if (null === $property) {
-            return (count($this->updated) > 0);
+            return \count($this->updated) > 0;
         }
 
-        return (isset($this->updated[$property]) && $this->updated[$property] === true);
+        return isset($this->updated[$property]) && $this->updated[$property] === true;
     }
 
     /**

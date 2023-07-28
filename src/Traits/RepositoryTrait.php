@@ -14,17 +14,21 @@ namespace Eureka\Component\Orm\Traits;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception;
 use Eureka\Component\Orm\Query;
+use Eureka\Component\Orm\RepositoryInterface;
 
 /**
  * Repository trait.
  *
  * @author Romain Cottard
  *
+ * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
- * @template TRepository of \Eureka\Component\Orm\RepositoryInterface
  */
 trait RepositoryTrait
 {
+    use ConnectionAwareTrait;
+    use TableTrait;
+
     /**
      * @param  int $id
      * @return TEntity
@@ -42,7 +46,7 @@ trait RepositoryTrait
         }
 
         $primaryKeys = $this->getPrimaryKeys();
-        $field       = reset($primaryKeys);
+        $field       = (string) reset($primaryKeys);
 
         return $this->findByKeys([$field => $id]);
     }
@@ -88,10 +92,9 @@ trait RepositoryTrait
      */
     public function delete(EntityInterface $entity): bool
     {
-        /** @var TRepository $this */
         $queryBuilder = new Query\DeleteBuilder($this, $entity);
 
-        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getBind());
+        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getAllBind());
 
         //~ Reset some data
         $entity->setExists(false);
@@ -121,13 +124,12 @@ trait RepositoryTrait
             return false;
         }
 
-        /** @var TRepository $this */
         $queryBuilder = new Query\InsertBuilder($this, $entity);
         $connection   = $this->getConnection();
 
         $statement = $this->execute(
             $queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore),
-            $queryBuilder->getBind()
+            $queryBuilder->getAllBind()
         );
 
         if ($onDuplicateIgnore && $statement->rowCount() === 0) {
@@ -168,10 +170,9 @@ trait RepositoryTrait
             return false;
         }
 
-        /** @var TRepository $this */
         $queryBuilder = new Query\UpdateBuilder($this, $entity);
 
-        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getBind());
+        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getAllBind());
 
         //~ Reset some data
         $entity->resetUpdated();

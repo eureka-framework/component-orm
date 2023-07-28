@@ -38,7 +38,7 @@ trait JoinAwareTrait
 
     public function hasJoin(): bool
     {
-        return (count($this->joinList) > 0);
+        return \count($this->joinList) > 0;
     }
 
     public function getQueryJoin(): string
@@ -47,7 +47,7 @@ trait JoinAwareTrait
             return '';
         }
 
-        return implode(' ', $this->joinList) . ' ';
+        return \implode(' ', $this->joinList) . ' ';
     }
 
     public function resetJoin(): static

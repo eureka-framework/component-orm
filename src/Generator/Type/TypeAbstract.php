@@ -88,7 +88,7 @@ abstract class TypeAbstract implements TypeInterface
      * @param  int $length
      * @return $this
      */
-    public function setLength(int $length): TypeInterface
+    public function setLength(int $length): static
     {
         $this->length = $length;
 
@@ -101,7 +101,7 @@ abstract class TypeAbstract implements TypeInterface
      * @param  bool $isUnsigned
      * @return $this
      */
-    public function setIsUnsigned(bool $isUnsigned): TypeInterface
+    public function setIsUnsigned(bool $isUnsigned): static
     {
         $this->isUnsigned = $isUnsigned;
 
@@ -114,7 +114,7 @@ abstract class TypeAbstract implements TypeInterface
      * @param  string $other
      * @return $this
      */
-    public function setOther(string $other): TypeInterface
+    public function setOther(string $other): static
     {
         $this->other = $other;
 

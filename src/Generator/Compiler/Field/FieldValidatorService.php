@@ -107,7 +107,7 @@ class FieldValidatorService
     /**
      * @param string $typeClass
      * @param bool $isUnsigned
-     * @return int[]
+     * @return array{min_range?: int|float, max_range?: int|float}
      */
     private function getIntegerOptions(string $typeClass, bool $isUnsigned): array
     {

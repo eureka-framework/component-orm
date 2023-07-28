@@ -11,6 +11,3 @@ parameters:
 
   bootstrapFiles:
     - ./../vendor/autoload.php
-
-  ignoreErrors:
-    - '`Call to an undefined method Eureka\\Component\\Orm\\RepositoryInterface::.+`'

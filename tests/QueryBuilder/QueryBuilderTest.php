@@ -19,9 +19,12 @@ use Eureka\Component\Orm\Exception\EmptySetClauseException;
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Exception\InvalidQueryException;
 use Eureka\Component\Orm\Exception\OrmException;
+use Eureka\Component\Orm\Query\DeleteBuilder;
 use Eureka\Component\Orm\Query\QueryBuilder;
 use Eureka\Component\Orm\Query\QueryBuilderFactory;
 use Eureka\Component\Orm\Query\InsertBuilder;
+use Eureka\Component\Orm\Query\SelectBuilder;
+use Eureka\Component\Orm\Query\UpdateBuilder;
 use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
 use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
@@ -45,10 +48,24 @@ class QueryBuilderTest extends TestCase
 
         $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryBuilder->setListIndexedByField('user_id');
-        $queryBuilder->bind([':user_id' => 1]);
+        $queryBuilder->bindAll([':user_id' => 1]);
 
         $this->assertSame('user_id', $queryBuilder->getListIndexedByField());
-        $this->assertSame([':user_id' => 1], $queryBuilder->getBind());
+        $this->assertSame([':user_id' => 1], $queryBuilder->getAllBind());
+    }
+    /**
+     * @return void
+     */
+    public function testICanInstantiateAnyQueryBuilderWithFactory(): void
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindAll());
+        $factory   = new QueryBuilderFactory();
+
+        $this->assertInstanceOf(QueryBuilder::class, $factory->newQueryBuilder($repository));
+        $this->assertInstanceOf(SelectBuilder::class, $factory->newSelectBuilder($repository));
+        $this->assertInstanceOf(DeleteBuilder::class, $factory->newDeleteBuilder($repository));
+        $this->assertInstanceOf(InsertBuilder::class, $factory->newInsertBuilder($repository));
+        $this->assertInstanceOf(UpdateBuilder::class, $factory->newUpdateBuilder($repository));
     }
 
     /**
@@ -256,6 +273,23 @@ class QueryBuilderTest extends TestCase
      * @return void
      * @throws OrmException
      */
+    public function testICanAddMultipleWhereWithRegexpTypeToQueryBuilder(): void
+    {
+        $suffix = '[a-f0-9]{13}';
+
+        $repository = $this->getUserRepository($this->getMockEntityFindId1());
+        $queryBuilder = new QueryBuilder($repository);
+        $queryBuilder->addWhere('user_id', 1);
+        $queryBuilder->addWhere('user_name', 'any');
+
+        $pattern = "` WHERE user_id = :user_id_$suffix AND user_name = :user_name_$suffix `";
+        $this->assertMatchesRegularExpression($pattern, $queryBuilder->getQueryWhere());
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
     public function testICanAddWhereRawToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
@@ -318,6 +352,20 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = new InsertBuilder($repository);
         $this->expectException(EmptySetClauseException::class);
         $queryBuilder->getQuerySet();
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
+    public function testIHaveAnExceptionWhenITryToGetQueryOnUpdateBuilderWithoutEntity(): void
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindId1());
+        $queryBuilder = new UpdateBuilder($repository);
+
+        $this->expectException(InvalidQueryException::class);
+        $this->expectExceptionMessage('Entity must be given to perform an update!');
+        $queryBuilder->getQuery();
     }
 
     /**

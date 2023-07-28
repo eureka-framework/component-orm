@@ -80,7 +80,7 @@ class GeneratorTest extends TestCase
     public function testIHaveAnExceptionWhenITryToGenerateCodeWithNotDefinedJoinedConfigName(): void
     {
         $generator = new Generator();
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(GeneratorException::class);
         $this->expectExceptionMessage('Invalid orm config file for "user_invalid"');
         $generator->generate($this->getConnectionMock(), $this->getInvalidJoinConfig(), '', false);
 
@@ -94,7 +94,7 @@ class GeneratorTest extends TestCase
     public function testIHaveAnExceptionWhenITryToGenerateCodeWithNonExistingJoinedConfigName(): void
     {
         $generator = new Generator();
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(GeneratorException::class);
         $this->expectExceptionMessage('Invalid config. Joined config "not_exist" does not exist!');
         $generator->generate($this->getConnectionMock(), $this->getConfigWithMissingJoinedConfig(), '', false);
 
@@ -175,9 +175,13 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_parent_has_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_comment', 'Type' => 'varchar(100)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'no comment', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_bigint', 'Type' => 'bigint(20)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_bigint_unsigned', 'Type' => 'bigint(20) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_mediumint', 'Type' => 'mediumint(8)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_mediumint_unsigned', 'Type' => 'mediumint(8) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_smallint', 'Type' => 'smallint(5)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_smallint_unsigned', 'Type' => 'smallint(5) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_tinyint', 'Type' => 'tinyint(3)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_tinyint_unsigned', 'Type' => 'tinyint(3) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_float', 'Type' => 'float(5,2)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0.0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
@@ -218,7 +222,7 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @param array<mixed> $mockedData
+     * @param array<\stdClass|bool> $mockedData
      * @return \PDOStatement
      */
     private function getPDOStatementMock(array $mockedData = []): \PDOStatement
@@ -232,7 +236,26 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array<mixed>
+     * @return array<array{
+     *  comment: array{author: string, copyright: string},
+     *  class: array{classname: string},
+     *  namespace: array{entity: string, mapper: string, repository: string},
+     *  path: array{entity: string, mapper: string, repository: string},
+     *  cache: array{prefix: string},
+     *  database: array{table: string, prefix: string|string[]},
+     *  validation: array{
+     *      extended_validation: array<array{type: string, options?: array<string, string|int|float>}>|null,
+     *      enabled: bool,
+     *      auto: bool
+     *  },
+     *  joins: array<string, array{
+     *     eager_loading: bool,
+     *     config: string,
+     *     relation: string,
+     *     type: string,
+     *     keys: array<bool|string>,
+     *    }>
+     *  }>
      */
     private function getConfig(): array
     {
@@ -399,7 +422,26 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array<mixed>
+     * @return array<array{
+     *  comment: array{author: string, copyright: string},
+     *  class: array{classname: string},
+     *  namespace: array{entity: string, mapper: string, repository: string},
+     *  path: array{entity: string, mapper: string, repository: string},
+     *  cache: array{prefix: string},
+     *  database: array{table: string, prefix: string|string[]},
+     *  validation: array{
+     *      extended_validation: array<array{type: string, options?: array<string, string|int|float>}>|null,
+     *      enabled: bool,
+     *      auto: bool
+     *  },
+     *  joins: array<string, array{
+     *     eager_loading: bool,
+     *     config: string,
+     *     relation: string,
+     *     type: string,
+     *     keys: array<bool|string>,
+     *    }>
+     *  }>
      */
     private function getInvalidJoinConfig(): array
     {
@@ -480,7 +522,26 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array<mixed>
+     * @return array<array{
+     *  comment: array{author: string, copyright: string},
+     *  class: array{classname: string},
+     *  namespace: array{entity: string, mapper: string, repository: string},
+     *  path: array{entity: string, mapper: string, repository: string},
+     *  cache: array{prefix: string},
+     *  database: array{table: string, prefix: string|string[]},
+     *  validation: array{
+     *      extended_validation: array<array{type: string, options?: array<string, string|int|float>}>|null,
+     *      enabled: bool,
+     *      auto: bool
+     *  },
+     *  joins: array<string, array{
+     *     eager_loading: bool,
+     *     config: string,
+     *     relation: string,
+     *     type: string,
+     *     keys: array<bool|string>,
+     *    }>
+     *  }>
      */
     private function getConfigWithMissingJoinedConfig(): array
     {

@@ -105,19 +105,37 @@ interface ConfigInterface
     /**
      * Get validation config.
      *
-     * @return array<mixed>
+     * @return array{
+     *          extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>,
+     *          enabled?: bool,
+     *          auto?: bool
+     *      }
      */
     public function getValidation(): array;
 
     /**
      * Get Config object(s) for "joined" tables
      *
-     * @return array<mixed>
+     * @return array<array{
+     *     eager_loading?: bool,
+     *     config: string,
+     *     relation: string,
+     *     type: string,
+     *     keys: array<bool|string>,
+     *     instance: ConfigInterface
+     * }>
      */
     public function getAllJoin(): array;
 
     /**
-     * @param  ConfigInterface[] $joinList
+     * @param  array<array{
+     *     eager_loading?: bool,
+     *     config: string,
+     *     relation: string,
+     *     type: string,
+     *     keys: array<bool|string>,
+     *     instance: ConfigInterface
+     * }> $joinList
      * @return $this
      */
     public function setJoinList(array $joinList): ConfigInterface;

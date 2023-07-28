@@ -13,6 +13,7 @@ namespace Eureka\Component\Orm\Generator\Compiler;
 
 use Eureka\Component\Orm\Config;
 use Eureka\Component\Orm\Exception\GeneratorException;
+use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Generator\Compiler\Field\Field;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldValidatorService;
 
@@ -59,8 +60,13 @@ class AbstractClassCompiler extends AbstractCompiler
     {
         $statement = $this->connection->query('SHOW FULL COLUMNS FROM ' . $this->config->getDbTable());
 
+        if ($statement === false) {
+            throw new GeneratorException("Cannot get list of columns for table '{$this->config->getDbTable()}'"); // @codeCoverageIgnore
+        }
+
         $this->fields = [];
         while (false !== ($column = $statement->fetch(\PDO::FETCH_OBJ))) {
+            /** @var \stdClass $column */
             $this->fields[] = new Field($column, $this->config->getDbPrefix(), $this->config->getValidation());
         }
 

@@ -11,11 +11,13 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\AbstractMapper;
 use Eureka\Component\Orm\EntityInterface;
+use Eureka\Component\Orm\Exception\ConnectionLostDuringTransactionException;
+use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Exception\InvalidQueryException;
 use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Query;
+use Eureka\Component\Orm\Query\SelectBuilder;
 use Eureka\Component\Orm\RepositoryInterface;
 use PDO;
 use Psr\Cache\CacheItemPoolInterface;
@@ -26,8 +28,8 @@ use Psr\Cache\InvalidArgumentException;
  *
  * @author Romain Cottard
  *
- * @template TEntity of EntityInterface
  * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
  */
 trait CacheAwareTrait
 {
@@ -81,14 +83,16 @@ trait CacheAwareTrait
      * Try to get all entities from cache.
      * Return list of entities (for found) / null (for not found in cache)
      *
-     * @param AbstractMapper<TEntity, TRepository> $repository
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
-     * @return array<TEntity|null>
+     * @phpstan-param TRepository $repository
+     * @phpstan-param SelectBuilder $queryBuilder
+     * @phpstan-return array<TEntity|null>
      * @throws InvalidQueryException
      * @throws OrmException
+     * @throws ConnectionLostDuringTransactionException
+     * @throws EmptyWhereClauseException
      */
     protected function selectFromCache(
-        AbstractMapper $repository,
+        RepositoryInterface $repository,
         Query\SelectBuilder $queryBuilder
     ): array {
         if (!$this->isCacheEnabledOnRead) {
@@ -99,7 +103,7 @@ trait CacheAwareTrait
             return []; // @codeCoverageIgnore
         }
 
-        $statement = $this->execute($queryBuilder->getQuery(false, '', true), $queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery(false, '', true), $queryBuilder->getAllBind());
 
         $queryBuilder->clear(true);
 
@@ -110,6 +114,7 @@ trait CacheAwareTrait
         $collection       = [];
 
         while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
+            /** @var \stdClass $row */
             $entityIdInstance = $repository->newEntity($row, true);
 
             //~ Pre-fill collection to keep the order
@@ -149,6 +154,10 @@ trait CacheAwareTrait
      */
     protected function getCacheEntity(string $cacheKey): ?\stdClass
     {
+        if (!$this->cache instanceof CacheItemPoolInterface) {
+            return null; // @codeCoverageIgnore
+        }
+
         if (!$this->isCacheEnabledOnRead) {
             return null; // @codeCoverageIgnore
         }
@@ -156,10 +165,12 @@ trait CacheAwareTrait
         try {
             $cacheItem = $this->cache->getItem($cacheKey);
         } catch (InvalidArgumentException $exception) { // @codeCoverageIgnore
-            throw new OrmException('Cannot delete cache', $exception->getCode(), $exception); // @codeCoverageIgnore
+            throw new OrmException('Cannot get cache item', $exception->getCode(), $exception); // @codeCoverageIgnore
         }
 
-        return $cacheItem->get();
+        $item = $cacheItem->get();
+
+        return $item instanceof \stdClass ? $item : null;
     }
 
     /**
@@ -172,7 +183,7 @@ trait CacheAwareTrait
     protected function deleteCacheEntity(string $cacheKey): static
     {
         if (!$this->cache instanceof CacheItemPoolInterface) {
-            return $this;
+            return $this; // @codeCoverageIgnore
         }
 
         try {

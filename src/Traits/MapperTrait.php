@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\AbstractMapper;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Exception;
@@ -30,20 +29,31 @@ use PDO;
  */
 trait MapperTrait
 {
+    use TableTrait;
+
     /** @var int $lastId */
     protected int $lastId = 0;
 
     /** @var int $rowCount The number of rows affected by the last SQL statement */
     protected int $rowCount = 0;
 
-    /** @var array<TRepository> $mappers */
+    /**
+     * @var array $mappers
+     */
     protected array $mappers = [];
 
-    /** @var array<mixed> $joinConfigs */
+    /**
+     * @var array<array{
+     *     mapper: class-string<RepositoryInterface>,
+     *     type: string,
+     *     relation: string,
+     *     keys: array<string, bool|string>
+     * }> $joinConfigs */
     protected array $joinConfigs = [];
 
     /**
-     * @param  TRepository[] $mappers
+     * @template TRepositoryJoin of RepositoryInterface
+     * @param  array<class-string<TRepositoryJoin>, TRepositoryJoin> $mappers
      * @return static
      */
     public function addMappers(array $mappers): static
@@ -56,10 +66,10 @@ trait MapperTrait
     /**
      * @template TRepositoryJoin of RepositoryInterface
      * @phpstan-param class-string<TRepositoryJoin> $name
-     * @return TRepositoryJoin
+     * @phpstan-return TRepositoryJoin
      * @throws Exception\UndefinedMapperException
      */
-    public function getMapper(string $name): RepositoryInterface
+    public function getMapper(string $name)
     {
         if (!isset($this->mappers[$name])) {
             throw new Exception\UndefinedMapperException('Mapper does not exist! (mapper: ' . $name . ')');
@@ -110,14 +120,15 @@ trait MapperTrait
     /**
      * Count number of rows corresponding to the query.
      *
-     * @param Query\QueryBuilder<TRepository, TEntity> $queryBuilder
+     * @param Query\QueryBuilder $queryBuilder
      * @param string $field
      * @return int
-     * @throws Exception\ConnectionLostDuringTransactionException|Exception\EmptyWhereClauseException
+     * @throws Exception\ConnectionLostDuringTransactionException
+     * @throws Exception\EmptyWhereClauseException
      */
     public function count(Query\QueryBuilder $queryBuilder, string $field = '*'): int
     {
-        $statement = $this->execute($queryBuilder->getQueryCount($field), $queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQueryCount($field), $queryBuilder->getAllBind());
 
         $queryBuilder->clear();
 
@@ -125,7 +136,7 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @return bool
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
@@ -149,7 +160,7 @@ trait MapperTrait
     public function query(QueryBuilderInterface $queryBuilder): array
     {
         $indexedBy = $queryBuilder->getListIndexedByField();
-        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getAllBind());
 
         $collection = [];
 
@@ -157,6 +168,7 @@ trait MapperTrait
 
         $id = 0;
         while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
+            /** @var \stdClass $row */
             if (!empty($indexedBy) && !isset($row->{$indexedBy})) {
                 throw new Exception\OrmException(
                     'List is supposed to be indexed by a column that does not exist: ' . $indexedBy
@@ -177,13 +189,14 @@ trait MapperTrait
      */
     public function queryRows(QueryBuilderInterface $queryBuilder): array
     {
-        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getAllBind());
 
         $queryBuilder->clear();
 
         $collection = [];
 
         while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
+            /** @var \stdClass $row */
             $collection[] = $row;
         }
 
@@ -191,7 +204,7 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @return TEntity
      * @throws Exception\EntityNotExistsException
      * @throws Exception\InvalidQueryException
@@ -211,7 +224,7 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @return TEntity[]
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
@@ -239,9 +252,10 @@ trait MapperTrait
             return $collection;
         }
 
-        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getBind());
+        $statement = $this->execute($queryBuilder->getQuery(), $queryBuilder->getAllBind());
 
         while (false !== ($row = $statement->fetch(PDO::FETCH_OBJ))) {
+            /** @var \stdClass $row */
             $entity                             = $this->newEntity($row, true);
             $collection[$entity->getCacheKey()] = $entity;
             $this->setCacheEntity($entity->getCacheKey(), $row);
@@ -263,7 +277,7 @@ trait MapperTrait
      * Select all rows corresponding of where clause.
      * Use eager loading to select joined entities.
      *
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @param string[] $filters
      * @return TEntity[]
      * @throws Exception\OrmException
@@ -292,57 +306,12 @@ trait MapperTrait
     }
 
     /**
-     * Set fields for mapper.
-     *
-     * @param  string[] $fields
-     * @return static
-     */
-    protected function setFields(array $fields = []): static
-    {
-        $this->fields = $fields;
-
-        return $this;
-    }
-
-    /**
-     * Set primary keys.
-     *
-     * @param  string[] $primaryKeys
-     * @return static
-     */
-    protected function setPrimaryKeys(array $primaryKeys): static
-    {
-        $this->primaryKeys = $primaryKeys;
-
-        return $this;
-    }
-
-    /**
-     * Set table name.
-     *
-     * @param  string $table
-     * @return static
-     */
-    protected function setTable(string $table): static
-    {
-        $this->table = $table;
-
-        return $this;
-    }
-
-    /**
-     * @param array<mixed> $nameMap
-     * @return static
-     */
-    protected function setNamesMap(array $nameMap): static
-    {
-        $this->entityNamesMap = $nameMap;
-
-        return $this;
-    }
-
-    /**
-     * @param array<mixed> $joinConfigs
+     * @param array<array{
+     *     mapper: class-string<TRepository>,
+     *     type: string,
+     *     relation: string,
+     *     keys: array<string, bool|string>
+     * }> $joinConfigs
      * @return static
      */
     protected function setJoinConfigs(array $joinConfigs): static
@@ -356,7 +325,12 @@ trait MapperTrait
      * Get list of joins config filters if filters is provided.
      *
      * @param  string[] $filters
-     * @return array<mixed>
+     * @return array<array{
+     *     mapper: class-string<TRepository>,
+     *     type: string,
+     *     relation: string,
+     *     keys: array<string, bool|string>
+     * }>
      */
     private function getJoinsConfig(array $filters = []): array
     {
@@ -374,15 +348,19 @@ trait MapperTrait
     }
 
     /**
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
-     * @param array<mixed> $joinConfigs
+     * @param Query\SelectBuilder $queryBuilder
+     * @param array<array{
+     *     mapper: class-string<TRepository>,
+     *     type: string,
+     *     relation: string,
+     *     keys: array<string, bool|string>
+     * }> $joinConfigs
      * @return \stdClass[]
      * @throws Exception\OrmException
      * @throws Exception\UndefinedMapperException
      */
     private function getRawResultsWithJoin(Query\SelectBuilder $queryBuilder, array $joinConfigs): array
     {
-        /** @var RepositoryInterface $this */
         //~ Add main fields to query builder
         foreach ($queryBuilder->getQueryFieldsList($this, true) as $field) {
             $queryBuilder->addField($field, '', false);
@@ -396,10 +374,10 @@ trait MapperTrait
             $aliasPrefix = $mapper->getTable() . '_' . $index++;
             $aliasSuffix = '_' . $aliasPrefix;
 
-            $keyLeft  = key($join['keys']);
+            $keyLeft  = (string) key($join['keys']);
             $keyRight = current($join['keys']);
 
-            $keyRight = $keyRight === true ? $keyLeft : $keyRight;
+            $keyRight = (string) ($keyRight === true ? $keyLeft : $keyRight);
 
             //~ Add joined fields to query builder
             foreach ($queryBuilder->getQueryFieldsList($mapper, true, false, $aliasPrefix, $aliasSuffix) as $field) {
@@ -422,8 +400,16 @@ trait MapperTrait
 
     /**
      * @param \stdClass[] $list
-     * @param array<mixed> $joinConfigs
-     * @return array<object>
+     * @param array<array{
+     *     mapper: class-string<TRepository>,
+     *     type: string,
+     *     relation: string,
+     *     keys: array<string, bool|string>
+     * }> $joinConfigs
+     * @return array{
+     *     0: array<string, TEntity>,
+     *     1: array<string, array<string, array<int, TEntity>>>
+     * }
      * @throws Exception\UndefinedMapperException
      */
     private function getCollectionAndRelations(array $list, array $joinConfigs): array
@@ -490,7 +476,7 @@ trait MapperTrait
         $collection = [];
         $nameMap = $this->getNamesMap($listIndexedBy);
         $getter = $nameMap['get'];
-        foreach ($rawCollection as $index => $item) {
+        foreach ($rawCollection as $item) {
             $collection[$item->$getter()] = $item;
         }
 

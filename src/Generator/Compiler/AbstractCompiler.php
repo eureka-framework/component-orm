@@ -142,7 +142,11 @@ abstract class AbstractCompiler
             '/(_in_)/i', // db_prefix is not empty
             '/(_)/',
         );
-        $methodName = str_replace(' ', '', ucwords(preg_replace($toReplace, ' ', strtolower($field->getName(true)))));
+        $methodName = str_replace(
+            ' ',
+            '',
+            ucwords((string) preg_replace($toReplace, ' ', strtolower($field->getName(true))))
+        );
 
         $type = $field->getType();
         $name = $field->getName();

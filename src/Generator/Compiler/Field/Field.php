@@ -29,7 +29,7 @@ class Field
     /** @var string[] $dbPrefixes field prefix */
     protected array $dbPrefixes = [];
 
-    /** @var array{type?: string, options?: array<mixed>} $validation Validation config */
+    /** @var array{type?: string, options?: array<string, string|int|float>} $validation Validation config */
     protected array $validation = [];
 
     /**
@@ -38,7 +38,7 @@ class Field
      * @param \stdClass $field
      * @param string[] $dbPrefixes
      * @param array{
-     *          extended_validation?: array<array{type?: string, options?: array<mixed>}>,
+     *          extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>,
      *          enabled?: bool,
      *          auto?: bool
      *      } $validationConfig
@@ -55,9 +55,9 @@ class Field
             $this->validation = $validationConfig['extended_validation'][$field->Field];
         }
 
-        $this->hasValidation = (isset($validationConfig['enabled']) && (bool) $validationConfig['enabled']);
+        $this->hasValidation = $validationConfig['enabled'] ?? false;
 
-        $isAuto = (isset($validationConfig['auto']) && (bool) $validationConfig['auto']);
+        $isAuto = $validationConfig['auto'] ?? false;
         $this->hasValidationAuto = $this->hasValidation && $isAuto;
     }
 
@@ -88,7 +88,7 @@ class Field
     }
 
     /**
-     * @return array{type: string, options: array<mixed>}
+     * @return array{type?: string, options?: array<string, string|int|float>}
      */
     public function getValidation(): array
     {
@@ -113,11 +113,6 @@ class Field
     public function isPrimaryKey(): bool
     {
         return $this->isPrimaryKey;
-    }
-
-    public function isKey(): bool
-    {
-        return $this->isKey;
     }
 
     public function isAutoIncrement(): bool
@@ -206,7 +201,7 @@ class Field
         }
 
         $this->default = match ((string) $this->getType()) {
-            'string' => "'" . trim($default, "'") . "'",
+            'string' => "'" . trim((string) $default, "'") . "'",
             'bool'   => var_export((bool) $default, true),
             default  => $default,
         };

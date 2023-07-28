@@ -20,6 +20,7 @@ use Eureka\Component\Orm\Exception\UndefinedMapperException;
 use Eureka\Component\Orm\MapperInterface;
 use Eureka\Component\Orm\Query\QueryBuilder;
 use Eureka\Component\Orm\Query\SelectBuilder;
+use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Orm\Tests\Generated\Entity\User;
 use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
 use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserParentMapper;
@@ -405,7 +406,9 @@ class MapperTest extends TestCase
         $this->expectException(UndefinedMapperException::class);
         $this->expectExceptionMessage('Mapper does not exist! (mapper: \Unknown\Mapper\ClassName)');
 
-        $repository->getMapper('\Unknown\Mapper\ClassName');
+        /** @var class-string<RepositoryInterface> $mapperClass */
+        $mapperClass = '\Unknown\Mapper\ClassName';
+        $repository->getMapper($mapperClass);
     }
 
     /**
@@ -428,6 +431,16 @@ class MapperTest extends TestCase
      */
     public function testIHaveAnExceptionWhenITryToGetQueryWithResultWithAnError(): void
     {
+        /** @var array{
+         *     0: \stdClass,
+         *     1: bool,
+         *     2: \stdClass,
+         *     3: bool,
+         *     4: \stdClass,
+         *     5: bool,
+         *     6: \stdClass,
+         *     7: bool
+         * } $entities */
         $entities = $this->getMockEntityFindId1();
         $repository = $this->getUserRepository($entities, true, 1);
 
@@ -560,24 +573,24 @@ class MapperTest extends TestCase
 
     /**
      * @param bool $includeCacheMock
-     * @return array<mixed>
+     * @return array{
+     *     0: \stdClass,
+     *     1: bool,
+     *     2: \stdClass,
+     *     3: bool,
+     *     4: \stdClass,
+     *     5: bool,
+     *     6: \stdClass,
+     *     7: bool
+     * }|array{
+     *     0: \stdClass,
+     *     1: bool,
+     * }
      */
     private function getMockEntityFindId1(bool $includeCacheMock = true): array
     {
-        $mock = [];
-
-        if ($includeCacheMock) {
-            $mock = [
-                (object) [
-                    'user_id' => 1,
-                ],
-                false,
-            ];
-        }
-
-        $mock = array_merge(
-            $mock,
-            [
+        if (!$includeCacheMock) {
+            return [
                 (object) [
                     'user_id'          => 1,
                     'user_is_enabled'  => true,
@@ -587,35 +600,65 @@ class MapperTest extends TestCase
                     'user_date_update' => null,
                 ],
                 false,
-            ]
-        );
+            ];
+        }
 
-        return array_merge($mock, $mock); // double for cache test
+        // double for cache test
+        return [
+            (object) [
+                'user_id' => 1,
+            ],
+            false,
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            false,
+            (object) [
+                'user_id' => 1,
+            ],
+            false,
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            false,
+        ];
     }
 
     /**
      * @param bool $includeCacheMock
-     * @return array<mixed>
+     * @return array{
+     *     0: \stdClass,
+     *     1: \stdClass,
+     *     2: bool,
+     *     3: \stdClass,
+     *     4: \stdClass,
+     *     5: bool,
+     *     6: \stdClass,
+     *     7: \stdClass,
+     *     8: bool,
+     *     9: \stdClass,
+     *     10: \stdClass,
+     *     11: bool
+     * }|array{
+     *     0: \stdClass,
+     *     1: \stdClass,
+     *     2: bool,
+     * }
      */
     private function getMockEntityFindAll(bool $includeCacheMock = true): array
     {
-        $mock = [];
-
-        if ($includeCacheMock) {
-            $mock = [
-                (object) [
-                    'user_id' => 1,
-                ],
-                (object) [
-                    'user_id' => 2,
-                ],
-                false,
-            ];
-        }
-
-        $mock = array_merge(
-            $mock,
-            [
+        if (!$includeCacheMock) {
+            return [
                 (object) [
                     'user_id'          => 1,
                     'user_is_enabled'  => true,
@@ -633,10 +676,51 @@ class MapperTest extends TestCase
                     'user_date_update' => null,
                 ],
                 false,
-            ]
-        );
+            ];
+        }
 
-        return array_merge($mock, $mock); // double for cache test
+        return [
+           (object) ['user_id' => 1],
+           (object) ['user_id' => 2],
+           false,
+           (object) [
+               'user_id'          => 1,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-01 10:00:00',
+               'user_date_update' => null,
+           ],
+           (object) [
+               'user_id'          => 2,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user02@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-02 10:00:00',
+               'user_date_update' => null,
+           ],
+           false,
+           (object) ['user_id' => 1],
+           (object) ['user_id' => 2],
+           false,
+           (object) [
+               'user_id'          => 1,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-01 10:00:00',
+               'user_date_update' => null,
+           ],
+           (object) [
+               'user_id'          => 2,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user02@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-02 10:00:00',
+               'user_date_update' => null,
+           ],
+           false,
+        ];
     }
 
     /**

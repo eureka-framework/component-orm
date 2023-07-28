@@ -11,15 +11,17 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query;
 
+use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
+use Eureka\Component\Orm\RepositoryInterface;
 
 /**
  * Class QueryBuilder
  *
  * @author Romain Cottard
  *
- * @template TRepository of \Eureka\Component\Orm\RepositoryInterface
- * @template TEntity of \Eureka\Component\Orm\EntityInterface
+ * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
  * @extends SelectBuilder<TRepository, TEntity>
  */
 class QueryBuilder extends SelectBuilder

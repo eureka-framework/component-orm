@@ -24,19 +24,16 @@ use Psr\Cache\CacheItemPoolInterface;
  *
  * @author Romain Cottard
  *
- * @template TEntity of EntityInterface
  * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
+ * @implements RepositoryInterface<TRepository, TEntity>
  */
-abstract class AbstractMapper
+abstract class AbstractMapper implements RepositoryInterface
 {
-    /** @use Traits\CacheAwareTrait<TEntity, TRepository> */
     use Traits\CacheAwareTrait;
     use Traits\ConnectionAwareTrait;
-    /** @use Traits\EntityAwareTrait<TEntity> */
     use Traits\EntityAwareTrait;
-    /** @use Traits\MapperTrait<TEntity, TRepository> */
     use Traits\MapperTrait;
-    /** @use Traits\RepositoryTrait<TEntity, TRepository> */
     use Traits\RepositoryTrait;
     use Traits\TableTrait;
     use Traits\ValidatorAwareTrait;

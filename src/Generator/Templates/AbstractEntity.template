@@ -26,8 +26,8 @@ use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
  *
  * @author {{ comment.author }}
  *
- * @template TRepository of RepositoryInterface
- * @extends AbstractEntity<TRepository>
+ * @template TRepository
+ * @template TEntity
  */
 abstract class Abstract{{ class.name }} extends AbstractEntity
 {

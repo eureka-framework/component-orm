@@ -81,7 +81,7 @@ trait FieldAwareTrait
             $fields = $this->getQueryFieldsList($repository, $isPrefixed, $onlyPrimaryKeys);
         }
 
-        return $calc . implode(', ', $fields);
+        return $calc . \implode(', ', $fields);
     }
 
     /**
@@ -96,7 +96,7 @@ trait FieldAwareTrait
             }
         }
 
-        return ($this->calculateFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '') . implode(', ', $this->fields);
+        return ($this->calculateFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '') . \implode(', ', $this->fields);
     }
 
     /**

@@ -14,10 +14,7 @@ namespace Eureka\Component\Orm;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
- * Entity aware interface.
- *
- * @author Romain Cottard
- *
+ * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
  */
 interface EntityAwareInterface
@@ -37,10 +34,9 @@ interface EntityAwareInterface
      *
      * @param  \stdClass|null $row
      * @param  bool $exists
-     * @return EntityInterface
-     * @phpstan-return TEntity
+     * @return TEntity
      */
-    public function newEntity(\stdClass $row = null, bool $exists = false);
+    public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface;
 
     /**
      * Create new entity from array.

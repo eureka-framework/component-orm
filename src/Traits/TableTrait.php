@@ -27,7 +27,7 @@ trait TableTrait
     /** @var string[] $primaryKeys */
     protected array $primaryKeys = [];
 
-    /** @var string[][] $entityNamesMap */
+    /** @var array<string, array<string, string>> $entityNamesMap */
     protected array $entityNamesMap = [];
 
     /**
@@ -62,7 +62,7 @@ trait TableTrait
 
     /**
      * @param string $field
-     * @return array<mixed>
+     * @return array<string, string>
      */
     public function getNamesMap(string $field): array
     {
@@ -107,5 +107,55 @@ trait TableTrait
     public function getPropertyForField(string $field): string
     {
         return $this->getNamesMap($field)['property'];
+    }
+
+    /**
+     * @param array<string, array<string, string>> $nameMap
+     * @return static
+     */
+    protected function setNamesMap(array $nameMap): static
+    {
+        $this->entityNamesMap = $nameMap;
+
+        return $this;
+    }
+
+    /**
+     * Set fields for mapper.
+     *
+     * @param  string[] $fields
+     * @return static
+     */
+    protected function setFields(array $fields = []): static
+    {
+        $this->fields = $fields;
+
+        return $this;
+    }
+
+    /**
+     * Set primary keys.
+     *
+     * @param  string[] $primaryKeys
+     * @return static
+     */
+    protected function setPrimaryKeys(array $primaryKeys): static
+    {
+        $this->primaryKeys = $primaryKeys;
+
+        return $this;
+    }
+
+    /**
+     * Set table name.
+     *
+     * @param  string $table
+     * @return static
+     */
+    protected function setTable(string $table): static
+    {
+        $this->table = $table;
+
+        return $this;
     }
 }

@@ -13,6 +13,7 @@ namespace Eureka\Component\Orm\Generator;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Config\Config;
+use Eureka\Component\Orm\Config\ConfigInterface;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Compiler\EntityCompiler;
 use Eureka\Component\Orm\Generator\Compiler\MapperCompiler;
@@ -27,7 +28,26 @@ class Generator
 {
     /**
      * @param Connection $connection
-     * @param array<mixed> $configList
+     * @param array<array{
+     *  comment: array{author: string, copyright: string},
+     *  class: array{classname: string},
+     *  namespace: array{entity: string, mapper: string, repository?: string},
+     *  path: array{entity: string, mapper: string, repository?: string},
+     *  cache: array{prefix: string},
+     *  database: array{table: string, prefix: string|string[]},
+     *  validation: array{
+     *      extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>|null,
+     *      enabled?: bool,
+     *      auto?: bool
+     *  },
+     *  joins?: array<string, array{
+     *      eager_loading?: bool,
+     *      config?: string,
+     *      relation?: string,
+     *      type?: string,
+     *      keys?: array<string, string|bool>
+     *  }>
+     * }> $configList
      * @param string $configName
      * @param bool $isVerbose
      * @return void
@@ -67,9 +87,29 @@ class Generator
     /**
      * Find configs.
      *
-     * @param array<string|string[]|string[][]> $configList
+     * @param array<array{
+     *  comment: array{author: string, copyright: string},
+     *  class: array{classname: string},
+     *  namespace: array{entity: string, mapper: string, repository?: string},
+     *  path: array{entity: string, mapper: string, repository?: string},
+     *  cache: array{prefix: string},
+     *  database: array{table: string, prefix: string|string[]},
+     *  validation: array{
+     *      extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>|null,
+     *      enabled?: bool,
+     *      auto?: bool
+     *  },
+     *  joins?: array<string, array{
+     *      eager_loading?: bool,
+     *      config?: string,
+     *      relation?: string,
+     *      type?: string,
+     *      keys?: array<string, string|bool>
+     *  }>
+     * }> $configList
      * @param string $configName Filter on name
      * @return Config[]
+     * @throws GeneratorException
      */
     protected function buildConfigs(array $configList, string $configName = ''): array
     {
@@ -92,15 +132,25 @@ class Generator
             if (empty($configList[$name]['joins'])) {
                 continue;
             }
+
+            /** @var array<array{
+             *     eager_loading?: bool,
+             *     config?: string,
+             *     relation: string,
+             *     type: string,
+             *     keys: array<bool|string>,
+             *     instance?: ConfigInterface
+             * }> $joins
+             */
             $joins = $configList[$name]['joins'];
 
             foreach ($joins as $key => $join) {
                 if (!isset($join['config'])) {
-                    throw new \RuntimeException('Invalid orm config file for "' . $name . '"');
+                    throw new GeneratorException('Invalid orm config file for "' . $name . '"');
                 }
 
                 if (!isset($baseConfig[$join['config']])) {
-                    throw new \RuntimeException(
+                    throw new GeneratorException(
                         'Invalid config. Joined config "' . $join['config'] . '" does not exist!'
                     );
                 }
@@ -108,6 +158,15 @@ class Generator
                 $joins[$key]['instance'] = clone $baseConfig[$join['config']];
             }
 
+            /** @var array<array{
+             *     eager_loading?: bool,
+             *     config: string,
+             *     relation: string,
+             *     type: string,
+             *     keys: array<bool|string>,
+             *     instance?: ConfigInterface
+             * }> $joins
+             */
             $config->setJoinList($joins);
         }
 
@@ -121,13 +180,14 @@ class Generator
     /**
      * @param string[] $paths
      * @return void
+     * @throws GeneratorException
      */
     private function generatePaths(array $paths): void
     {
         foreach ($paths as $path) {
             if (!is_dir($path) && !mkdir($path, 0755, true)) {
                 // @codeCoverageIgnoreStart
-                throw new \RuntimeException('Cannot created output directory! (dir:' . $path . ')');
+                throw new GeneratorException('Cannot created output directory! (dir:' . $path . ')');
                 // @codeCoverageIgnoreEnd
             }
         }

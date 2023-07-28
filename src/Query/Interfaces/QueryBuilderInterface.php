@@ -26,12 +26,12 @@ interface QueryBuilderInterface
      * @param  bool $isUnique
      * @return string Return bind name field
      */
-    public function addBind(string $field, string|int|float|bool|null $value, bool $isUnique = false): string;
+    public function bind(string $field, string|int|float|bool|null $value, bool $isUnique = false): string;
 
     /**
      * @return array<string|int|float|bool|null>
      */
-    public function getBind(): array;
+    public function getAllBind(): array;
 
     /**
      * @return string

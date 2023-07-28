@@ -16,21 +16,20 @@ use Eureka\Component\Orm\Exception\EmptySetClauseException;
 use Eureka\Component\Orm\Query\Interfaces\FieldAwareInterface;
 use Eureka\Component\Orm\Query\Interfaces\SetAwareInterface;
 use Eureka\Component\Orm\Query\Traits;
+use Eureka\Component\Orm\RepositoryInterface;
 
 /**
  * Class InsertBuilder
  *
  * @author Romain Cottard
  *
- * @template TRepository of \Eureka\Component\Orm\RepositoryInterface
+ * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
  *
- * @implements FieldAwareInterface<TRepository>
  * @extends AbstractQueryBuilder<TRepository, TEntity>
  */
 class InsertBuilder extends AbstractQueryBuilder implements FieldAwareInterface, SetAwareInterface
 {
-    /** @use Traits\FieldAwareTrait<TRepository> */
     use Traits\FieldAwareTrait;
     use Traits\SetAwareTrait;
 

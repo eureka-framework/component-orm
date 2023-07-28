@@ -20,11 +20,18 @@ use Eureka\Component\Orm\Exception\OrmException;
  *
  * @author Romain Cottard
  *
- * @template TEntity of EntityInterface
  * @template TRepository of RepositoryInterface
- * @extends MapperInterface<TEntity, TRepository>
+ * @template TEntity of EntityInterface
+ *
+ * @extends MapperInterface<TRepository, TEntity>
+ * @extends EntityAwareInterface<TRepository, TEntity>
  */
-interface RepositoryInterface extends MapperInterface, TableInterface
+interface RepositoryInterface extends
+    CacheAwareInterface,
+    ConnectionAwareInterface,
+    EntityAwareInterface,
+    MapperInterface,
+    TableInterface
 {
     /**
      * Get first row corresponding of the primary keys.

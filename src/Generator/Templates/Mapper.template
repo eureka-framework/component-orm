@@ -17,10 +17,6 @@ use {{ repository.namespace }}\{{ class.repository }};
  * Mapper class for table "{{ database.table }}"
  *
  * @author {{ comment.author }}
-
- * @template TEntity of \{{ orm.namespace }}\EntityInterface
- * @template TRepository of \{{ orm.namespace }}\RepositoryInterface
- * @extends Abstracts\Abstract{{ class.mapper }}<\{{ entity.namespace }}\{{ class.entity }}, {{ class.repository }}>
  */
 class {{ class.mapper }} extends Abstracts\Abstract{{ class.mapper }} implements {{ class.repository }}
 {

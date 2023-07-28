@@ -15,6 +15,7 @@ use Eureka\Component\Validation\Entity\GenericEntity;
 use Eureka\Component\Validation\Exception\ValidationException;
 use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
+use Eureka\Component\Validation\ValidatorInterface;
 
 /**
  * Repository trait.
@@ -29,17 +30,26 @@ trait ValidatorAwareTrait
     /** @var ValidatorEntityFactoryInterface|null $validatorEntityFactory */
     private ?ValidatorEntityFactoryInterface $validatorEntityFactory;
 
-    /** @var array<mixed> $validationConfig */
+    /** @var array<string, array{type?:string, options?: array<string, string|int|float>}> $validationConfig */
     private array $validationConfig = [];
 
     /**
      * @param array<mixed> $data
-     * @param array<mixed> $config
+     * @param array<string, array{type?:string, options?: array<string, string|int|float>}> $config
      * @return GenericEntity
      */
     public function newGenericEntity(array $data = [], array $config = []): GenericEntity
     {
-        return $this->getValidatorEntityFactory()->createGeneric(!empty($config) ?: $this->getValidatorConfig(), $data);
+        if ($this->getValidatorEntityFactory() === null) {
+            // @codeCoverageIgnoreStart
+            throw new \LogicException(
+                'Validator Entity Factory is null, cannot create generic entity from this service!'
+            );
+            // @codeCoverageIgnoreEnd
+        }
+
+        $config = !empty($config) ? $config : $this->getValidatorConfig();
+        return $this->getValidatorEntityFactory()->createGeneric($config, $data);
     }
 
     /**
@@ -74,7 +84,7 @@ trait ValidatorAwareTrait
     }
 
     /**
-     * @return array<mixed>
+     * @return array<string, array{type?:string, options?: array<string, string|int|float>}>
      */
     public function getValidatorConfig(): array
     {
@@ -82,7 +92,7 @@ trait ValidatorAwareTrait
     }
 
     /**
-     * @param array<mixed> $config
+     * @param array<string, array{type?:string, options?: array<string, string|int|float>}> $config
      * @return void
      */
     protected function setValidatorConfig(array $config): void
@@ -100,14 +110,14 @@ trait ValidatorAwareTrait
     {
         if (empty($this->validationConfig[$field])) {
             // @codeCoverageIgnoreStart
-            throw new ValidationException('No validation config defined for given field! (field: ' . $field . ')');
+            throw new ValidationException("No validation config defined for given field! (field: $field)");
             // @codeCoverageIgnoreEnd
         }
 
         $config = $this->validationConfig[$field];
         if (empty($config['type'])) {
             // @codeCoverageIgnoreStart
-            throw new ValidationException('No validation type defined for given field! (field: ' . $field . ')');
+            throw new ValidationException("No validation type defined for given field! (field: $field)");
             // @codeCoverageIgnoreEnd
         }
 
@@ -116,9 +126,15 @@ trait ValidatorAwareTrait
 
         if (str_contains($validatorType, '\\')) {
             //~ Custom class validator
+            /** @var class-string<ValidatorInterface> $validatorType */
             $validator = new $validatorType(); // @codeCoverageIgnore
         } else {
             //~ Component type validator
+            if ($this->getValidatorFactory() === null) {
+                // @codeCoverageIgnoreStart
+                throw new \LogicException('Validator factory is null, cannot validate type!');
+                // @codeCoverageIgnoreEnd
+            }
             $validator = $this->getValidatorFactory()->getValidator($validatorType);
         }
 

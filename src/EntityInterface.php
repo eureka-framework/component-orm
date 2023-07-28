@@ -14,11 +14,8 @@ namespace Eureka\Component\Orm;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
- * DataMapper Data interface, should be implemented by all data objects
- *
- * @author  Romain Cottard
- *
  * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
  */
 interface EntityInterface
 {
@@ -39,7 +36,7 @@ interface EntityInterface
     public function getCacheKey(): string;
 
     /**
-     * @return TRepository
+     * @return RepositoryInterface
      */
     public function getRepository(): RepositoryInterface;
 

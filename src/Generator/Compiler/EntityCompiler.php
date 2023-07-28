@@ -60,8 +60,10 @@ class EntityCompiler extends AbstractClassCompiler
         $context->add('cache.key.suffix', $this->buildCacheSuffix());
         $context->add('validator.config', $this->buildValidatorConfig());
 
+        /** @var string $repositoryName */
+        $repositoryName = $context->get('class.repository');
         $context->add('entity.uses', [
-            'use ' . $this->config->getBaseNamespaceForRepository() . '\\' . $context->get('class.repository') . ';',
+            "use {$this->config->getBaseNamespaceForRepository()}\\{$repositoryName};",
         ]);
 
         $compiledTemplate = [
@@ -112,7 +114,7 @@ class EntityCompiler extends AbstractClassCompiler
         }
 
         $context->add('method.joins', implode("\n", $compiledTemplate['joins']));
-        $context->add('entity.uses', implode("\n", $context->get('entity.uses')));
+        $context->add('entity.uses', implode("\n", (array) $context->get('entity.uses')));
 
         return $context;
     }
@@ -132,6 +134,7 @@ class EntityCompiler extends AbstractClassCompiler
 
     private function appendClassUseOrmException(Context $context): void
     {
+        /** @var string[] $classUses */
         $classUses = $context->get('entity.uses');
 
         $classUses[OrmException::class] = 'use ' . OrmException::class . ';';

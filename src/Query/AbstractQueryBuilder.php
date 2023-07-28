@@ -34,8 +34,8 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     abstract public function getQuery(): string;
 
     /**
-     * @param TRepository $repository
-     * @param TEntity|null $entity
+     * @phpstan-param TRepository $repository
+     * @phpstan-param TEntity|null $entity
      */
     public function __construct(
         protected readonly RepositoryInterface $repository,
@@ -53,9 +53,12 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    public function addBind(string $field, string|int|float|bool|null $value, bool $isUnique = false): string
+    /**
+     * @throws \Exception
+     */
+    public function bind(string $field, string|int|float|bool|null $value, bool $isUnique = false): string
     {
-        $suffix = ($isUnique ? '_' . uniqid() : '');
+        $suffix = ($isUnique ? '_' . substr(bin2hex(random_bytes(13)), 0, 13) : '');
         $name   = ':' . strtolower(str_replace(['(', ')', ',', ' '], ['', '', '', '_'], $field . $suffix));
 
         if (is_bool($value)) {
@@ -72,7 +75,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
      *
      * @return array<string|int|float|bool|null>
      */
-    public function getBind(): array
+    public function getAllBind(): array
     {
         return $this->bind;
     }
@@ -83,7 +86,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
      * @param  array<string|int|float|bool|null> $bind Bound values
      * @return QueryBuilderInterface
      */
-    public function bind(array $bind): QueryBuilderInterface
+    public function bindAll(array $bind): QueryBuilderInterface
     {
         $this->bind = $bind;
 

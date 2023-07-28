@@ -18,14 +18,14 @@ use Eureka\Component\Orm\Query;
  *
  * @author  Romain Cottard
  *
- * @template TEntity of EntityInterface
  * @template TRepository of RepositoryInterface
- * @extends EntityAwareInterface<TEntity>
+ * @template TEntity of EntityInterface
  */
-interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface, EntityAwareInterface
+interface MapperInterface
 {
     /**
-     * @param  TRepository[] $mappers
+     * @template TRepositoryJoin of RepositoryInterface
+     * @param  array<class-string<TRepositoryJoin>, TRepositoryJoin> $mappers
      * @return static
      */
     public function addMappers(array $mappers): static;
@@ -33,9 +33,9 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * @template TRepositoryJoin of RepositoryInterface
      * @phpstan-param class-string<TRepositoryJoin> $name
-     * @return TRepositoryJoin
+     * @phpstan-return TRepositoryJoin
      */
-    public function getMapper(string $name): RepositoryInterface;
+    public function getMapper(string $name);
 
     /**
      *  Returns the number of rows affected by the last SQL statement
@@ -62,7 +62,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Count number of results for query.
      *
-     * @param  Query\QueryBuilder<TRepository, TEntity> $queryBuilder
+     * @param  Query\QueryBuilder $queryBuilder
      * @param  string $field
      * @return int
      * @throws \DomainException
@@ -72,7 +72,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Check if value row exists in database.
      *
-     * @param  Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param  Query\SelectBuilder $queryBuilder
      * @return bool
      * @throws Exception\OrmException
      */
@@ -81,7 +81,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Fetch rows for specified query.
      *
-     * @param  Query\Interfaces\QueryBuilderInterface $queryBuilder
+     * @param  \Eureka\Component\Orm\Query\Interfaces\QueryBuilderInterface $queryBuilder
      * @return TEntity[] Array of EntityInterface object for query.
      * @throws Exception\OrmException
      */
@@ -90,7 +90,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Fetch rows for specified query.
      *
-     * @param  Query\Interfaces\QueryBuilderInterface $queryBuilder
+     * @param  \Eureka\Component\Orm\Query\Interfaces\QueryBuilderInterface $queryBuilder
      * @return \stdClass[] Array of stdClass object for query.
      * @throws Exception\OrmException
      */
@@ -99,7 +99,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Select all rows corresponding of where clause.
      *
-     * @param  Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param  Query\SelectBuilder $queryBuilder
      * @return TEntity[] List of row.
      * @throws Exception\OrmException
      */
@@ -109,7 +109,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
      * Select all rows corresponding of where clause.
      * Use eager loading to select joined entities.
      *
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @param string[] $filters
      * @return TEntity[]
      * @throws Exception\OrmException
@@ -120,7 +120,7 @@ interface MapperInterface extends CacheAwareInterface, ConnectionAwareInterface,
     /**
      * Select first rows corresponding to where clause.
      *
-     * @param  Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param  Query\SelectBuilder $queryBuilder
      * @return TEntity
      * @throws Exception\EntityNotExistsException
      * @throws Exception\InvalidQueryException

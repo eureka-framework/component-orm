@@ -11,8 +11,10 @@ declare(strict_types=0);
 
 namespace Eureka\Component\Orm\Traits;
 
+use Eureka\Component\Orm\EntityAwareInterface;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinType;
+use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
@@ -20,11 +22,12 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  *
  * @author Romain Cottard
  *
+ * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
  */
 trait EntityAwareTrait
 {
-    /** @phpstan-var class-string<TEntity> $entityClass Name of class use to instance entity class. */
+    /** @phpstan-var class-string<TEntity> $entityClass */
     protected string $entityClass;
 
     /** @var bool $ignoreNotMappedFields If true, does not throw an exception for not mapped fields in setDataValue */
@@ -47,7 +50,7 @@ trait EntityAwareTrait
     /**
      * @phpstan-param class-string<TEntity> $entityClass
      */
-    public function setEntityClass(string $entityClass): static
+    public function setEntityClass(string $entityClass): RepositoryInterface
     {
         $this->entityClass = $entityClass;
 
@@ -59,10 +62,9 @@ trait EntityAwareTrait
      *
      * @param  \stdClass|null $row
      * @param  bool $exists
-     * @return EntityInterface
-     * @phpstan-return TEntity
+     * @return TEntity
      */
-    public function newEntity(\stdClass $row = null, bool $exists = false)
+    public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface
     {
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 

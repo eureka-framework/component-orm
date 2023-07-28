@@ -48,7 +48,7 @@ trait GroupAwareTrait
     ): static {
         $fieldHaving = (0 < count($this->havingList) ? ' ' . $clauseConcat->value . ' ' . $field : $field);
 
-        $bindName = $this->addBind($field, $value, true);
+        $bindName = $this->bind($field, $value, true);
         $this->havingList[] = $fieldHaving . ' ' . $operator->value . ' ' . $bindName;
 
         return $this;
@@ -59,7 +59,7 @@ trait GroupAwareTrait
      */
     public function getQueryGroupBy(): string
     {
-        return (0 < count($this->groupList) ? ' GROUP BY ' . implode(', ', $this->groupList) . ' ' : '');
+        return 0 < count($this->groupList) ? ' GROUP BY ' . implode(', ', $this->groupList) . ' ' : '';
     }
 
     /**
