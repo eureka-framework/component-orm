@@ -11,12 +11,18 @@ declare(strict_types=1);
 
 namespace {{ class.namespace }};
 
+use {{ orm.namespace }}\EntityInterface;
+use {{ orm.namespace }}\RepositoryInterface;
 use {{ repository.namespace }}\{{ class.repository }};
 
 /**
  * Mapper class for table "{{ database.table }}"
  *
  * @author {{ comment.author }}
+ *
+ * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
+ * @extends Abstracts\Abstract{{ class.mapper }}<TRepository, TEntity>
  */
 class {{ class.mapper }} extends Abstracts\Abstract{{ class.mapper }} implements {{ class.repository }}
 {

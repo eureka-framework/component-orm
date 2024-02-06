@@ -13,8 +13,6 @@ namespace Eureka\Component\Orm;
 
 use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Enumerator\Operator;
-use Eureka\Component\Orm\Query;
-use Eureka\Component\Orm\Traits;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -26,14 +24,15 @@ use Psr\Cache\CacheItemPoolInterface;
  *
  * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
- * @implements RepositoryInterface<TRepository, TEntity>
  */
-abstract class AbstractMapper implements RepositoryInterface
+abstract class AbstractMapper
 {
     use Traits\CacheAwareTrait;
     use Traits\ConnectionAwareTrait;
     use Traits\EntityAwareTrait;
+    /** @use Traits\MapperTrait<TEntity> */
     use Traits\MapperTrait;
+    /** @use Traits\RepositoryTrait<TRepository, TEntity> */
     use Traits\RepositoryTrait;
     use Traits\TableTrait;
     use Traits\ValidatorAwareTrait;
@@ -50,7 +49,7 @@ abstract class AbstractMapper implements RepositoryInterface
      * @param ConnectionFactory $connectionFactory
      * @param ValidatorFactoryInterface|null $validatorFactory
      * @param ValidatorEntityFactory|null $validatorEntityFactory
-     * @param TRepository[] $mappers
+     * @param array<class-string, RepositoryInterface> $mappers
      * @param CacheItemPoolInterface|null $cache
      * @param bool $enableCacheOnRead
      */
@@ -79,7 +78,7 @@ abstract class AbstractMapper implements RepositoryInterface
 
     /**
      * @param callable $callback
-     * @param Query\SelectBuilder<TRepository, TEntity> $queryBuilder
+     * @param Query\SelectBuilder $queryBuilder
      * @param string $key
      * @param int $start
      * @param int $end

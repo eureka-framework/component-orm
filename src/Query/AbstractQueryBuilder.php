@@ -15,14 +15,6 @@ use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Query\Interfaces\QueryBuilderInterface;
 use Eureka\Component\Orm\RepositoryInterface;
 
-/**
- * Class AbstractQueryBuilder
- *
- * @author Romain Cottard
- *
- * @template TRepository of RepositoryInterface
- * @template TEntity of EntityInterface
- */
 abstract class AbstractQueryBuilder implements QueryBuilderInterface
 {
     /** @var array<string|int|float|bool|null> $bind List of binding values */
@@ -33,10 +25,6 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     abstract public function clear(): static;
     abstract public function getQuery(): string;
 
-    /**
-     * @phpstan-param TRepository $repository
-     * @phpstan-param TEntity|null $entity
-     */
     public function __construct(
         protected readonly RepositoryInterface $repository,
         protected readonly ?EntityInterface $entity = null

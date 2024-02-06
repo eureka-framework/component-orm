@@ -483,7 +483,10 @@ class MapperTest extends TestCase
         if ($exceptionCode > 0) {
             $exception = new \PDOException('Exception', $exceptionCode);
             $exception->errorInfo = [0 => 'HY000', 1 => $exceptionCode, 2 => 'Exception'];
-            $statementMock->expects($this->exactly($exceptionCode === 2006 ? 2 : 1))->method('execute')->willReturnOnConsecutiveCalls(...
+            $statementMock
+                ->expects($this->exactly($exceptionCode === 2006 ? 2 : 1))
+                ->method('execute')
+                ->willReturnOnConsecutiveCalls(...
                 [
                     new Exception($exception),
                     true,

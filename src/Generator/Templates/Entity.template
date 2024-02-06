@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace {{ class.namespace }};
 
-use {{ orm.namespace }}\EntityInterface;
 use {{ repository.namespace }}\{{ class.repository }};
 
 /**
@@ -19,9 +18,8 @@ use {{ repository.namespace }}\{{ class.repository }};
  *
  * @author {{ comment.author }}
  *
- * @implements EntityInterface<{{ class.repository }}, {{ class.name }}>
  * @extends Abstracts\Abstract{{ class.name }}<{{ class.repository }}, {{ class.name }}>
  */
-class {{ class.name }} extends Abstracts\Abstract{{ class.name }} implements EntityInterface
+class {{ class.name }} extends Abstracts\Abstract{{ class.name }}
 {
 }

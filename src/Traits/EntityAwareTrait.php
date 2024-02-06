@@ -22,7 +22,6 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  *
  * @author Romain Cottard
  *
- * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
  */
 trait EntityAwareTrait
@@ -50,7 +49,7 @@ trait EntityAwareTrait
     /**
      * @phpstan-param class-string<TEntity> $entityClass
      */
-    public function setEntityClass(string $entityClass): RepositoryInterface
+    public function setEntityClass(string $entityClass): static
     {
         $this->entityClass = $entityClass;
 
@@ -60,19 +59,11 @@ trait EntityAwareTrait
     /**
      * Create new instance of EntityInterface implementation class & return it.
      *
-     * @param  \stdClass|null $row
-     * @param  bool $exists
-     * @return TEntity
+     * @phpstan-return TEntity
      */
     public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface
     {
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
-
-        if (!($entity instanceof EntityInterface)) {
-            // @codeCoverageIgnoreStart
-            throw new \LogicException('Entity object is not an instance of EntityInterface class!');
-            // @codeCoverageIgnoreEnd
-        }
 
         if ($row instanceof \stdClass) {
             foreach ((array) $row as $field => $value) {
@@ -90,7 +81,7 @@ trait EntityAwareTrait
      * Array fields must be named as the entity properties name.
      *
      * @param  array<string|int|float|bool|null> $form
-     * @return TEntity
+     * @phpstan-return TEntity
      */
     public function newEntityFromArray(array $form): EntityInterface
     {
@@ -101,7 +92,7 @@ trait EntityAwareTrait
      * Hydrate entity with form entity values
      *
      * @param  GenericEntity $genericEntity
-     * @return TEntity
+     * @phpstan-return TEntity
      */
     public function newEntityFromGeneric(GenericEntity $genericEntity): EntityInterface
     {
@@ -115,9 +106,9 @@ trait EntityAwareTrait
      * Update entity from form data.
      * Form fields must be named as the entity properties name.
      *
-     * @param TEntity $entity
+     * @phpstan-param TEntity $entity
      * @param array<string|int|float|bool|null> $form
-     * @return TEntity
+     * @phpstan-return TEntity
      */
     public function updateEntityFromArray(EntityInterface $entity, array $form): EntityInterface
     {
@@ -138,10 +129,7 @@ trait EntityAwareTrait
      * Create new instance of EntityInterface implementation class & return it.
      * Remove prefix from result set field to retrieve the correct field name.
      *
-     * @param  \stdClass $row
-     * @param  string $suffix
-     * @param  string $type
-     * @return TEntity|null
+     * @phpstan-return TEntity|null
      * @throws \LogicException
      */
     public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?EntityInterface
@@ -184,9 +172,7 @@ trait EntityAwareTrait
 
 
     /**
-     * @param  TEntity $entity
-     * @param  string $field
-     * @return bool
+     * @phpstan-param  TEntity $entity
      */
     public function isEntityUpdated(EntityInterface $entity, string $field): bool
     {
@@ -204,8 +190,7 @@ trait EntityAwareTrait
     }
 
     /**
-     * @param  TEntity $entity
-     * @param  string $field
+     * @phpstan-param  TEntity $entity
      * @return string|int|float|bool|null
      */
     public function getEntityValue(EntityInterface $entity, string $field): mixed
@@ -224,7 +209,7 @@ trait EntityAwareTrait
     /**
      * Get array "key" => "value" for primaries keys.
      *
-     * @param  TEntity $entity
+     * @phpstan-param  TEntity $entity
      * @return array<string|int|float|bool|null>
      */
     public function getEntityPrimaryKeysValues(EntityInterface $entity): array
@@ -242,10 +227,7 @@ trait EntityAwareTrait
     /**
      * Set value into EntityInterface instance based on field value
      *
-     * @param  TEntity $entity
-     * @param  string $field
-     * @param  mixed $value
-     * @return static
+     * @phpstan-param  TEntity $entity
      * @throws \DomainException
      */
     protected function setEntityValue(EntityInterface $entity, string $field, mixed $value): static

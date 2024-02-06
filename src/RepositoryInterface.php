@@ -20,11 +20,9 @@ use Eureka\Component\Orm\Exception\OrmException;
  *
  * @author Romain Cottard
  *
- * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
- *
- * @extends MapperInterface<TRepository, TEntity>
- * @extends EntityAwareInterface<TRepository, TEntity>
+ * @extends EntityAwareInterface<TEntity>
+ * @extends MapperInterface<TEntity>
  */
 interface RepositoryInterface extends
     CacheAwareInterface,

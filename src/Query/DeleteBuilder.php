@@ -11,21 +11,9 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query;
 
-use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Query\Interfaces\WhereAwareInterface;
-use Eureka\Component\Orm\Query\Traits;
-use Eureka\Component\Orm\RepositoryInterface;
 
-/**
- * Class DeleteBuilder
- *
- * @author Romain Cottard
- *
- * @template TRepository of RepositoryInterface
- * @template TEntity of EntityInterface
- * @extends AbstractQueryBuilder<TRepository, TEntity>
- */
 class DeleteBuilder extends AbstractQueryBuilder implements WhereAwareInterface
 {
     use Traits\WhereAwareTrait;

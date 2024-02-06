@@ -25,7 +25,6 @@ use PDO;
  * @author Romain Cottard
  *
  * @template TEntity of EntityInterface
- * @template TRepository of RepositoryInterface
  */
 trait MapperTrait
 {
@@ -38,13 +37,13 @@ trait MapperTrait
     protected int $rowCount = 0;
 
     /**
-     * @var array $mappers
+     * @var array<class-string, RepositoryInterface> $mappers
      */
     protected array $mappers = [];
 
     /**
      * @var array<array{
-     *     mapper: class-string<RepositoryInterface>,
+     *     mapper: class-string,
      *     type: string,
      *     relation: string,
      *     keys: array<string, bool|string>
@@ -52,8 +51,7 @@ trait MapperTrait
     protected array $joinConfigs = [];
 
     /**
-     * @template TRepositoryJoin of RepositoryInterface
-     * @param  array<class-string<TRepositoryJoin>, TRepositoryJoin> $mappers
+     * @param  array<class-string, RepositoryInterface> $mappers
      * @return static
      */
     public function addMappers(array $mappers): static
@@ -64,12 +62,11 @@ trait MapperTrait
     }
 
     /**
-     * @template TRepositoryJoin of RepositoryInterface
-     * @phpstan-param class-string<TRepositoryJoin> $name
-     * @phpstan-return TRepositoryJoin
+     * @phpstan-param class-string $name
+     * @phpstan-return RepositoryInterface
      * @throws Exception\UndefinedMapperException
      */
-    public function getMapper(string $name)
+    public function getMapper(string $name): RepositoryInterface
     {
         if (!isset($this->mappers[$name])) {
             throw new Exception\UndefinedMapperException('Mapper does not exist! (mapper: ' . $name . ')');
@@ -176,7 +173,8 @@ trait MapperTrait
             }
 
             $index              = !empty($indexedBy) ? $row->{$indexedBy} : $id++;
-            $collection[$index] = $this->newEntity($row, true);
+            $entity = $this->newEntity($row, true);
+            $collection[$index] = $entity;
         }
 
         return $collection;
@@ -307,7 +305,7 @@ trait MapperTrait
 
     /**
      * @param array<array{
-     *     mapper: class-string<TRepository>,
+     *     mapper: class-string,
      *     type: string,
      *     relation: string,
      *     keys: array<string, bool|string>
@@ -326,7 +324,7 @@ trait MapperTrait
      *
      * @param  string[] $filters
      * @return array<array{
-     *     mapper: class-string<TRepository>,
+     *     mapper: class-string,
      *     type: string,
      *     relation: string,
      *     keys: array<string, bool|string>
@@ -350,7 +348,7 @@ trait MapperTrait
     /**
      * @param Query\SelectBuilder $queryBuilder
      * @param array<array{
-     *     mapper: class-string<TRepository>,
+     *     mapper: class-string,
      *     type: string,
      *     relation: string,
      *     keys: array<string, bool|string>
@@ -401,7 +399,7 @@ trait MapperTrait
     /**
      * @param \stdClass[] $list
      * @param array<array{
-     *     mapper: class-string<TRepository>,
+     *     mapper: class-string,
      *     type: string,
      *     relation: string,
      *     keys: array<string, bool|string>

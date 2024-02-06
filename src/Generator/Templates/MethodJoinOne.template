@@ -9,6 +9,7 @@
     public function get{{ join.entity.name }}(bool $isForceReload = false): {{ join.entity.class }}
     {
         if ($isForceReload || $this->joinOneCache{{ join.entity.name }} === null) {
+            /** @phpstan-var {{ join.entity.class }}Mapper $mapper */
             $mapper = $this->getRepository()->getMapper({{ join.entity.class }}Mapper::class);
             $this->joinOneCache{{ join.entity.name }} = $mapper->findByKeys([
                 {{ join.entity.keys }}

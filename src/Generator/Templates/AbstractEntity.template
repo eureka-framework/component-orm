@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace {{ class.namespace }};
 
 use {{ orm.namespace }}\AbstractEntity;
+use {{ orm.namespace }}\EntityInterface;
 use {{ orm.namespace }}\RepositoryInterface;
 use Eureka\Component\Validation\Exception\ValidationException;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
@@ -26,8 +27,9 @@ use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
  *
  * @author {{ comment.author }}
  *
- * @template TRepository
- * @template TEntity
+ * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
+ * @extends AbstractEntity<TRepository, TEntity>
  */
 abstract class Abstract{{ class.name }} extends AbstractEntity
 {

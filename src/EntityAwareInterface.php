@@ -14,7 +14,6 @@ namespace Eureka\Component\Orm;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
- * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
  */
 interface EntityAwareInterface

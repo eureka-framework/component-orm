@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query;
 
-use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Query\Interfaces\FieldAwareInterface;
 use Eureka\Component\Orm\Query\Interfaces\GroupAwareInterface;
@@ -19,18 +18,7 @@ use Eureka\Component\Orm\Query\Interfaces\JoinAwareInterface;
 use Eureka\Component\Orm\Query\Interfaces\LimitAwareInterface;
 use Eureka\Component\Orm\Query\Interfaces\OrderAwareInterface;
 use Eureka\Component\Orm\Query\Interfaces\WhereAwareInterface;
-use Eureka\Component\Orm\Query\Traits;
-use Eureka\Component\Orm\RepositoryInterface;
 
-/**
- * Class SelectBuilder
- *
- * @author Romain Cottard
- *
- * @template TRepository of RepositoryInterface
- * @template TEntity of EntityInterface
- * @extends AbstractQueryBuilder<TRepository, TEntity>
- */
 class SelectBuilder extends AbstractQueryBuilder implements
     FieldAwareInterface,
     GroupAwareInterface,

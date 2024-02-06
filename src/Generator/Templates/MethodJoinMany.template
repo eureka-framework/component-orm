@@ -9,6 +9,7 @@
     public function getAll{{ join.entity.name }}(bool $isForceReload = false): array
     {
         if ($isForceReload || $this->joinManyCache{{ join.entity.name }} === null) {
+            /** @phpstan-var {{ join.entity.class }}Mapper $mapper */
             $mapper = $this->getRepository()->getMapper({{ join.entity.class }}Mapper::class);
             $this->joinManyCache{{ join.entity.name }} = $mapper->findAllByKeys([
                 {{ join.entity.keys }}

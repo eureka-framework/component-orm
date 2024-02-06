@@ -11,29 +11,24 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm;
 
-use Eureka\Component\Orm\Query;
-
 /**
  * DataMapper Mapper abstract class.
  *
  * @author  Romain Cottard
  *
- * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
  */
 interface MapperInterface
 {
     /**
-     * @template TRepositoryJoin of RepositoryInterface
-     * @param  array<class-string<TRepositoryJoin>, TRepositoryJoin> $mappers
+     * @param  array<class-string, RepositoryInterface> $mappers
      * @return static
      */
     public function addMappers(array $mappers): static;
 
     /**
-     * @template TRepositoryJoin of RepositoryInterface
-     * @phpstan-param class-string<TRepositoryJoin> $name
-     * @phpstan-return TRepositoryJoin
+     * @phpstan-param class-string $name
+     * @phpstan-return RepositoryInterface
      */
     public function getMapper(string $name);
 
@@ -81,7 +76,7 @@ interface MapperInterface
     /**
      * Fetch rows for specified query.
      *
-     * @param  \Eureka\Component\Orm\Query\Interfaces\QueryBuilderInterface $queryBuilder
+     * @param  Query\Interfaces\QueryBuilderInterface $queryBuilder
      * @return TEntity[] Array of EntityInterface object for query.
      * @throws Exception\OrmException
      */
@@ -90,7 +85,7 @@ interface MapperInterface
     /**
      * Fetch rows for specified query.
      *
-     * @param  \Eureka\Component\Orm\Query\Interfaces\QueryBuilderInterface $queryBuilder
+     * @param  Query\Interfaces\QueryBuilderInterface $queryBuilder
      * @return \stdClass[] Array of stdClass object for query.
      * @throws Exception\OrmException
      */
