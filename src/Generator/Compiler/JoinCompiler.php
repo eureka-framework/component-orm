@@ -165,7 +165,7 @@ class JoinCompiler extends AbstractMethodCompiler
                 $mappedBy = $joinKeys[$field->getName()];
             }
 
-            $keys[] = "'${mappedBy}' => \$this->" . $this->getNameForGetter($field) . '(),';
+            $keys[] = "'$mappedBy' => \$this->" . $this->getNameForGetter($field) . '(),';
         }
 
         return implode("            \n", $keys);

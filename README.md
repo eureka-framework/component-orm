@@ -1,7 +1,7 @@
 # component-orm
 
 [![Current version](https://img.shields.io/packagist/v/eureka/component-orm.svg?logo=composer)](https://packagist.org/packages/eureka/component-orm)
-[![Supported PHP version](https://img.shields.io/static/v1?logo=php&label=PHP&message=7.4%20-%208.2&color=777bb4)](https://packagist.org/packages/eureka/component-orm)
+[![Supported PHP version](https://img.shields.io/static/v1?logo=php&label=PHP&message=7.4%20-%208.3&color=777bb4)](https://packagist.org/packages/eureka/component-orm)
 ![CI](https://github.com/eureka-framework/component-orm/workflows/CI/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=eureka-framework_component-orm&metric=alert_status)](https://sonarcloud.io/dashboard?id=eureka-framework_component-orm)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=eureka-framework_component-orm&metric=coverage)](https://sonarcloud.io/dashboard?id=eureka-framework_component-orm)

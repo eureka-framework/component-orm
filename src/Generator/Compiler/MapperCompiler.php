@@ -119,7 +119,7 @@ class MapperCompiler extends AbstractClassCompiler
             }
 
             $joins [] = "
-            '${name}' => [
+            '$name' => [
                 'mapper'   => " . $config->getClassname() . "Mapper::class,
                 'type'     => '" . (!empty($join['type']) ? strtoupper($join['type']) : JoinType::INNER) . "',
                 'relation' => '" . (!empty($join['relation']) ? $join['relation'] : JoinRelation::ONE) . "',
