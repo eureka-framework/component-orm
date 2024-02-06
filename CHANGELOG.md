@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 ### Removed
 ```
+## [5.5.0] - 2024-02-06
+[5.5.0]: https://github.com/eureka-framework/component-orm/compare/5.4.0...5.5.0
+### Changed
+- Now compatible with PHP 8.3
+- Update GitHub workflow
+
 ## [5.4.0] - 2023-06-14
 [5.4.0]: https://github.com/eureka-framework/component-orm/compare/5.3.0...5.4.0
 ### Changed
