@@ -35,7 +35,7 @@ interface EntityAwareInterface
      * @param  bool $exists
      * @return TEntity
      */
-    public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface;
+    public function newEntity(\stdClass $row = null, bool $exists = false): object;
 
     /**
      * Create new entity from array.
@@ -44,7 +44,7 @@ interface EntityAwareInterface
      * @param  array<string|int|float|bool|null> $form
      * @return TEntity
      */
-    public function newEntityFromArray(array $form): EntityInterface;
+    public function newEntityFromArray(array $form): object;
 
     /**
      * Update entity from form data.
@@ -54,7 +54,7 @@ interface EntityAwareInterface
      * @param  array<string|int|float|bool|null> $form
      * @return TEntity
      */
-    public function updateEntityFromArray(EntityInterface $data, array $form): EntityInterface;
+    public function updateEntityFromArray(EntityInterface $data, array $form): object;
 
     /**
      * Create new instance of EntityInterface implementation class & return it.
@@ -66,7 +66,7 @@ interface EntityAwareInterface
      * @return TEntity|null
      * @throws \LogicException
      */
-    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?EntityInterface;
+    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?object;
 
     /**
      * Create new instance of EntityInterface implementation class & return it.
@@ -83,7 +83,7 @@ interface EntityAwareInterface
      * @param  GenericEntity $genericEntity
      * @return TEntity
      */
-    public function newEntityFromGeneric(GenericEntity $genericEntity): EntityInterface;
+    public function newEntityFromGeneric(GenericEntity $genericEntity): object;
 
     /**
      * @param  TEntity $entity

@@ -9,14 +9,14 @@
 
 declare(strict_types=1);
 
-namespace {{ class.namespace }};
+namespace {{ class.namespace }}\Abstracts;
 
-use {{ orm.namespace }}\AbstractEntity;
 use {{ orm.namespace }}\EntityInterface;
-use {{ orm.namespace }}\RepositoryInterface;
+use {{ orm.namespace }}\Traits;
 use Eureka\Component\Validation\Exception\ValidationException;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
 use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
+use {{ class.namespace }}\{{ class.entity }};
 {{ entity.uses }}
 
 /**
@@ -26,13 +26,12 @@ use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
  * You can add your specific code in child class: {{ class.name }}
  *
  * @author {{ comment.author }}
- *
- * @template TRepository of RepositoryInterface
- * @template TEntity of EntityInterface
- * @extends AbstractEntity<TRepository, TEntity>
  */
-abstract class Abstract{{ class.name }} extends AbstractEntity
+abstract class Abstract{{ class.name }} implements EntityInterface
 {
+    /** @use Traits\EntityTrait<{{ class.repository }}, {{ class.name }}> */
+    use Traits\EntityTrait;
+
 {{ class.properties }}
     /**
      * AbstractEntity constructor.
@@ -49,6 +48,11 @@ abstract class Abstract{{ class.name }} extends AbstractEntity
         $this->setRepository($repository);
         $this->setValidatorFactories($validatorFactory, $validatorEntityFactory);
 
+        $this->initializeValidatorConfig();
+    }
+
+    protected function initializeValidatorConfig(): void
+    {
         $this->setValidatorConfig([{{ validator.config }}
         ]);
     }

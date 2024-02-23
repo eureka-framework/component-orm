@@ -49,7 +49,7 @@ class MapperCompiler extends AbstractClassCompiler
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
         $context
-            ->add('class.namespace', $this->config->getBaseNamespaceForMapper() . ($isAbstract ? '\Abstracts' : ''))
+            ->add('class.namespace', $this->config->getBaseNamespaceForMapper())
             ->add('repository.namespace', $this->config->getBaseNamespaceForRepository())
             ->add('entity.namespace', $this->config->getBaseNamespaceForEntity())
             ->add('database.tab:e', $this->config->getDbTable())

@@ -18,6 +18,6 @@ namespace Eureka\Component\Orm\Enumerator;
  */
 class JoinRelation
 {
-    const MANY = 'many';
-    const ONE  = 'one';
+    public const MANY = 'many';
+    public const ONE  = 'one';
 }

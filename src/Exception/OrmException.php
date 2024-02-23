@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class OrmException extends \Exception
-{
-}
+class OrmException extends \Exception {}

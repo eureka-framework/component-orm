@@ -61,8 +61,9 @@ trait EntityAwareTrait
      *
      * @phpstan-return TEntity
      */
-    public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface
+    public function newEntity(\stdClass $row = null, bool $exists = false): object
     {
+        /** @var TEntity $entity */
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
         if ($row instanceof \stdClass) {
@@ -94,7 +95,7 @@ trait EntityAwareTrait
      * @param  GenericEntity $genericEntity
      * @phpstan-return TEntity
      */
-    public function newEntityFromGeneric(GenericEntity $genericEntity): EntityInterface
+    public function newEntityFromGeneric(GenericEntity $genericEntity): object
     {
         $entity = $this->newEntity();
         $entity->hydrateFromGenericEntity($genericEntity);
@@ -110,7 +111,7 @@ trait EntityAwareTrait
      * @param array<string|int|float|bool|null> $form
      * @phpstan-return TEntity
      */
-    public function updateEntityFromArray(EntityInterface $entity, array $form): EntityInterface
+    public function updateEntityFromArray(EntityInterface $entity, array $form): object
     {
         foreach ($this->getFields() as $field) {
             $map = $this->getNamesMap($field);
@@ -132,8 +133,9 @@ trait EntityAwareTrait
      * @phpstan-return TEntity|null
      * @throws \LogicException
      */
-    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?EntityInterface
+    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?object
     {
+        /** @var TEntity $entity */
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
         if (!($entity instanceof EntityInterface)) {
@@ -177,11 +179,11 @@ trait EntityAwareTrait
     public function isEntityUpdated(EntityInterface $entity, string $field): bool
     {
         if (!isset($this->entityNamesMap[$field]['property'])) {
-             // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
             throw new \DomainException(
                 'Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')'
             );
-             // @codeCoverageIgnoreEnd
+            // @codeCoverageIgnoreEnd
         }
 
         $property = $this->getPropertyForField($field);

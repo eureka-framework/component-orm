@@ -18,8 +18,8 @@ namespace Eureka\Component\Orm\Enumerator;
  */
 class JoinType
 {
-    const INNER = 'INNER';
-    const LEFT  = 'LEFT OUTER';
-    const RIGHT = 'RIGHT OUTER';
-    const FULL  = 'FULL OUTER';
+    public const INNER = 'INNER';
+    public const LEFT  = 'LEFT OUTER';
+    public const RIGHT = 'RIGHT OUTER';
+    public const FULL  = 'FULL OUTER';
 }

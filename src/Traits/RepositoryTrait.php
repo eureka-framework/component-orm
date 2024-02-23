@@ -58,7 +58,7 @@ trait RepositoryTrait
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
      */
-    public function findByKeys(array $keys): EntityInterface
+    public function findByKeys(array $keys): object
     {
         /** @var TRepository $this */
         $queryBuilder = new Query\SelectBuilder($this);

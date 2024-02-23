@@ -17,9 +17,5 @@ use {{ repository.namespace }}\{{ class.repository }};
  * DataMapper Data class for table "{{ database.table }}"
  *
  * @author {{ comment.author }}
- *
- * @extends Abstracts\Abstract{{ class.name }}<{{ class.repository }}, {{ class.name }}>
  */
-class {{ class.name }} extends Abstracts\Abstract{{ class.name }}
-{
-}
+class {{ class.name }} extends Abstracts\Abstract{{ class.name }} {}

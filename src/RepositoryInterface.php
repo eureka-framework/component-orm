@@ -40,7 +40,7 @@ interface RepositoryInterface extends
      * @throws EntityNotExistsException
      * @throws \LogicException
      */
-    public function findById(int $id): EntityInterface;
+    public function findById(int $id): object;
 
     /**
      * Get rows corresponding of the keys.
@@ -60,7 +60,7 @@ interface RepositoryInterface extends
      * @throws EntityNotExistsException
      * @throws OrmException
      */
-    public function findByKeys(array $primaryKeys): EntityInterface;
+    public function findByKeys(array $primaryKeys): object;
 
     /**
      * Either insert or update an entity

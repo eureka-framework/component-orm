@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class EntityNotExistsException extends OrmException
-{
-}
+class EntityNotExistsException extends OrmException {}

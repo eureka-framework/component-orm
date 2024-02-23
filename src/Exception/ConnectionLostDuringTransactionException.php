@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class ConnectionLostDuringTransactionException extends OrmException
-{
-}
+class ConnectionLostDuringTransactionException extends OrmException {}

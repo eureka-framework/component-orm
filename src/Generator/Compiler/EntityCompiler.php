@@ -52,10 +52,7 @@ class EntityCompiler extends AbstractClassCompiler
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
         $context->add('repository.namespace', $this->config->getBaseNamespaceForRepository());
-        $context->add(
-            'class.namespace',
-            $this->config->getBaseNamespaceForEntity() . ($isAbstract ? '\Abstracts' : '')
-        );
+        $context->add('class.namespace', $this->config->getBaseNamespaceForEntity());
         $context->add('cache.key.prefix', rtrim($this->config->getCachePrefix(), '.'));
         $context->add('cache.key.suffix', $this->buildCacheSuffix());
         $context->add('validator.config', $this->buildValidatorConfig());

@@ -24,6 +24,7 @@ use PDO;
  *
  * @author Romain Cottard
  *
+ * @template TRepository of RepositoryInterface
  * @template TEntity of EntityInterface
  */
 trait MapperTrait
@@ -233,7 +234,9 @@ trait MapperTrait
         $listIndexedByField = $queryBuilder->getListIndexedByField();
 
         if ($this->isCacheEnabledOnRead) {
-            $collection = $this->selectFromCache($this, $queryBuilder);
+            /** @var TRepository $repository */
+            $repository = $this;
+            $collection = $this->selectFromCache($repository, $queryBuilder);
         }
 
         if ($this->cacheSkipMissingItemQuery) {
@@ -359,8 +362,11 @@ trait MapperTrait
      */
     private function getRawResultsWithJoin(Query\SelectBuilder $queryBuilder, array $joinConfigs): array
     {
+        /** @var TRepository $repository */
+        $repository = $this;
+
         //~ Add main fields to query builder
-        foreach ($queryBuilder->getQueryFieldsList($this, true) as $field) {
+        foreach ($queryBuilder->getQueryFieldsList($repository, true) as $field) {
             $queryBuilder->addField($field, '', false);
         }
 
@@ -439,12 +445,14 @@ trait MapperTrait
 
             //~ Build relation joined
             $index = 0;
+            /** @var string $name */
             foreach ($joinConfigs as $name => $join) {
                 $mapper      = $this->getMapper($join['mapper']);
                 $aliasSuffix = '_' . $mapper->getTable() . '_' . $index++;
 
                 $mapper->enableIgnoreNotMappedFields();
 
+                /** @var TEntity $dataJoin */
                 $dataJoin = $mapper->newEntitySuffixAware($row, $aliasSuffix, $join['type']);
 
                 if (!isset($relations[$name][$hash])) {

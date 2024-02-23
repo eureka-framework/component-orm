@@ -9,13 +9,14 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm;
+namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\Traits\ValidatorAwareTrait;
+use Eureka\Component\Orm\EntityInterface;
+use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
- * DataMapper Data abstract class.
+ * Entity Trait.
  *
  * @author Romain Cottard
  *
@@ -23,7 +24,7 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  * @template TEntity of EntityInterface
  * @implements EntityInterface<TRepository, TEntity>
  */
-abstract class AbstractEntity implements EntityInterface
+trait EntityTrait
 {
     use ValidatorAwareTrait;
 
@@ -47,7 +48,7 @@ abstract class AbstractEntity implements EntityInterface
      * Set auto increment value.
      * Must be overridden to use internal property setter method, according to the data class definition.
      *
-     * @param  int $id
+     * @param int $id
      * @return static
      * @codeCoverageIgnore
      */
@@ -69,7 +70,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * If the data set exists.
      *
-     * @param  bool $exists
+     * @param bool $exists
      * @return $this
      */
     public function setExists(bool $exists): static
@@ -83,7 +84,7 @@ abstract class AbstractEntity implements EntityInterface
      * If at least one data has been updated.
      * If property name is specified, check only property.
      *
-     * @param  string|null $property
+     * @param string|null $property
      * @return bool
      */
     public function isUpdated(?string $property = null): bool
@@ -98,7 +99,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Flag property as updated
      *
-     * @param  string $property
+     * @param string $property
      * @return void
      */
     protected function markFieldAsUpdated(string $property): void
@@ -163,7 +164,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Hydrate entity with form entity values
      *
-     * @param  GenericEntity $genericEntity
+     * @param GenericEntity $genericEntity
      * @return static
      */
     public function hydrateFromGenericEntity(GenericEntity $genericEntity): static

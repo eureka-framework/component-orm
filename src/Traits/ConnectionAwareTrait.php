@@ -157,7 +157,7 @@ trait ConnectionAwareTrait
                 //~ Force reconnection to reset "inTransaction()" status & throw error specific error
                 $this->getConnection(true);
                 throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_000);
-                 // @codeCoverageIgnoreEnd
+                // @codeCoverageIgnoreEnd
             }
 
             $connection = $this->getConnection(true); // Force reconnection
@@ -190,7 +190,7 @@ trait ConnectionAwareTrait
                 //~ Force reconnection to reset "inTransaction()" status & throw error specific error
                 $this->getConnection(true);
                 throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_001);
-                 // @codeCoverageIgnoreEnd
+                // @codeCoverageIgnoreEnd
             }
 
             $connection = $this->getConnection(true); // Force reconnection

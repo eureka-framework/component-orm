@@ -28,8 +28,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     public function __construct(
         protected readonly RepositoryInterface $repository,
         protected readonly ?EntityInterface $entity = null
-    ) {
-    }
+    ) {}
 
     /**
      * @return static

@@ -70,13 +70,13 @@ class FieldValidatorService
             case Type\TypeTinyint::class:
                 $options = array_merge($this->getIntegerOptions(get_class($type), $isUnsigned), $options);
                 break;
-            //~ Case float
+                //~ Case float
             case Type\TypeFloat::class:
             case Type\TypeDouble::class:
             case Type\TypeDecimal::class:
                 $options = array_merge($this->getDecimalOptions($isUnsigned), $options);
                 break;
-            //~ Case Strings
+                //~ Case Strings
             case Type\TypeLongtext::class:
             case Type\TypeMediumtext::class:
             case Type\TypeText::class:

@@ -21,6 +21,4 @@ use {{ entity.namespace }}\{{ class.entity }};
  *
  * @extends RepositoryInterface<{{ class.entity }}>
  */
-interface {{ class.repository }} extends RepositoryInterface
-{
-}
+interface {{ class.repository }} extends RepositoryInterface {}
