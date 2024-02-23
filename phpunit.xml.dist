@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
         backupGlobals="true"
         colors="true"
         processIsolation="false"
@@ -13,20 +13,17 @@
         timeoutForSmallTests="1"
         timeoutForMediumTests="10"
         timeoutForLargeTests="60"
-        cacheDirectory=".phpunit.cache"
+        cacheDirectory="./build/.phpunit.cache"
         backupStaticProperties="false"
         requireCoverageMetadata="false">
-
+  <testsuites>
+    <testsuite name="unit">
+      <directory>./tests/unit</directory>
+    </testsuite>
+  </testsuites>
   <source>
     <include>
       <directory>./src</directory>
     </include>
   </source>
-
-  <testsuites>
-    <testsuite name="Test suite">
-      <directory>./tests</directory>
-    </testsuite>
-  </testsuites>
-
 </phpunit>

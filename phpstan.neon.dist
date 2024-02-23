@@ -16,5 +16,5 @@ parameters:
 
   ignoreErrors:
     #~ Ignore some voluntary broken phpdoc for testing wrong cases
-    - path:    'tests/Generator/GeneratorTest.php'
+    - path:    'tests/unit/Generator/GeneratorTest.php'
       message: '`Method .+GeneratorTest::getInvalidJoinConfig\(\) should return array.+`'
