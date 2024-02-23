@@ -61,7 +61,11 @@ class AbstractClassCompiler extends AbstractCompiler
         $statement = $this->connection->query('SHOW FULL COLUMNS FROM ' . $this->config->getDbTable());
 
         if ($statement === false) {
-            throw new GeneratorException("Cannot get list of columns for table '{$this->config->getDbTable()}'"); // @codeCoverageIgnore
+            // @codeCoverageIgnoreStart
+            throw new GeneratorException(
+                "Cannot get list of columns for table '{$this->config->getDbTable()}'"
+            );
+            // @codeCoverageIgnoreEnd
         }
 
         $this->fields = [];
@@ -152,7 +156,7 @@ class AbstractClassCompiler extends AbstractCompiler
 
         if (!is_dir($basePath) && !mkdir($basePath, 0755, true)) {
             // @codeCoverageIgnoreStart
-            throw new \RuntimeException(
+            throw new \UnexpectedValueException(
                 'Cannot created output directory! (dir:' . $basePath . ')'
             );
             // @codeCoverageIgnoreEnd

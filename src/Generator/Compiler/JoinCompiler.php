@@ -152,9 +152,6 @@ class JoinCompiler extends AbstractMethodCompiler
         $classUses[$useEntityClassName] = 'use ' . $useEntityClassName . ';';
         $classUses[$useMapperClassName] = 'use ' . $useMapperClassName . ';';
 
-        //$classUses[EntityInterface::class] = 'use ' . EntityInterface::class . ';';
-
-
         $this->mainContext->add('entity.uses', $classUses);
 
         return $this;

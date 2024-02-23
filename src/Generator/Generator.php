@@ -153,10 +153,19 @@ class Generator
             $config->setJoinList($joins);
         }
 
-        if (empty($configName)) {
-            return $configs;
+        if (!empty($configName)) {
+            $configs = $this->filterConfigs($configs, $configName);
         }
 
+        return $configs;
+    }
+
+    /**
+     * @param Config[] $configs
+     * @return Config[]
+     */
+    private function filterConfigs(array $configs, string $configName): array
+    {
         $filteredConfigs = [];
         foreach ($configs as $name => $config) {
             if (preg_match("`^$configName$`", $name) > 0) {
