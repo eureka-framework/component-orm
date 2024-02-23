@@ -3,10 +3,11 @@ includes:
   - ./../vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
-  phpVersion: 80100 # PHP 8.1
+  phpVersion: 80100
   level: 0
   paths:
     - ./../src
+    - ./../scripts
     - ./../tests
 
   bootstrapFiles:

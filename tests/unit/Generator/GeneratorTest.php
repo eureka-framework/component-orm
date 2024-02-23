@@ -23,6 +23,7 @@ use PHPUnit\Framework\TestCase;
  * Class GeneratorTest
  *
  * @author Romain Cottard
+ * @phpstan-import-type ConfigList from \Eureka\Component\Orm\Generator\Generator
  */
 class GeneratorTest extends TestCase
 {
@@ -55,6 +56,18 @@ class GeneratorTest extends TestCase
     {
         $generator = new Generator();
         $generator->generate($this->getConnectionMock(), $this->getConfig(), 'user', false);
+
+        $this->assertInstanceOf(Generator::class, $generator);
+    }
+
+    /**
+     * @return void
+     * @throws GeneratorException
+     */
+    public function testICanGenerateMappersAndEntityClassesAccordingToConfigAndMockedDatabaseAndFilteredOnPatternConfigName(): void
+    {
+        $generator = new Generator();
+        $generator->generate($this->getConnectionMock(), $this->getConfig(), 'user.*', false);
 
         $this->assertInstanceOf(Generator::class, $generator);
     }
@@ -236,26 +249,7 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array<array{
-     *  comment: array{author: string, copyright: string},
-     *  class: array{classname: string},
-     *  namespace: array{entity: string, mapper: string, repository: string},
-     *  path: array{entity: string, mapper: string, repository: string},
-     *  cache: array{prefix: string},
-     *  database: array{table: string, prefix: string|string[]},
-     *  validation: array{
-     *      extended_validation: array<array{type: string, options?: array<string, string|int|float>}>|null,
-     *      enabled: bool,
-     *      auto: bool
-     *  },
-     *  joins: array<string, array{
-     *     eager_loading: bool,
-     *     config: string,
-     *     relation: string,
-     *     type: string,
-     *     keys: array<bool|string>,
-     *    }>
-     *  }>
+     * @return ConfigList
      */
     private function getConfig(): array
     {
@@ -422,26 +416,7 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array<array{
-     *  comment: array{author: string, copyright: string},
-     *  class: array{classname: string},
-     *  namespace: array{entity: string, mapper: string, repository: string},
-     *  path: array{entity: string, mapper: string, repository: string},
-     *  cache: array{prefix: string},
-     *  database: array{table: string, prefix: string|string[]},
-     *  validation: array{
-     *      extended_validation: array<array{type: string, options?: array<string, string|int|float>}>|null,
-     *      enabled: bool,
-     *      auto: bool
-     *  },
-     *  joins: array<string, array{
-     *     eager_loading: bool,
-     *     config: string,
-     *     relation: string,
-     *     type: string,
-     *     keys: array<bool|string>,
-     *    }>
-     *  }>
+     * @return ConfigList
      */
     private function getInvalidJoinConfig(): array
     {
@@ -522,26 +497,7 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array<array{
-     *  comment: array{author: string, copyright: string},
-     *  class: array{classname: string},
-     *  namespace: array{entity: string, mapper: string, repository: string},
-     *  path: array{entity: string, mapper: string, repository: string},
-     *  cache: array{prefix: string},
-     *  database: array{table: string, prefix: string|string[]},
-     *  validation: array{
-     *      extended_validation: array<array{type: string, options?: array<string, string|int|float>}>|null,
-     *      enabled: bool,
-     *      auto: bool
-     *  },
-     *  joins: array<string, array{
-     *     eager_loading: bool,
-     *     config: string,
-     *     relation: string,
-     *     type: string,
-     *     keys: array<bool|string>,
-     *    }>
-     *  }>
+     * @return ConfigList
      */
     private function getConfigWithMissingJoinedConfig(): array
     {

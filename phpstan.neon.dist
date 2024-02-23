@@ -7,6 +7,7 @@ parameters:
   level: max
   paths:
     - ./src
+    - ./scripts
     - ./tests
 
   checkGenericClassInNonGenericObjectType: false
@@ -14,7 +15,4 @@ parameters:
   bootstrapFiles:
     - ./vendor/autoload.php
 
-  ignoreErrors:
-    #~ Ignore some voluntary broken phpdoc for testing wrong cases
-    - path:    'tests/unit/Generator/GeneratorTest.php'
-      message: '`Method .+GeneratorTest::getInvalidJoinConfig\(\) should return array.+`'
+  ignoreErrors: []

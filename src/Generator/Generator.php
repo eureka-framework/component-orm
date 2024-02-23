@@ -23,31 +23,33 @@ use Eureka\Component\Orm\Generator\Compiler\RepositoryCompiler;
  * Class Generator
  *
  * @author Romain Cottard
+ *
+ * @phpstan-type ConfigList array<array{
+ *   comment: array{author: string, copyright: string},
+ *   class: array{classname: string},
+ *   namespace: array{entity: string, mapper: string, repository?: string},
+ *   path: array{entity: string, mapper: string, repository?: string},
+ *   cache: array{prefix: string},
+ *   database: array{table: string, prefix: string|string[]},
+ *   validation: array{
+ *       extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>|null,
+ *       enabled?: bool,
+ *       auto?: bool
+ *   },
+ *   joins?: array<string, array{
+ *       eager_loading?: bool,
+ *       config?: string,
+ *       relation?: string,
+ *       type?: string,
+ *       keys?: array<string, string|bool>
+ *   }>
+ *  }>
  */
 class Generator
 {
     /**
      * @param Connection $connection
-     * @param array<array{
-     *  comment: array{author: string, copyright: string},
-     *  class: array{classname: string},
-     *  namespace: array{entity: string, mapper: string, repository?: string},
-     *  path: array{entity: string, mapper: string, repository?: string},
-     *  cache: array{prefix: string},
-     *  database: array{table: string, prefix: string|string[]},
-     *  validation: array{
-     *      extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>|null,
-     *      enabled?: bool,
-     *      auto?: bool
-     *  },
-     *  joins?: array<string, array{
-     *      eager_loading?: bool,
-     *      config?: string,
-     *      relation?: string,
-     *      type?: string,
-     *      keys?: array<string, string|bool>
-     *  }>
-     * }> $configList
+     * @param ConfigList $configList
      * @param string $configName
      * @param bool $isVerbose
      * @return void
@@ -87,26 +89,7 @@ class Generator
     /**
      * Find configs.
      *
-     * @param array<array{
-     *  comment: array{author: string, copyright: string},
-     *  class: array{classname: string},
-     *  namespace: array{entity: string, mapper: string, repository?: string},
-     *  path: array{entity: string, mapper: string, repository?: string},
-     *  cache: array{prefix: string},
-     *  database: array{table: string, prefix: string|string[]},
-     *  validation: array{
-     *      extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>|null,
-     *      enabled?: bool,
-     *      auto?: bool
-     *  },
-     *  joins?: array<string, array{
-     *      eager_loading?: bool,
-     *      config?: string,
-     *      relation?: string,
-     *      type?: string,
-     *      keys?: array<string, string|bool>
-     *  }>
-     * }> $configList
+     * @param ConfigList $configList
      * @param string $configName Filter on name
      * @return Config[]
      * @throws GeneratorException
@@ -170,11 +153,18 @@ class Generator
             $config->setJoinList($joins);
         }
 
-        if (!empty($configName) && !empty($configs[$configName])) {
-            $configs = [$configName => $configs[$configName]];
+        if (empty($configName)) {
+            return $configs;
         }
 
-        return $configs;
+        $filteredConfigs = [];
+        foreach ($configs as $name => $config) {
+            if (preg_match("`^$configName$`", $name) > 0) {
+                $filteredConfigs[$name] = $config;
+            }
+        }
+
+        return $filteredConfigs;
     }
 
     /**

@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Script;
 
 use Eureka\Component\Console\AbstractScript;
-use Eureka\Component\Console\Color\Bit8Color;
 use Eureka\Component\Console\Color\Bit8StandardColor;
 use Eureka\Component\Console\Help;
 use Eureka\Component\Console\Option\Option;
@@ -28,6 +27,7 @@ use Eureka\Component\Orm\Generator\Generator as GeneratorService;
  *
  * @author Romain Cottard
  * @codeCoverageIgnore
+ * @phpstan-import-type ConfigList from \Eureka\Component\Orm\Generator\Generator
  */
 class Generator extends AbstractScript
 {
@@ -48,7 +48,7 @@ class Generator extends AbstractScript
                     new Option(
                         shortName: '',
                         longName: 'config-name',
-                        description: 'Generate config only for given config name',
+                        description: 'Name (like "user") or pattern (like "user.+") for config(s) to generate',
                         hasArgument: true
                     )
                 )
@@ -87,6 +87,7 @@ class Generator extends AbstractScript
 
         try {
             $connection = $this->factory->getConnection($connectionName);
+            /** @var ConfigList $configList */
             $configList = $this->ormConfigs;
 
             $generator = new GeneratorService();
