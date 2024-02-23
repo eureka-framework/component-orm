@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class EmptyInValuesException extends \Exception
-{
-}
+class EmptyInValuesException extends \Exception {}

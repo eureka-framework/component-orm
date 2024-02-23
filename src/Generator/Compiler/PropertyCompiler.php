@@ -20,38 +20,17 @@ use Eureka\Component\Orm\Exception\GeneratorException;
  */
 class PropertyCompiler extends AbstractCompiler
 {
-    /** @var string $name */
-    private string $name;
-
-    /** @var string $typeHint */
-    private string $typeHint;
-
-    /** @var string $typeDoc */
-    private string $typeDoc;
-
-    /** @var mixed $defaultValue */
-    private $defaultValue;
-
-    /**
-     * PropertyCompiler constructor.
-     *
-     * @param string $name
-     * @param string $typeHint
-     * @param string $typeDoc
-     * @param null $defaultValue
-     */
-    public function __construct(string $name, string $typeHint, string $typeDoc, $defaultValue = null)
-    {
+    public function __construct(
+        private readonly string $name,
+        private readonly string $typeHint,
+        private readonly string $typeDoc,
+        private readonly string|int|float|bool|null $defaultValue = null
+    ) {
         parent::__construct(
             [
                 __DIR__ . '/../Templates/FieldProperty.template' => false,
             ]
         );
-
-        $this->name         = $name;
-        $this->typeHint     = $typeHint;
-        $this->typeDoc      = $typeDoc;
-        $this->defaultValue = $defaultValue;
     }
 
     /**

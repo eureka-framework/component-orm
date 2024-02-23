@@ -18,7 +18,7 @@ namespace Eureka\Component\Orm\Generator\Compiler;
  */
 class Context
 {
-    /** @var string[] $context */
+    /** @var array<string[]|string|int|float|bool|null> $context */
     private array $context;
 
     /**
@@ -31,10 +31,10 @@ class Context
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param string[]|string|int|float|bool|null $value
      * @return Context
      */
-    public function add(string $key, $value): self
+    public function add(string $key, array|string|int|float|bool|null $value): self
     {
         $this->context['{{ ' . $key . ' }}'] = $value;
 
@@ -43,9 +43,9 @@ class Context
 
     /**
      * @param string $key
-     * @return mixed|string|null
+     * @return string[]|string|int|float|bool|null
      */
-    public function get(string $key)
+    public function get(string $key): array|float|bool|int|string|null
     {
         if (isset($this->context['{{ ' . $key . ' }}'])) {
             return $this->context['{{ ' . $key . ' }}'];
@@ -74,7 +74,7 @@ class Context
     }
 
     /**
-     * @return string[]
+     * @return array<string[]|string|int|float|bool|null>
      */
     public function getValues(): array
     {
@@ -82,7 +82,7 @@ class Context
     }
 
     /**
-     * @return array
+     * @return array<string[]|string|int|float|bool|null>
      */
     private function toArray(): array
     {

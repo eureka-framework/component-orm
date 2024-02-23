@@ -11,6 +11,7 @@ declare(strict_types=0);
 
 namespace Eureka\Component\Orm\Traits;
 
+use Eureka\Component\Orm\EntityAwareInterface;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinType;
 use Eureka\Component\Orm\RepositoryInterface;
@@ -20,29 +21,25 @@ use Eureka\Component\Validation\Entity\GenericEntity;
  * Entity Trait.
  *
  * @author Romain Cottard
+ *
+ * @template TEntity of EntityInterface
  */
 trait EntityAwareTrait
 {
-    /** @var string $entityClass Name of class use to instance entity class. */
-    protected string $entityClass = '';
+    /** @phpstan-var class-string<TEntity> $entityClass */
+    protected string $entityClass;
 
-    /** @var bool $ignoreNotMappedFields If true, does not throw an exception for not mapped fields (ie : COUNT()) in setDataValue */
+    /** @var bool $ignoreNotMappedFields If true, does not throw an exception for not mapped fields in setDataValue */
     protected bool $ignoreNotMappedFields = false;
 
-    /**
-     * @return $this|RepositoryInterface
-     */
-    public function enableIgnoreNotMappedFields(): RepositoryInterface
+    public function enableIgnoreNotMappedFields(): static
     {
         $this->ignoreNotMappedFields = true;
 
         return $this;
     }
 
-    /**
-     * @return $this|RepositoryInterface
-     */
-    public function disableIgnoreNotMappedFields(): RepositoryInterface
+    public function disableIgnoreNotMappedFields(): static
     {
         $this->ignoreNotMappedFields = false;
 
@@ -50,10 +47,9 @@ trait EntityAwareTrait
     }
 
     /**
-     * @param  string $entityClass
-     * @return $this|RepositoryInterface
+     * @phpstan-param class-string<TEntity> $entityClass
      */
-    public function setEntityClass(string $entityClass): RepositoryInterface
+    public function setEntityClass(string $entityClass): static
     {
         $this->entityClass = $entityClass;
 
@@ -63,20 +59,15 @@ trait EntityAwareTrait
     /**
      * Create new instance of EntityInterface implementation class & return it.
      *
-     * @param  \stdClass|null $row
-     * @param  bool $exists
-     * @return EntityInterface
+     * @phpstan-return TEntity
      */
-    public function newEntity(\stdClass $row = null, bool $exists = false): EntityInterface
+    public function newEntity(\stdClass $row = null, bool $exists = false): object
     {
+        /** @var TEntity $entity */
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
-        if (!($entity instanceof EntityInterface)) {
-            throw new \LogicException('Entity object is not an instance of EntityInterface class!'); // @codeCoverageIgnore
-        }
-
         if ($row instanceof \stdClass) {
-            foreach ($row as $field => $value) {
+            foreach ((array) $row as $field => $value) {
                 $this->setEntityValue($entity, $field, $value);
             }
         }
@@ -90,8 +81,8 @@ trait EntityAwareTrait
      * Create new entity from array.
      * Array fields must be named as the entity properties name.
      *
-     * @param  array $form
-     * @return EntityInterface
+     * @param  array<string|int|float|bool|null> $form
+     * @phpstan-return TEntity
      */
     public function newEntityFromArray(array $form): EntityInterface
     {
@@ -102,9 +93,9 @@ trait EntityAwareTrait
      * Hydrate entity with form entity values
      *
      * @param  GenericEntity $genericEntity
-     * @return EntityInterface
+     * @phpstan-return TEntity
      */
-    public function newEntityFromGeneric(GenericEntity $genericEntity): EntityInterface
+    public function newEntityFromGeneric(GenericEntity $genericEntity): object
     {
         $entity = $this->newEntity();
         $entity->hydrateFromGenericEntity($genericEntity);
@@ -116,11 +107,11 @@ trait EntityAwareTrait
      * Update entity from form data.
      * Form fields must be named as the entity properties name.
      *
-     * @param EntityInterface $entity
-     * @param array $form
-     * @return EntityInterface
+     * @phpstan-param TEntity $entity
+     * @param array<string|int|float|bool|null> $form
+     * @phpstan-return TEntity
      */
-    public function updateEntityFromArray(EntityInterface $entity, array $form): EntityInterface
+    public function updateEntityFromArray(EntityInterface $entity, array $form): object
     {
         foreach ($this->getFields() as $field) {
             $map = $this->getNamesMap($field);
@@ -139,14 +130,12 @@ trait EntityAwareTrait
      * Create new instance of EntityInterface implementation class & return it.
      * Remove prefix from result set field to retrieve the correct field name.
      *
-     * @param  \stdClass $row
-     * @param  string $suffix
-     * @param  string $type
-     * @return EntityInterface|null
+     * @phpstan-return TEntity|null
      * @throws \LogicException
      */
-    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?EntityInterface
+    public function newEntitySuffixAware(\stdClass $row, string $suffix, string $type): ?object
     {
+        /** @var TEntity $entity */
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
         if (!($entity instanceof EntityInterface)) {
@@ -157,7 +146,7 @@ trait EntityAwareTrait
         $hasSomeJoinValues = ($type !== JoinType::LEFT);
 
         //~ Check if join entity as value (or if is LEFT without left entity)
-        foreach ($row as $field => $value) {
+        foreach ((array) $row as $field => $value) {
             $suffixPosition = strrpos($field, $suffix);
             if (!empty($suffix) && $suffixPosition !== false) {
                 $field = substr($field, 0, $suffixPosition);
@@ -175,11 +164,7 @@ trait EntityAwareTrait
         }
 
         foreach ($data as $field => $value) {
-            try {
-                $this->setEntityValue($entity, $field, $value);
-            } catch (\TypeError $exception) { // @codeCoverageIgnore
-                //~ Skip type error when data came from database
-            }
+            $this->setEntityValue($entity, $field, $value);
         }
 
         $entity->setExists(true);
@@ -189,30 +174,33 @@ trait EntityAwareTrait
 
 
     /**
-     * @param  EntityInterface $entity
-     * @param  string $field
-     * @return bool
+     * @phpstan-param  TEntity $entity
      */
     public function isEntityUpdated(EntityInterface $entity, string $field): bool
     {
         if (!isset($this->entityNamesMap[$field]['property'])) {
-            throw new \DomainException('Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')'); // @codeCoverageIgnore
+            // @codeCoverageIgnoreStart
+            throw new \DomainException(
+                'Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')'
+            );
+            // @codeCoverageIgnoreEnd
         }
 
-        $property = $this->entityNamesMap[$field]['property'];
+        $property = $this->getPropertyForField($field);
 
         return $entity->isUpdated($property);
     }
 
     /**
-     * @param  EntityInterface $entity
-     * @param  string $field
-     * @return mixed
+     * @phpstan-param  TEntity $entity
+     * @return string|int|float|bool|null
      */
-    public function getEntityValue(EntityInterface $entity, string $field)
+    public function getEntityValue(EntityInterface $entity, string $field): mixed
     {
         if (!isset($this->entityNamesMap[$field]['get'])) {
-            throw new \DomainException('Cannot get field value: field have no mapping with entity instance (field: ' . $field . ')');
+            throw new \DomainException(
+                'Cannot get field value: field have no mapping with entity instance (field: ' . $field . ')'
+            );
         }
 
         $method = $this->entityNamesMap[$field]['get'];
@@ -223,15 +211,15 @@ trait EntityAwareTrait
     /**
      * Get array "key" => "value" for primaries keys.
      *
-     * @param  EntityInterface $entity
-     * @return array
+     * @phpstan-param  TEntity $entity
+     * @return array<string|int|float|bool|null>
      */
     public function getEntityPrimaryKeysValues(EntityInterface $entity): array
     {
         $values = [];
 
         foreach ($this->getPrimaryKeys() as $key) {
-            $getter       = $this->entityNamesMap[$key]['get'];
+            $getter       = $this->getGetterForField($key);
             $values[$key] = $entity->{$getter}();
         }
 
@@ -241,13 +229,10 @@ trait EntityAwareTrait
     /**
      * Set value into EntityInterface instance based on field value
      *
-     * @param  EntityInterface $entity
-     * @param  string $field
-     * @param  mixed $value
-     * @return self|RepositoryInterface
+     * @phpstan-param  TEntity $entity
      * @throws \DomainException
      */
-    protected function setEntityValue(EntityInterface $entity, string $field, $value): RepositoryInterface
+    protected function setEntityValue(EntityInterface $entity, string $field, mixed $value): static
     {
         if (!isset($this->entityNamesMap[$field]['set'])) {
             if (true === $this->ignoreNotMappedFields) {
@@ -257,7 +242,7 @@ trait EntityAwareTrait
             throw new \DomainException('Field have not mapping with entity instance (field: ' . $field . ')');
         }
 
-        $method = $this->entityNamesMap[$field]['set'];
+        $method = $this->getSetterForField($field);
 
         $entity->{$method}($value);
 

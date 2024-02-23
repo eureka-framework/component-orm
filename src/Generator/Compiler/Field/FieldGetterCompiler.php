@@ -21,26 +21,16 @@ use Eureka\Component\Orm\Generator\Compiler\Context;
  */
 class FieldGetterCompiler extends AbstractFieldCompiler
 {
-    /**
-     * FieldGetterCompiler constructor.
-     *
-     * @param Field $field
-     */
     public function __construct(Field $field)
     {
         parent::__construct(
             $field,
             [
-            __DIR__ . '/../../Templates/FieldGetter.template' => false
+                __DIR__ . '/../../Templates/FieldGetter.template' => false
             ]
         );
     }
 
-    /**
-     * @param Context $context
-     * @param bool $isAbstract
-     * @return Context
-     */
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
         $context

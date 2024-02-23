@@ -9,20 +9,19 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Validation\Tests;
+namespace Eureka\Component\Orm\Tests\Unit\Mapper;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Exception\OrmException;
-use Eureka\Component\Orm\Tests\Generated\Entity\User;
-use Eureka\Component\Orm\Tests\Generated\Entity\UserParent;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserParentMapper;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserParentRepositoryInterface;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
-use Eureka\Component\Validation\Entity\GenericEntity;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\User;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\UserParent;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserParentRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -62,7 +61,7 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCreateNewEmptyUserEntityFromEmptyContent()
+    public function testICanCreateNewEmptyUserEntityFromEmptyContent(): void
     {
         $repository = $this->getUserRepository();
         $user       = $repository->newEntity();
@@ -73,10 +72,10 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCreateNewUserEntityFromNonEmptyContent()
+    public function testICanCreateNewUserEntityFromNonEmptyContent(): void
     {
         $repository = $this->getUserRepository();
-        /** @var User $user */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User $user */
         $user       = $repository->newEntity(
             (object) [
                 'user_id'          => 1,
@@ -95,10 +94,10 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testICanUpdateAnEntity()
+    public function testICanUpdateAnEntity(): void
     {
         $repository = $this->getUserRepository();
-        /** @var User $user */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User $user */
         $user       = $repository->newEntity(
             (object) [
                 'user_id'          => 1,
@@ -130,7 +129,7 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCreateNewEntityFromArray()
+    public function testICanCreateNewEntityFromArray(): void
     {
         $repository = $this->getUserRepository();
         $user       = $repository->newEntityFromArray(
@@ -154,6 +153,8 @@ class EntityTest extends TestCase
             ]
         );
 
+        $a = $expected->getId();
+
         $this->assertEquals($expected, $user);
     }
 
@@ -161,7 +162,7 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCreateNewEntityWithUnknownFieldWhenIEnableIgnoreNotMappedField()
+    public function testICanCreateNewEntityWithUnknownFieldWhenIEnableIgnoreNotMappedField(): void
     {
         $repository = $this->getUserRepository();
         $repository->enableIgnoreNotMappedFields();
@@ -183,7 +184,7 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveExceptionWhenIgnoreNotMappedFieldIsDisabled()
+    public function testIHaveExceptionWhenIgnoreNotMappedFieldIsDisabled(): void
     {
         $repository = $this->getUserRepository();
         $repository->disableIgnoreNotMappedFields();
@@ -206,7 +207,7 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveExceptionWhenITryToGetValueOfEntityOnNonExistingField()
+    public function testIHaveExceptionWhenITryToGetValueOfEntityOnNonExistingField(): void
     {
         $repository = $this->getUserRepository();
 
@@ -229,7 +230,7 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCreateNewGenericEntityFromUserEntity()
+    public function testICanCreateNewGenericEntityFromUserEntity(): void
     {
         $repository = $this->getUserRepository();
 
@@ -264,11 +265,10 @@ class EntityTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCreateNewEntityFromGenericEntity()
+    public function testICanCreateNewEntityFromGenericEntity(): void
     {
         $repository = $this->getUserRepository();
 
-        /** @var User $user */
         $generic = $repository->newGenericEntity(
             [
                 'id'          => 1,
@@ -300,9 +300,8 @@ class EntityTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanResetLazyLoadedData()
+    public function testICanResetLazyLoadedData(): void
     {
-        /** @var User $user */
         $repository = $this->getUserRepository();
         $user       = $repository->newEntity();
 
@@ -322,6 +321,7 @@ class EntityTest extends TestCase
         $connection  = $mockBuilder->getMock();
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
+        /** @var ConnectionFactory&MockObject $connectionFactory */
         $connectionFactory = $mockBuilder->getMock();
         $connectionFactory->method('getConnection')->willReturn($connection);
 
@@ -345,7 +345,7 @@ class EntityTest extends TestCase
     private function getUserParentRepository(): UserParentRepositoryInterface
     {
         $connectionFactory = $this->getConnectionFactoryMock();
-        return new UserParentMapper(
+        return new \Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserParentMapper(
             'common',
             $connectionFactory,
             new ValidatorFactory(),

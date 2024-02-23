@@ -26,16 +26,10 @@ abstract class AbstractCompiler
     /** @var bool $verbose Verbose active or not. */
     protected bool $verbose = true;
 
-    /** @var string $rootDir */
-    protected string $rootDir = __DIR__ . '/../../eureka-component';
-
     /** @var Connection $connection */
     protected Connection $connection;
 
-    /** @var string $validatorsConfig */
-    protected string $validatorsConfig = '';
-
-    /** @var bool[]  */
+    /** @var array<string, bool>  */
     protected array $templates = [];
 
     /**
@@ -46,7 +40,7 @@ abstract class AbstractCompiler
     /**
      * AbstractCompiler constructor.
      *
-     * @param array $templates
+     * @param array<string, bool> $templates
      */
     public function __construct(array $templates)
     {
@@ -103,13 +97,17 @@ abstract class AbstractCompiler
     protected function readTemplate(string $template): string
     {
         if (!is_readable($template)) {
-            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')'); // @codeCoverageIgnore
+            // @codeCoverageIgnoreStart
+            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')');
+            // @codeCoverageIgnoreEnd
         }
 
         $content = file_get_contents($template);
 
         if ($content === false) {
-            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')'); // @codeCoverageIgnore
+            // @codeCoverageIgnoreStart
+            throw new GeneratorException('Template file does not exists or not readable (file: ' . $template . ')');
+            // @codeCoverageIgnoreEnd
         }
 
         return $content;
@@ -144,25 +142,22 @@ abstract class AbstractCompiler
             '/(_in_)/i', // db_prefix is not empty
             '/(_)/',
         );
-        $methodName = str_replace(' ', '', ucwords(preg_replace($toReplace, ' ', strtolower($field->getName(true)))));
+        $methodName = str_replace(
+            ' ',
+            '',
+            ucwords((string) preg_replace($toReplace, ' ', strtolower($field->getName(true))))
+        );
 
         $type = $field->getType();
         $name = $field->getName();
 
-        switch (true) {
-            case ($type instanceof Type\TypeBool) && (stripos($name, '_has_') !== false || stripos($name, 'has_') === 0):
-                $methodPrefix = 'has';
-                break;
-            case ($type instanceof Type\TypeBool) && (stripos($name, '_is_') !== false || stripos($name, 'is_') === 0):
-                $methodPrefix = 'is';
-                break;
-            case ($type instanceof Type\TypeBool) && (stripos($name, '_in_') !== false || stripos($name, 'in_') === 0):
-                $methodPrefix = 'in';
-                break;
-            default:
-                $methodPrefix = 'get';
-                break;
-        }
+        $isTypeBool = ($type instanceof Type\TypeBool);
+        $methodPrefix = match (true) {
+            $isTypeBool && (stripos($name, '_has_') !== false || stripos($name, 'has_') === 0) => 'has',
+            $isTypeBool && (stripos($name, '_is_') !== false || stripos($name, 'is_') === 0)   => 'is',
+            $isTypeBool && (stripos($name, '_in_') !== false || stripos($name, 'in_') === 0)   => 'in',
+            default => 'get',
+        };
 
         return $methodPrefix . $methodName;
     }

@@ -14,7 +14,6 @@ namespace Eureka\Component\Orm\Traits;
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Exception\ConnectionLostDuringTransactionException;
-use Eureka\Component\Orm\RepositoryInterface;
 
 /**
  * Connection Aware trait
@@ -41,13 +40,13 @@ trait ConnectionAwareTrait
     /**
      * Quote parameter according to the connection.
      *
-     * @param  int|float|string|bool $value
+     * @param  int|float|string|bool|null $value
      * @return string
      * @codeCoverageIgnore
      */
-    public function quote($value): string
+    public function quote(int|float|string|bool|null $value): string
     {
-        return $this->getConnection()->quote($value);
+        return $this->getConnection()->quote((string) $value);
     }
 
     /**
@@ -116,9 +115,9 @@ trait ConnectionAwareTrait
 
     /**
      * @param ConnectionFactory $connectionFactory
-     * @return self|RepositoryInterface
+     * @return static
      */
-    protected function setConnectionFactory(ConnectionFactory $connectionFactory): RepositoryInterface
+    protected function setConnectionFactory(ConnectionFactory $connectionFactory): static
     {
         $this->connectionFactory = $connectionFactory;
 
@@ -127,9 +126,9 @@ trait ConnectionAwareTrait
 
     /**
      * @param string $name
-     * @return $this|RepositoryInterface
+     * @return static
      */
-    protected function setConnectionName(string $name): RepositoryInterface
+    protected function setConnectionName(string $name): static
     {
         $this->name = $name;
 
@@ -138,7 +137,7 @@ trait ConnectionAwareTrait
 
     /**
      * @param string $query
-     * @param array|null $bind
+     * @param array<mixed>|null $bind
      * @return \PDOStatement
      * @throws ConnectionLostDuringTransactionException
      */
@@ -154,9 +153,11 @@ trait ConnectionAwareTrait
             }
 
             if ($this->inTransaction()) {
+                // @codeCoverageIgnoreStart
                 //~ Force reconnection to reset "inTransaction()" status & throw error specific error
-                $this->getConnection(true); // @codeCoverageIgnore
-                throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_000); // @codeCoverageIgnore
+                $this->getConnection(true);
+                throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_000);
+                // @codeCoverageIgnoreEnd
             }
 
             $connection = $this->getConnection(true); // Force reconnection
@@ -169,7 +170,7 @@ trait ConnectionAwareTrait
 
     /**
      * @param string $query
-     * @param array|null $bind
+     * @param array<mixed>|null $bind
      * @return bool
      * @throws ConnectionLostDuringTransactionException
      */
@@ -185,9 +186,11 @@ trait ConnectionAwareTrait
             }
 
             if ($this->inTransaction()) {
+                // @codeCoverageIgnoreStart
                 //~ Force reconnection to reset "inTransaction()" status & throw error specific error
-                $this->getConnection(true); // @codeCoverageIgnore
-                throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_001); // @codeCoverageIgnore
+                $this->getConnection(true);
+                throw new ConnectionLostDuringTransactionException('Connection lost during a transaction.', 1_001);
+                // @codeCoverageIgnoreEnd
             }
 
             $connection = $this->getConnection(true); // Force reconnection
@@ -205,6 +208,6 @@ trait ConnectionAwareTrait
         // Only keep SQLState HY000 with ErrorCode 2006 | 2013 (MySQL server has gone away)
         $sqlState = $exception->errorInfo[0] ?? 'UNKNW';
         $sqlCode  = $exception->errorInfo[1] ?? 1;
-        return ($sqlState === 'HY000' && in_array($sqlCode, [2006, 2013]));
+        return $sqlState === 'HY000' && in_array($sqlCode, [2006, 2013]);
     }
 }

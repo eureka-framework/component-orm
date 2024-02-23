@@ -11,14 +11,12 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
-use Eureka\Component\Orm\Query\QueryBuilderInterface;
-
 /**
  * Class LimitTrait
  *
  * @author Romain Cottard
  */
-trait LimitTrait
+trait LimitAwareTrait
 {
     /** @var int|null $limit Max limit for current query. */
     protected ?int $limit = null;
@@ -26,14 +24,7 @@ trait LimitTrait
     /** @var int|null $offset Start fetch result position for current query */
     protected ?int $offset = null;
 
-    /**
-     * Set limit & offset.
-     *
-     * @param  int $limit
-     * @param  int $offset
-     * @return self|QueryBuilderInterface
-     */
-    public function setLimit(int $limit, ?int $offset = null): QueryBuilderInterface
+    public function setLimit(int $limit, ?int $offset = null): static
     {
         $this->limit  = $limit;
         $this->offset = $offset;
@@ -41,11 +32,6 @@ trait LimitTrait
         return $this;
     }
 
-    /**
-     * Get limit clause.
-     *
-     * @return string
-     */
     public function getQueryLimit(): string
     {
         if ($this->limit !== null && $this->offset !== null) {
@@ -57,10 +43,7 @@ trait LimitTrait
         return '';
     }
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    public function resetLimit(): QueryBuilderInterface
+    public function resetLimit(): static
     {
         $this->offset = 0;
         $this->limit  = 0;

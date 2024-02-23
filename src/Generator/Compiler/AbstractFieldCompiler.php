@@ -28,7 +28,7 @@ class AbstractFieldCompiler extends AbstractCompiler
      * AbstractFieldCompiler constructor.
      *
      * @param Field $field
-     * @param array $templates
+     * @param array<string, bool> $templates
      */
     public function __construct(Field $field, array $templates)
     {
@@ -59,9 +59,6 @@ class AbstractFieldCompiler extends AbstractCompiler
         return array_values($rendered);
     }
 
-    /**
-     * @return Context
-     */
     protected function getContext(): Context
     {
         $name = $this->getPropertyName($this->field);
@@ -78,8 +75,6 @@ class AbstractFieldCompiler extends AbstractCompiler
 
     /**
      * Get type for documentation
-     *
-     * @return string
      */
     private function getTypeDoc(): string
     {
@@ -94,8 +89,6 @@ class AbstractFieldCompiler extends AbstractCompiler
 
     /**
      * Get type hint
-     *
-     * @return string
      */
     private function getTypeHint(): string
     {
@@ -110,10 +103,8 @@ class AbstractFieldCompiler extends AbstractCompiler
 
     /**
      * Get default value for the field.
-     *
-     * @return mixed
      */
-    protected function getDefault()
+    protected function getDefault(): string|int|float|bool|null
     {
         $default = $this->field->getDefaultValue();
 

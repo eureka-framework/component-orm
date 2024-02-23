@@ -30,7 +30,7 @@ abstract class TypeAbstract implements TypeInterface
     /** @var bool $isUnsigned If type is unsigned */
     protected bool $isUnsigned = false;
 
-    /** @var int $length Number of characters length (string). For numbers, number of digit "displayed". 0 for unlimited. */
+    /** @var int $length Number of characters length. For numbers, number of digit "displayed". 0 for unlimited. */
     protected int $length = 0;
 
     /** @var string $other Other data. */
@@ -41,9 +41,6 @@ abstract class TypeAbstract implements TypeInterface
 
     /** @var string $validatorType Validator type|class */
     protected string $validatorType = '';
-
-    /** @var array $validatorOptions Validator options */
-    protected array $validatorOptions = [];
 
     /**
      * @return string
@@ -91,9 +88,9 @@ abstract class TypeAbstract implements TypeInterface
      * @param  int $length
      * @return $this
      */
-    public function setLength(int $length): TypeInterface
+    public function setLength(int $length): static
     {
-        $this->length = (int) $length;
+        $this->length = $length;
 
         return $this;
     }
@@ -104,9 +101,9 @@ abstract class TypeAbstract implements TypeInterface
      * @param  bool $isUnsigned
      * @return $this
      */
-    public function setIsUnsigned(bool $isUnsigned): TypeInterface
+    public function setIsUnsigned(bool $isUnsigned): static
     {
-        $this->isUnsigned = (bool) $isUnsigned;
+        $this->isUnsigned = $isUnsigned;
 
         return $this;
     }
@@ -117,7 +114,7 @@ abstract class TypeAbstract implements TypeInterface
      * @param  string $other
      * @return $this
      */
-    public function setOther(string $other): TypeInterface
+    public function setOther(string $other): static
     {
         $this->other = $other;
 

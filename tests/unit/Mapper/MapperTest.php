@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Validation\Tests;
+namespace Eureka\Component\Orm\Tests\Unit\Mapper;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
@@ -20,18 +20,17 @@ use Eureka\Component\Orm\Exception\UndefinedMapperException;
 use Eureka\Component\Orm\MapperInterface;
 use Eureka\Component\Orm\Query\QueryBuilder;
 use Eureka\Component\Orm\Query\SelectBuilder;
-use Eureka\Component\Orm\Tests\Generated\Entity\User;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserParentMapper;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserParentRepositoryInterface;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
+use Eureka\Component\Orm\RepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\User;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserParentRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub\Exception;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-
-use function PHPUnit\Framework\exactly;
 
 /**
  * Class MapperTest
@@ -43,14 +42,13 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testICanInstantiateUserMapper()
+    public function testICanInstantiateUserMapper(): void
     {
         $repository = $this->getUserRepository();
         $repository->disableCacheOnRead();
         $repository->enableCacheOnRead();
 
         $this->assertInstanceOf(UserMapper::class, $repository);
-        $this->assertInstanceOf(AbstractMapper::class, $repository);
         $this->assertInstanceOf(UserRepositoryInterface::class, $repository);
         $this->assertInstanceOf(MapperInterface::class, $repository);
     }
@@ -59,7 +57,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanInsertEntity()
+    public function testICanInsertEntity(): void
     {
         $repository = $this->getUserRepository();
 
@@ -85,7 +83,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanInsertUpdateEntity()
+    public function testICanInsertUpdateEntity(): void
     {
         $repository = $this->getUserRepository();
 
@@ -114,7 +112,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanDeleteEntity()
+    public function testICanDeleteEntity(): void
     {
         $repository = $this->getUserRepository();
 
@@ -140,7 +138,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanFindEntityById()
+    public function testICanFindEntityById(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
@@ -172,7 +170,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanFindEntityByIdWithoutCacheEnabledNorCache()
+    public function testICanFindEntityByIdWithoutCacheEnabledNorCache(): void
     {
         $repository = $this->getUserRepositoryNoCache($this->getMockEntityFindId1(false));
 
@@ -201,7 +199,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToFindNotExistingEntity()
+    public function testIHaveAnExceptionWhenITryToFindNotExistingEntity(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
@@ -213,7 +211,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanFindEntitiesByKeys()
+    public function testICanFindEntitiesByKeys(): void
     {
         $repository = $this->getUserRepositoryNoCache($this->getMockEntityFindAll());
 
@@ -226,7 +224,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteQuery()
+    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteQuery(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll(false), false);
         $collection = $repository->query((new SelectBuilder($repository))->setListIndexedByField('user_email'));
@@ -263,13 +261,12 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteSelect()
+    public function testICanGetListOfEntityIndexedByGivenFieldWhenExecuteSelect(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
         $builder    = new SelectBuilder($repository);
         $builder->addWhere('user_id', 1)->setListIndexedByField('user_id');
 
-        /** @var User[] $users */
         $users = $repository->select($builder);
         $ids   = array_keys($users);
 
@@ -293,7 +290,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToExecuteQueryAndIndexResultByNonExistingField()
+    public function testIHaveAnExceptionWhenITryToExecuteQueryAndIndexResultByNonExistingField(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll(false), false);
 
@@ -306,7 +303,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanCheckIfRowExists()
+    public function testICanCheckIfRowExists(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
@@ -316,7 +313,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testICanCountRows()
+    public function testICanCountRows(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
@@ -327,7 +324,7 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testICanCheckIfRowDoesNotExists()
+    public function testICanCheckIfRowDoesNotExists(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
@@ -337,7 +334,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testICanGetMaxPrimaryKeyIdForARepository()
+    public function testICanGetMaxPrimaryKeyIdForARepository(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
@@ -347,7 +344,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQuery()
+    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQuery(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1(), true, 2006);
 
@@ -358,9 +355,10 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQueryWithResult()
+    public function testAReconnectionIsMadeAutomaticallyWhenConnectionIsLostAndITryToExecuteAQueryWithResult(): void
     {
-        $entities = $this->getMockEntityFindId1();
+        /** @var \stdClass[] $entities */
+        $entities   = $this->getMockEntityFindId1();
         $repository = $this->getUserRepository($entities, true, 2006);
 
         /** @var User $entity */
@@ -374,7 +372,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveAnExceptionWhenITryToGetMaxPrimaryKeyIdOnRepositoryWithMultiPrimaryKeys()
+    public function testIHaveAnExceptionWhenITryToGetMaxPrimaryKeyIdOnRepositoryWithMultiPrimaryKeys(): void
     {
         $repository = $this->getUserParentRepository($this->getMockEntityNone());
 
@@ -386,7 +384,7 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveAnExceptionWhenITryToGetNamesMapForNonExistingField()
+    public function testIHaveAnExceptionWhenITryToGetNamesMapForNonExistingField(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
@@ -399,14 +397,16 @@ class MapperTest extends TestCase
     /**
      * @return void
      */
-    public function testIHaveAnExceptionWhenITryToGetNonExistingMapper()
+    public function testIHaveAnExceptionWhenITryToGetNonExistingMapper(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
         $this->expectException(UndefinedMapperException::class);
         $this->expectExceptionMessage('Mapper does not exist! (mapper: \Unknown\Mapper\ClassName)');
 
-        $repository->getMapper('\Unknown\Mapper\ClassName');
+        /** @var class-string<RepositoryInterface> $mapperClass */
+        $mapperClass = '\Unknown\Mapper\ClassName';
+        $repository->getMapper($mapperClass);
     }
 
     /**
@@ -414,7 +414,7 @@ class MapperTest extends TestCase
      * @throws EntityNotExistsException
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToGetQueryWithAnError()
+    public function testIHaveAnExceptionWhenITryToGetQueryWithAnError(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1(), false, 1);
 
@@ -427,8 +427,18 @@ class MapperTest extends TestCase
      * @return void
      * @throws OrmException
      */
-    public function testIHaveAnExceptionWhenITryToGetQueryWithResultWithAnError()
+    public function testIHaveAnExceptionWhenITryToGetQueryWithResultWithAnError(): void
     {
+        /** @var array{
+         *     0: \stdClass,
+         *     1: bool,
+         *     2: \stdClass,
+         *     3: bool,
+         *     4: \stdClass,
+         *     5: bool,
+         *     6: \stdClass,
+         *     7: bool
+         * } $entities */
         $entities = $this->getMockEntityFindId1();
         $repository = $this->getUserRepository($entities, true, 1);
 
@@ -443,7 +453,7 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @param bool $includeCacheMock
      * @param int $exceptionCode
      * @return ConnectionFactory
@@ -471,7 +481,10 @@ class MapperTest extends TestCase
         if ($exceptionCode > 0) {
             $exception = new \PDOException('Exception', $exceptionCode);
             $exception->errorInfo = [0 => 'HY000', 1 => $exceptionCode, 2 => 'Exception'];
-            $statementMock->expects($this->exactly($exceptionCode === 2006 ? 2 : 1))->method('execute')->willReturnOnConsecutiveCalls(...
+            $statementMock
+                ->expects($this->exactly($exceptionCode === 2006 ? 2 : 1))
+                ->method('execute')
+                ->willReturnOnConsecutiveCalls(...
                 [
                     new Exception($exception),
                     true,
@@ -487,6 +500,7 @@ class MapperTest extends TestCase
         $connection->method('inTransaction')->willReturn(false);
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
+        /** @var ConnectionFactory&MockObject $connectionFactory */
         $connectionFactory = $mockBuilder->getMock();
         $connectionFactory->method('getConnection')->willReturn($connection);
 
@@ -494,10 +508,10 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @param bool $includeCacheMock
      * @param int $exceptionCode
-     * @return UserRepositoryInterface
+     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface
      */
     private function getUserRepository(
         array $entityMock = [],
@@ -517,13 +531,13 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
+     * @param array<mixed> $entityMock
      * @return UserParentRepositoryInterface
      */
     private function getUserParentRepository(array $entityMock = []): UserParentRepositoryInterface
     {
         $connectionFactory = $this->getConnectionFactoryMock($entityMock, false);
-        return new UserParentMapper(
+        return new \Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserParentMapper(
             'common',
             $connectionFactory,
             new ValidatorFactory(),
@@ -533,13 +547,13 @@ class MapperTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
-     * @return UserRepositoryInterface
+     * @param array<mixed> $entityMock
+     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface
      */
     private function getUserRepositoryNoCache(array $entityMock = []): UserRepositoryInterface
     {
         $connectionFactory = $this->getConnectionFactoryMock($entityMock, false);
-        return new UserMapper(
+        return new \Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper(
             'common',
             $connectionFactory,
             new ValidatorFactory(),
@@ -560,24 +574,24 @@ class MapperTest extends TestCase
 
     /**
      * @param bool $includeCacheMock
-     * @return array
+     * @return array{
+     *     0: \stdClass,
+     *     1: bool,
+     *     2: \stdClass,
+     *     3: bool,
+     *     4: \stdClass,
+     *     5: bool,
+     *     6: \stdClass,
+     *     7: bool
+     * }|array{
+     *     0: \stdClass,
+     *     1: bool,
+     * }
      */
     private function getMockEntityFindId1(bool $includeCacheMock = true): array
     {
-        $mock = [];
-
-        if ($includeCacheMock) {
-            $mock = [
-                (object) [
-                    'user_id' => 1,
-                ],
-                false,
-            ];
-        }
-
-        $mock = array_merge(
-            $mock,
-            [
+        if (!$includeCacheMock) {
+            return [
                 (object) [
                     'user_id'          => 1,
                     'user_is_enabled'  => true,
@@ -587,35 +601,65 @@ class MapperTest extends TestCase
                     'user_date_update' => null,
                 ],
                 false,
-            ]
-        );
+            ];
+        }
 
-        return array_merge($mock, $mock); // double for cache test
+        // double for cache test
+        return [
+            (object) [
+                'user_id' => 1,
+            ],
+            false,
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            false,
+            (object) [
+                'user_id' => 1,
+            ],
+            false,
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            false,
+        ];
     }
 
     /**
      * @param bool $includeCacheMock
-     * @return array
+     * @return array{
+     *     0: \stdClass,
+     *     1: \stdClass,
+     *     2: bool,
+     *     3: \stdClass,
+     *     4: \stdClass,
+     *     5: bool,
+     *     6: \stdClass,
+     *     7: \stdClass,
+     *     8: bool,
+     *     9: \stdClass,
+     *     10: \stdClass,
+     *     11: bool
+     * }|array{
+     *     0: \stdClass,
+     *     1: \stdClass,
+     *     2: bool,
+     * }
      */
     private function getMockEntityFindAll(bool $includeCacheMock = true): array
     {
-        $mock = [];
-
-        if ($includeCacheMock) {
-            $mock = [
-                (object) [
-                    'user_id' => 1,
-                ],
-                (object) [
-                    'user_id' => 2,
-                ],
-                false,
-            ];
-        }
-
-        $mock = array_merge(
-            $mock,
-            [
+        if (!$includeCacheMock) {
+            return [
                 (object) [
                     'user_id'          => 1,
                     'user_is_enabled'  => true,
@@ -633,10 +677,51 @@ class MapperTest extends TestCase
                     'user_date_update' => null,
                 ],
                 false,
-            ]
-        );
+            ];
+        }
 
-        return array_merge($mock, $mock); // double for cache test
+        return [
+           (object) ['user_id' => 1],
+           (object) ['user_id' => 2],
+           false,
+           (object) [
+               'user_id'          => 1,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-01 10:00:00',
+               'user_date_update' => null,
+           ],
+           (object) [
+               'user_id'          => 2,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user02@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-02 10:00:00',
+               'user_date_update' => null,
+           ],
+           false,
+           (object) ['user_id' => 1],
+           (object) ['user_id' => 2],
+           false,
+           (object) [
+               'user_id'          => 1,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-01 10:00:00',
+               'user_date_update' => null,
+           ],
+           (object) [
+               'user_id'          => 2,
+               'user_is_enabled'  => true,
+               'user_email'       => 'user02@example.com',
+               'user_password'    => md5('password'),
+               'user_date_create' => '2020-01-02 10:00:00',
+               'user_date_update' => null,
+           ],
+           false,
+        ];
     }
 
     /**

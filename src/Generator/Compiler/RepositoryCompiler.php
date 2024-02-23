@@ -44,6 +44,7 @@ class RepositoryCompiler extends AbstractClassCompiler
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
         $context->add('class.namespace', $this->config->getBaseNamespaceForRepository());
+        $context->add('entity.namespace', $this->config->getBaseNamespaceForEntity());
 
         return $context;
     }

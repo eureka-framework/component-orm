@@ -21,14 +21,14 @@ interface CacheAwareInterface
     /**
      * Enable cache on read queries.
      *
-     * @return self|RepositoryInterface
+     * @return static
      */
-    public function enableCacheOnRead(): RepositoryInterface;
+    public function enableCacheOnRead(): static;
 
     /**
      * Disable cache on read query.
      *
-     * @return self|RepositoryInterface
+     * @return static
      */
-    public function disableCacheOnRead(): RepositoryInterface;
+    public function disableCacheOnRead(): static;
 }

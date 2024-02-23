@@ -14,9 +14,8 @@ namespace Eureka\Component\Orm;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
- * DataMapper Data interface, should be implemented by all data objects
- *
- * @author  Romain Cottard
+ * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
  */
 interface EntityInterface
 {
@@ -25,9 +24,9 @@ interface EntityInterface
      * Must be overridden to use internal property setter method, according to the data class definition.
      *
      * @param  int $id
-     * @return $this
+     * @return static
      */
-    public function setAutoIncrementId(int $id);
+    public function setAutoIncrementId(int $id): static;
 
     /**
      * Return cache key for the current data instance.
@@ -44,18 +43,17 @@ interface EntityInterface
     /**
      * Get form entity container.
      *
-     * @param  void
      * @return GenericEntity
      */
-    public function getGenericEntity();
+    public function getGenericEntity(): GenericEntity;
 
     /**
      * Hydrate entity with form entity values
      *
      * @param  GenericEntity $genericEntity
-     * @return $this
+     * @return static
      */
-    public function hydrateFromGenericEntity(GenericEntity $genericEntity);
+    public function hydrateFromGenericEntity(GenericEntity $genericEntity): static;
 
     /**
      * If the data set exists.
@@ -69,23 +67,23 @@ interface EntityInterface
      * If property name is specified, check only property.
      *
      * @param  bool $exists
-     * @return $this
+     * @return static
      */
-    public function setExists(bool $exists);
+    public function setExists(bool $exists): static;
 
     /**
      * If at least one data has been updated.
      * If property name is specified, check only property.
      *
-     * @param  string $property
+     * @param  string|null $property
      * @return bool
      */
-    public function isUpdated(string $property = null);
+    public function isUpdated(string $property = null): bool;
 
     /**
      * Reset updated list of properties
      *
-     * @return $this
+     * @return static
      */
-    public function resetUpdated();
+    public function resetUpdated(): static;
 }

@@ -49,7 +49,7 @@ class MapperCompiler extends AbstractClassCompiler
     protected function updateContext(Context $context, bool $isAbstract = false): Context
     {
         $context
-            ->add('class.namespace', $this->config->getBaseNamespaceForMapper() . ($isAbstract ? '\Abstracts' : ''))
+            ->add('class.namespace', $this->config->getBaseNamespaceForMapper())
             ->add('repository.namespace', $this->config->getBaseNamespaceForRepository())
             ->add('entity.namespace', $this->config->getBaseNamespaceForEntity())
             ->add('database.tab:e', $this->config->getDbTable())
@@ -115,15 +115,20 @@ class MapperCompiler extends AbstractClassCompiler
             $config = $join['instance'];
 
             if (!($config instanceof Config\ConfigInterface)) {
-                throw new GeneratorException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'); // @codeCoverageIgnore
+                // @codeCoverageIgnoreStart
+                throw new GeneratorException(
+                    'Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'
+                );
+                // @codeCoverageIgnoreEnd
             }
 
+            $keys     = $join['keys'];
             $joins [] = "
             '$name' => [
                 'mapper'   => " . $config->getClassname() . "Mapper::class,
                 'type'     => '" . (!empty($join['type']) ? strtoupper($join['type']) : JoinType::INNER) . "',
                 'relation' => '" . (!empty($join['relation']) ? $join['relation'] : JoinRelation::ONE) . "',
-                'keys'     => [" . var_export(key($join['keys']), true) . " => " . var_export(current($join['keys']), true) . "],
+                'keys'     => [" . var_export(key($keys), true) . " => " . var_export(current($keys), true) . "],
             ],";
         }
 
@@ -146,7 +151,11 @@ class MapperCompiler extends AbstractClassCompiler
             $config = $join['instance'];
 
             if (!($config instanceof Config\ConfigInterface)) {
-                throw new GeneratorException('Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'); // @codeCoverageIgnore
+                // @codeCoverageIgnoreStart
+                throw new GeneratorException(
+                    'Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'
+                );
+                // @codeCoverageIgnoreEnd
             }
 
             $className = $config->getBaseNamespaceForMapper() . '\\' . $config->getClassname() . 'Mapper';

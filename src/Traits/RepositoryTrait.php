@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception;
 use Eureka\Component\Orm\Query;
@@ -21,16 +20,22 @@ use Eureka\Component\Orm\RepositoryInterface;
  * Repository trait.
  *
  * @author Romain Cottard
+ *
+ * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
  */
 trait RepositoryTrait
 {
+    use ConnectionAwareTrait;
+    use TableTrait;
+
     /**
      * @param  int $id
-     * @return object
+     * @return TEntity
      * @throws Exception\EntityNotExistsException
      * @throws Exception\OrmException
      */
-    public function findById(int $id)
+    public function findById(int $id): EntityInterface
     {
         if (count($this->getPrimaryKeys()) > 1) {
             // @codeCoverageIgnoreStart
@@ -41,23 +46,22 @@ trait RepositoryTrait
         }
 
         $primaryKeys = $this->getPrimaryKeys();
-        $field       = reset($primaryKeys);
+        $field       = (string) reset($primaryKeys);
 
         return $this->findByKeys([$field => $id]);
     }
 
     /**
-     * @param  array $keys
-     * @return EntityInterface
+     * @param  array<string, string|int|float|bool|null> $keys
+     * @return TEntity
      * @throws Exception\EntityNotExistsException
      * @throws Exception\InvalidQueryException
      * @throws Exception\OrmException
      */
-    public function findByKeys(array $keys)
+    public function findByKeys(array $keys): object
     {
-        /** @var RepositoryInterface $this */
-
-        $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
+        /** @var TRepository $this */
+        $queryBuilder = new Query\SelectBuilder($this);
         foreach ($keys as $field => $value) {
             $queryBuilder->addWhere($field, $value);
         }
@@ -66,14 +70,14 @@ trait RepositoryTrait
     }
 
     /**
-     * @param  array $keys
-     * @return EntityInterface[]
+     * @param  array<string, string|int|float|bool|null> $keys
+     * @return array<TEntity>
      * @throws Exception\OrmException
      */
     public function findAllByKeys(array $keys): array
     {
-        /** @var RepositoryInterface $this */
-        $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_SELECT, $this);
+        /** @var TRepository $this */
+        $queryBuilder = new Query\SelectBuilder($this);
         foreach ($keys as $field => $value) {
             $queryBuilder->addWhere($field, $value);
         }
@@ -82,16 +86,15 @@ trait RepositoryTrait
     }
 
     /**
-     * @param EntityInterface $entity
+     * @param TEntity $entity
      * @return bool
      * @throws Exception\OrmException
      */
     public function delete(EntityInterface $entity): bool
     {
-        /** @var RepositoryInterface $this */
-        $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_DELETE, $this, $entity);
+        $queryBuilder = new Query\DeleteBuilder($this, $entity);
 
-        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getBind());
+        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getAllBind());
 
         //~ Reset some data
         $entity->setExists(false);
@@ -101,11 +104,11 @@ trait RepositoryTrait
         $queryBuilder->clear();
         $this->deleteCacheEntity($entity->getCacheKey());
 
-        return (bool) $result;
+        return $result;
     }
 
     /**
-     * @param  EntityInterface $entity
+     * @param  TEntity $entity
      * @param  bool $onDuplicateUpdate
      * @param  bool $onDuplicateIgnore
      * @return bool
@@ -121,14 +124,13 @@ trait RepositoryTrait
             return false;
         }
 
-        /** @var RepositoryInterface $this */
-        $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_INSERT, $this, $entity);
+        $queryBuilder = new Query\InsertBuilder($this, $entity);
+        $connection   = $this->getConnection();
 
-        /** @var Connection $connection */
-        $connection = $this->getConnection();
-
-        /** @var Query\InsertBuilder $queryBuilder */
-        $statement = $this->execute($queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore), $queryBuilder->getBind());
+        $statement = $this->execute(
+            $queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore),
+            $queryBuilder->getAllBind()
+        );
 
         if ($onDuplicateIgnore && $statement->rowCount() === 0) {
             // @codeCoverageIgnoreStart
@@ -158,7 +160,7 @@ trait RepositoryTrait
     }
 
     /**
-     * @param EntityInterface $entity
+     * @param TEntity $entity
      * @return bool
      * @throws Exception\OrmException
      */
@@ -168,10 +170,9 @@ trait RepositoryTrait
             return false;
         }
 
-        /** @var RepositoryInterface $this */
-        $queryBuilder = Query\Factory::getBuilder(Query\Factory::TYPE_UPDATE, $this, $entity);
+        $queryBuilder = new Query\UpdateBuilder($this, $entity);
 
-        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getBind());
+        $result = $this->executeWithResult($queryBuilder->getQuery(), $queryBuilder->getAllBind());
 
         //~ Reset some data
         $entity->resetUpdated();
@@ -184,15 +185,18 @@ trait RepositoryTrait
     }
 
     /**
-     * @param EntityInterface $entity
+     * @param TEntity $entity
      * @param bool $onDuplicateUpdate
      * @param bool $onDuplicateIgnore
      * @return bool
      * @throws Exception\InsertFailedException
      * @throws Exception\OrmException
      */
-    public function persist(EntityInterface $entity, bool $onDuplicateUpdate = false, bool $onDuplicateIgnore = false): bool
-    {
+    public function persist(
+        EntityInterface $entity,
+        bool $onDuplicateUpdate = false,
+        bool $onDuplicateIgnore = false
+    ): bool {
         if ($entity->exists()) {
             return $this->update($entity);
         } else {

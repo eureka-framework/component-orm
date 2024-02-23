@@ -21,10 +21,10 @@ interface ConnectionAwareInterface
     /**
      * Quote parameter according to the connection.
      *
-     * @param  int|float|string|bool $value
+     * @param  int|float|string|bool|null $value
      * @return string
      */
-    public function quote($value): string;
+    public function quote(int|float|string|bool|null $value): string;
 
     /**
      * Start new transaction.

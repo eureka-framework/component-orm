@@ -53,6 +53,31 @@ interface TypeInterface
      */
     public function isUnsigned(): bool;
 
+
+    /**
+     * Number of characters length (string). For numbers, number of digit "displayed".
+     *
+     * @param  int $length
+     * @return static
+     */
+    public function setLength(int $length): static;
+
+    /**
+     * Set is unsigned.
+     *
+     * @param  bool $isUnsigned
+     * @return static
+     */
+    public function setIsUnsigned(bool $isUnsigned): static;
+
+    /**
+     * Set other data.
+     *
+     * @param  string $other
+     * @return static
+     */
+    public function setOther(string $other): static;
+
     /**
      * Get as string.
      *

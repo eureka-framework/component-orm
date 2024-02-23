@@ -9,21 +9,27 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Validation\Tests;
+namespace Eureka\Component\Orm\Tests\Unit\QueryBuilder;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Enumerator\JoinType;
+use Eureka\Component\Orm\Enumerator\Operator;
 use Eureka\Component\Orm\Exception\EmptySetClauseException;
 use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Exception\InvalidQueryException;
 use Eureka\Component\Orm\Exception\OrmException;
-use Eureka\Component\Orm\Query\Factory;
+use Eureka\Component\Orm\Query\DeleteBuilder;
 use Eureka\Component\Orm\Query\InsertBuilder;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
+use Eureka\Component\Orm\Query\QueryBuilder;
+use Eureka\Component\Orm\Query\QueryBuilderFactory;
+use Eureka\Component\Orm\Query\SelectBuilder;
+use Eureka\Component\Orm\Query\UpdateBuilder;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -35,32 +41,31 @@ class QueryBuilderTest extends TestCase
 {
     /**
      * @return void
-     * @throws OrmException
-     */
-    public function testIHaveAnErrorWhenITryToUseQueryBuilderFactoryWithUnknownType(): void
-    {
-        $repository = $this->getUserRepository($this->getMockEntityFindAll());
-
-        $this->expectException(OrmException::class);
-        $this->expectExceptionMessage('Unknown query builder type!');
-
-        Factory::getBuilder('unknown_type', $repository);
-    }
-
-    /**
-     * @return void
-     * @throws OrmException
      */
     public function testICanInstantiateQueryBuilderWithFactory(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryBuilder->setListIndexedByField('user_id');
-        $queryBuilder->bind([':user_id' => 1]);
+        $queryBuilder->bindAll([':user_id' => 1]);
 
         $this->assertSame('user_id', $queryBuilder->getListIndexedByField());
-        $this->assertSame([':user_id' => 1], $queryBuilder->getBind());
+        $this->assertSame([':user_id' => 1], $queryBuilder->getAllBind());
+    }
+    /**
+     * @return void
+     */
+    public function testICanInstantiateAnyQueryBuilderWithFactory(): void
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindAll());
+        $factory   = new QueryBuilderFactory();
+
+        $this->assertInstanceOf(QueryBuilder::class, $factory->newQueryBuilder($repository));
+        $this->assertInstanceOf(SelectBuilder::class, $factory->newSelectBuilder($repository));
+        $this->assertInstanceOf(DeleteBuilder::class, $factory->newDeleteBuilder($repository));
+        $this->assertInstanceOf(InsertBuilder::class, $factory->newInsertBuilder($repository));
+        $this->assertInstanceOf(UpdateBuilder::class, $factory->newUpdateBuilder($repository));
     }
 
     /**
@@ -71,26 +76,25 @@ class QueryBuilderTest extends TestCase
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
-        /** @var InsertBuilder $queryBuilder */
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_INSERT, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newInsertBuilder($repository);
         $queryBuilder->addSet('user_id', 1);
         $queryBuilder->addSet('user_name', 'test');
 
         //~ Basic query
         $suffix = '\_[a-z0-9]{13}';
         $insertQuery  = $queryBuilder->getQuery();
-        $patternQuery = "/INSERT INTO user SET `user\_id` = :user\_id{$suffix}\, `user\_name` = :user\_name{$suffix}/";
+        $patternQuery = "/INSERT INTO user SET `user_id` = :user_id$suffix, `user_name` = :user_name$suffix/";
         $this->assertMatchesRegularExpression($patternQuery, $insertQuery);
 
         //~ Query with IGNORE for duplicate
         $insertQuery  = $queryBuilder->getQuery(false, true);
-        $patternQuery = "/INSERT IGNORE INTO user SET `user\_id` = :user\_id{$suffix}\, `user\_name` = :user\_name{$suffix}/";
+        $patternQuery = "/INSERT IGNORE INTO user SET `user_id` = :user_id$suffix, `user_name` = :user_name$suffix/";
         $this->assertMatchesRegularExpression($patternQuery, $insertQuery);
 
         //~ Query with IGNORE for duplicate
         $queryBuilder->addUpdate('user_name', 'test');
-        $insertQuery  = $queryBuilder->getQuery(true, false);
-        $patternQuery = "/INSERT INTO user SET `user\_id` = :user\_id{$suffix}\, `user\_name` = :user\_name{$suffix} ON DUPLICATE KEY UPDATE `user\_name` = :user\_name{$suffix}/";
+        $insertQuery  = $queryBuilder->getQuery(true);
+        $patternQuery = "/INSERT INTO user SET `user_id` = :user_id$suffix, `user_name` = :user_name$suffix ON DUPLICATE KEY UPDATE `user_name` = :user_name$suffix/";
         $this->assertMatchesRegularExpression($patternQuery, $insertQuery);
     }
 
@@ -112,8 +116,7 @@ class QueryBuilderTest extends TestCase
             ]
         );
 
-        /** @var InsertBuilder $queryBuilder */
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_INSERT, $repository, $user);
+        $queryBuilder = (new QueryBuilderFactory())->newInsertBuilder($repository, $user);
         $query = $queryBuilder->getQuery(true);
 
         $this->assertIsString($query);
@@ -121,13 +124,13 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
+     * @throws EmptyWhereClauseException
      */
     public function testICanGetQueryFromQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
-        $queryBuilder->addFrom('user');
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
+        $queryBuilder->setFrom('user');
         $queryBuilder->addField('user_id');
 
         $query = $queryBuilder->getQuery();
@@ -137,12 +140,11 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanUseQueryFieldsPersonalizedParameters(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryField = $queryBuilder->getQueryFieldsPersonalized(['user_id' => 'usr_id', 'user_name' => '']);
 
         $this->assertSame('`user_id` AS `usr_id`, `user_name`', $queryField);
@@ -150,12 +152,11 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanGetQueryFields(): void
     {
         $repository   = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryBuilder->addField('user_id');
         $queryField   = $queryBuilder->getQueryFields($repository);
 
@@ -164,12 +165,11 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanGetQueryFieldsWithOnlyPrefixedPrimaryKeys(): void
     {
         $repository   = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryField   = $queryBuilder->getQueryFields($repository, true, true);
 
         $this->assertSame('user.user_id', $queryField);
@@ -177,12 +177,11 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanGetQueryFieldsWithOnlyCustomPrefixedPrimaryKeys(): void
     {
         $repository   = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryField   = $queryBuilder->getQueryFieldsList($repository, true, true, 'usr_alias', '_suffix');
 
         $this->assertSame('usr_alias.user_id AS user_id_suffix', $queryField[0]);
@@ -190,12 +189,11 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanEnableAndDisableRowFoundCalculationForQuery(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
 
         $queryBuilder->enableCalculateFoundRows();
         $queryField = $queryBuilder->getQueryFieldsPersonalized(['user_id' => 'usr_id', 'user_name' => '']);
@@ -209,25 +207,23 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanAddOrderToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
-        $queryBuilder->addOrder('user_id', 'ASC');
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
+        $queryBuilder->addOrder('user_id');
 
         $this->assertSame(' ORDER BY user_id ASC', $queryBuilder->getQueryOrderBy());
     }
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanAddGroupByToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryBuilder->addGroupBy('user_id');
 
         $this->assertSame(' GROUP BY user_id ', $queryBuilder->getQueryGroupBy());
@@ -235,27 +231,25 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanAddHavingClauseToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
-        $queryBuilder->addHaving('user_id', 0, '>');
+        $queryBuilder = new QueryBuilder($repository);
+        $queryBuilder->addHaving('user_id', 0, Operator::GreaterThan);
 
         $suffix = '\_[a-z0-9]{13}';
-        $patternQuery = "/ HAVING user\_id > :user\_id{$suffix} /";
+        $patternQuery = "/ HAVING user_id > :user_id$suffix /";
         $this->assertMatchesRegularExpression($patternQuery, $queryBuilder->getQueryHaving());
     }
 
     /**
      * @return void
-     * @throws OrmException
      */
     public function testICanAddJoinToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = new QueryBuilder($repository);
         $queryBuilder->addJoin(JoinType::INNER, 'address', 'user_id', 'user', 'user_id', 'address');
 
         $expected = ' INNER JOIN address AS address ON user.user_id = address.user_id ';
@@ -269,10 +263,27 @@ class QueryBuilderTest extends TestCase
     public function testICanAddWhereWithRegexpTypeToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
-        $queryBuilder->addWhere('user_name', 'test[a-z]', 'REGEXP');
+        $queryBuilder = new QueryBuilder($repository);
+        $queryBuilder->addWhere('user_name', 'test[a-z]', Operator::Regexp);
 
         $this->assertSame(' WHERE user_name REGEXP \'test[a-z]\' ', $queryBuilder->getQueryWhere());
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     */
+    public function testICanAddMultipleWhereWithRegexpTypeToQueryBuilder(): void
+    {
+        $suffix = '[a-f0-9]{13}';
+
+        $repository = $this->getUserRepository($this->getMockEntityFindId1());
+        $queryBuilder = new QueryBuilder($repository);
+        $queryBuilder->addWhere('user_id', 1);
+        $queryBuilder->addWhere('user_name', 'any');
+
+        $pattern = "` WHERE user_id = :user_id_$suffix AND user_name = :user_name_$suffix `";
+        $this->assertMatchesRegularExpression($pattern, $queryBuilder->getQueryWhere());
     }
 
     /**
@@ -282,7 +293,7 @@ class QueryBuilderTest extends TestCase
     public function testICanAddWhereRawToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = new QueryBuilder($repository);
         $queryBuilder->addWhereRaw('user_id IS NULL');
         $queryBuilder->addWhereRaw('user_name LIKE "test"');
 
@@ -296,12 +307,12 @@ class QueryBuilderTest extends TestCase
     public function testICanAddWhereKeysOrToQueryBuilder(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = new QueryBuilder($repository);
         $queryBuilder->addWhereKeysOr(['primary_key_1' => 1, 'primary_key_2' => 'a']);
         $queryBuilder->addWhereKeysOr(['primary_key_1' => 2, 'primary_key_2' => 'b']);
 
         $suffix = '\_[a-z0-9]{13}';
-        $patternQuery = "/ WHERE  \(primary\_key\_1 = :primary\_key\_1{$suffix} AND primary\_key\_2 = :primary\_key\_2{$suffix}\)   OR  \(primary\_key\_1 = :primary\_key\_1{$suffix} AND primary\_key\_2 = :primary\_key\_2{$suffix}\)  /";
+        $patternQuery = "/ WHERE  \(primary_key_1 = :primary_key_1$suffix AND primary_key_2 = :primary_key_2$suffix\)   OR  \(primary_key_1 = :primary_key_1$suffix AND primary_key_2 = :primary_key_2$suffix\)  /";
         $this->assertMatchesRegularExpression($patternQuery, $queryBuilder->getQueryWhere());
     }
 
@@ -312,7 +323,7 @@ class QueryBuilderTest extends TestCase
     public function testIHaveAnExceptionWhenITryToSetAddInWithAnEmptyArray(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = new QueryBuilder($repository);
 
         $this->expectException(InvalidQueryException::class);
         $this->expectExceptionMessage('Values for addIn must be non empty!');
@@ -326,7 +337,7 @@ class QueryBuilderTest extends TestCase
     public function testIHaveAnExceptionWhenITryGetQueryWhereWithoutWhereAdded(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_QUERY, $repository);
+        $queryBuilder = new QueryBuilder($repository);
         $this->expectException(EmptyWhereClauseException::class);
         $queryBuilder->getQueryWhere(true);
     }
@@ -338,13 +349,27 @@ class QueryBuilderTest extends TestCase
     public function testIHaveAnExceptionWhenITryGetQuerySetWithoutSetAdded(): void
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
-        $queryBuilder = Factory::getBuilder(Factory::TYPE_INSERT, $repository);
+        $queryBuilder = new InsertBuilder($repository);
         $this->expectException(EmptySetClauseException::class);
         $queryBuilder->getQuerySet();
     }
 
     /**
-     * @param array $entityMock
+     * @return void
+     * @throws OrmException
+     */
+    public function testIHaveAnExceptionWhenITryToGetQueryOnUpdateBuilderWithoutEntity(): void
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindId1());
+        $queryBuilder = new UpdateBuilder($repository);
+
+        $this->expectException(InvalidQueryException::class);
+        $this->expectExceptionMessage('Entity must be given to perform an update!');
+        $queryBuilder->getQuery();
+    }
+
+    /**
+     * @param array<mixed> $entityMock
      * @return ConnectionFactory
      */
     private function getConnectionFactoryMock(array $entityMock = []): ConnectionFactory
@@ -367,6 +392,7 @@ class QueryBuilderTest extends TestCase
         $connection->method('lastInsertId')->willReturn('1');
 
         $mockBuilder = $this->getMockBuilder(ConnectionFactory::class)->disableOriginalConstructor();
+        /** @var ConnectionFactory&MockObject $connectionFactory */
         $connectionFactory = $mockBuilder->getMock();
         $connectionFactory->method('getConnection')->willReturn($connection);
 
@@ -374,8 +400,8 @@ class QueryBuilderTest extends TestCase
     }
 
     /**
-     * @param array $entityMock
-     * @return UserRepositoryInterface
+     * @param array<mixed> $entityMock
+     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface
      */
     private function getUserRepository(array $entityMock = []): UserRepositoryInterface
     {
@@ -391,13 +417,16 @@ class QueryBuilderTest extends TestCase
         );
     }
 
+    /**
+     * @return false[]
+     */
     private function getMockEntityNone(): array
     {
         return [false];
     }
 
     /**
-     * @return array
+     * @return array<mixed>
      */
     private function getMockEntityFindId1(): array
     {
@@ -415,7 +444,7 @@ class QueryBuilderTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return array<mixed>
      */
     private function getMockEntityFindAll(): array
     {

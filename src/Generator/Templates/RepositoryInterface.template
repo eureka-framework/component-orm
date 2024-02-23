@@ -12,12 +12,13 @@ declare(strict_types=1);
 namespace {{ class.namespace }};
 
 use {{ orm.namespace }}\RepositoryInterface;
+use {{ entity.namespace }}\{{ class.entity }};
 
 /**
  * {{ class.name }} repository interface.
  *
  * @author {{ comment.author }}
+ *
+ * @extends RepositoryInterface<{{ class.entity }}>
  */
-interface {{ class.repository }} extends RepositoryInterface
-{
-}
+interface {{ class.repository }} extends RepositoryInterface {}

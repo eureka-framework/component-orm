@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class UndefinedMapperException extends OrmException
-{
-}
+class UndefinedMapperException extends OrmException {}

@@ -31,22 +31,26 @@ class Factory
     public static function create(string $sqlType, string $sqlComment): TypeInterface
     {
         $matches = array();
-        if (!(bool) preg_match('`^([a-z]+)\(?([0-9]*)\)? ?(.*)$`i', $sqlType, $matches)) {
+        if (!(bool) preg_match('`^([a-z]+)\(?(\d*)\)? ?(.*)$`i', $sqlType, $matches)) {
             throw new GeneratorException('Invalid sql type');
         }
 
-        $type   = strtolower((string) $matches[1]);
-        $length = (int) $matches[2];
-        $other  = strtolower((string) $matches[3]);
+        $typeName = strtolower((string) $matches[1]);
+        $length   = (int) $matches[2];
+        $other    = strtolower((string) $matches[3]);
 
-        if (strtolower($type) === 'tinyint') {
+        if (strtolower($typeName) === 'tinyint') {
             //~ Special case for tinyint used as boolean value.
-            $type = (($length === 1 || false !== strpos($sqlComment, 'ORMTYPE:bool')) ? new TypeBool() : new TypeTinyint());
+            $type = (($length === 1 || str_contains($sqlComment, 'ORMTYPE:bool'))
+                ? new TypeBool()
+                : new TypeTinyint())
+            ;
         } else {
-            $classname = __NAMESPACE__ . '\Type' . ucfirst($type);
+            /** @var class-string<TypeInterface> $classname */
+            $classname = __NAMESPACE__ . '\Type' . ucfirst($typeName);
 
             if (!class_exists($classname)) {
-                throw new GeneratorException('Sql type cannot be converted into php type! (type: ' . $type . ')');
+                throw new GeneratorException("Sql type cannot be converted into php type! (type: $typeName)");
             }
 
             $type = new $classname();

@@ -14,72 +14,53 @@ namespace Eureka\Component\Orm\Generator\Compiler\Field;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Type;
 
-/**
- * Sql field data class
- *
- * @author Romain Cottard
- */
 class Field
 {
-    /** @var string $name field name */
     protected string $name = '';
+    protected string|int|float|bool|null $default = null;
+    protected bool $isNullable = false;
+    protected bool $isAutoIncrement = false;
+    protected bool $isPrimaryKey = false;
+    protected bool $isKey = false;
+    protected bool $hasValidation = false;
+    protected bool $hasValidationAuto = false;
+    protected Type\TypeInterface $type;
 
     /** @var string[] $dbPrefixes field prefix */
     protected array $dbPrefixes = [];
 
-    /** @var mixed $default Default value. */
-    protected $default = null;
-
-    /** @var bool $isNullable If field can be null. */
-    protected bool $isNullable = false;
-
-    /** @var bool $isAutoIncrement Is auto-increment field. */
-    protected bool $isAutoIncrement = false;
-
-    /** @var bool $isPrimaryKey Is primary key. */
-    protected bool $isPrimaryKey = false;
-
-    /** @var bool $isKey Is key (index, primary or unique). */
-    protected bool $isKey = false;
-
-    /** @var Type\TypeInterface $type Type instance. */
-    protected Type\TypeInterface $type;
-
-    /** @var array $validation Validation config if provided. */
+    /** @var array{type?: string, options?: array<string, string|int|float>} $validation Validation config */
     protected array $validation = [];
-
-    /** @var bool $hasValidation */
-    protected bool $hasValidation = false;
-
-    /** @var bool $hasValidationAuto */
-    protected bool $hasValidationAuto = false;
 
     /**
      * Field constructor.
      *
      * @param \stdClass $field
-     * @param array|string $dbPrefixes
-     * @param array $validationConfig
+     * @param string[] $dbPrefixes
+     * @param array{
+     *          extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>,
+     *          enabled?: bool,
+     *          auto?: bool
+     *      } $validationConfig
      * @throws GeneratorException
      */
-    public function __construct(\stdClass $field, $dbPrefixes = [], array $validationConfig = [])
+    public function __construct(\stdClass $field, array $dbPrefixes = [], array $validationConfig = [])
     {
         $this->setData($field);
 
         $this->dbPrefixes = $dbPrefixes;
-        $this->validation = $validationConfig['extended_validation'][$field->Field] ?? [];
 
-        $this->hasValidation     = (bool) ($validationConfig['enabled'] ?? false);
-        $this->hasValidationAuto = $this->hasValidation && (bool) ($validationConfig['auto'] ?? false);
+        $this->validation = ['type' => '', 'options' => []];
+        if (isset($validationConfig['extended_validation'][$field->Field])) {
+            $this->validation = $validationConfig['extended_validation'][$field->Field];
+        }
+
+        $this->hasValidation = $validationConfig['enabled'] ?? false;
+
+        $isAuto = $validationConfig['auto'] ?? false;
+        $this->hasValidationAuto = $this->hasValidation && $isAuto;
     }
 
-    /**
-     * Get name.
-     * Can remove table prefix.
-     *
-     * @param  bool $withoutPrefix
-     * @return string
-     */
     public function getName(bool $withoutPrefix = false): string
     {
         if (!$withoutPrefix) {
@@ -96,100 +77,53 @@ class Field
         return $name;
     }
 
-
-    /**
-     * Get default value.
-     *
-     * @return mixed
-     */
-    public function getDefaultValue()
+    public function getDefaultValue(): string|int|float|bool|null
     {
         return $this->default;
     }
 
-    /**
-     * Get type.
-     *
-     * @return Type\TypeInterface
-     */
     public function getType(): Type\TypeInterface
     {
         return $this->type;
     }
 
     /**
-     * @return array
+     * @return array{type?: string, options?: array<string, string|int|float>}
      */
     public function getValidation(): array
     {
         return $this->validation;
     }
 
-    /**
-     * @return bool
-     */
     public function hasValidation(): bool
     {
         return $this->hasValidation;
     }
 
-    /**
-     * @return bool
-     */
     public function hasValidationAuto(): bool
     {
         return $this->hasValidationAuto;
     }
 
-    /**
-     * Get if value can be null.
-     *
-     * @return bool
-     */
     public function isNullable(): bool
     {
         return $this->isNullable;
     }
 
-    /**
-     * Get if field is in primary key.
-     *
-     * @return bool
-     */
     public function isPrimaryKey(): bool
     {
         return $this->isPrimaryKey;
     }
 
-    /**
-     * Get if field is in key (primary, index, unique...)
-     *
-     * @return bool
-     * @codeCoverageIgnore
-     */
-    public function isKey(): bool
-    {
-        return $this->isKey;
-    }
-
-    /**
-     * Get if value is auto incremented
-     *
-     * @return bool
-     */
     public function isAutoIncrement(): bool
     {
         return $this->isAutoIncrement;
     }
 
     /**
-     * Set field data from db query
-     *
-     * @param \stdClass $field
-     * @return Field
      * @throws GeneratorException
      */
-    protected function setData(\stdClass $field): self
+    protected function setData(\stdClass $field): static
     {
         $nullableField = 'Null';
         $defaultField  = 'Default';
@@ -205,13 +139,7 @@ class Field
         return $this;
     }
 
-    /**
-     * Set field name.
-     *
-     * @param  string $name
-     * @return $this
-     */
-    protected function setName(string $name): self
+    protected function setName(string $name): static
     {
         $this->name = $name;
 
@@ -219,66 +147,37 @@ class Field
     }
 
     /**
-     * Set field type
-     *
-     * @param string $type
-     * @param string $comment
-     * @return Field
      * @throws GeneratorException
      */
-    protected function setType(string $type, string $comment): self
+    protected function setType(string $type, string $comment): static
     {
         $this->type = Type\Factory::create($type, $comment);
 
         return $this;
     }
 
-    /**
-     * Set if field can to be null.
-     *
-     * @param  bool $isNullable
-     * @return $this
-     */
-    protected function setIsNullable(bool $isNullable): self
+    protected function setIsNullable(bool $isNullable): static
     {
-        $this->isNullable = (bool) $isNullable;
+        $this->isNullable = $isNullable;
 
         return $this;
     }
 
-    /**
-     * Set if field is in primary key
-     *
-     * @param  bool $isPrimaryKey
-     * @return $this
-     */
-    protected function setIsPrimaryKey(bool $isPrimaryKey): self
+    protected function setIsPrimaryKey(bool $isPrimaryKey): static
     {
-        $this->isPrimaryKey = (bool) $isPrimaryKey;
+        $this->isPrimaryKey = $isPrimaryKey;
 
         return $this;
     }
 
-    /**
-     * Set if field has key (primary, index, unique...)
-     *
-     * @param  bool $isKey
-     * @return $this
-     */
     protected function setIsKey(bool $isKey): self
     {
-        $this->isKey = (bool) $isKey;
+        $this->isKey = $isKey;
 
         return $this;
     }
 
-    /**
-     * Set default value.
-     *
-     * @param  mixed $default
-     * @return $this
-     */
-    protected function setDefaultValue($default): self
+    protected function setDefaultValue(string|int|float|bool|null $default): static
     {
         $isTimeType = ($this->getType() instanceof Type\TypeTimestamp || $this->getType() instanceof Type\TypeDatetime);
 
@@ -301,28 +200,16 @@ class Field
             return $this;
         }
 
-        switch ((string) $this->getType()) {
-            case 'string':
-                $this->default = "'" . trim($default, "'") . "'";
-                break;
-            case 'bool':
-                $this->default = var_export((bool) $default, true);
-                break;
-
-            default:
-                $this->default = $default;
-        }
+        $this->default = match ((string) $this->getType()) {
+            'string' => "'" . trim((string) $default, "'") . "'",
+            'bool'   => var_export((bool) $default, true),
+            default  => $default,
+        };
 
         return $this;
     }
 
-    /**
-     * Set extra info.
-     *
-     * @param  string $extra
-     * @return $this
-     */
-    protected function setExtra(string $extra): self
+    protected function setExtra(string $extra): static
     {
         if (empty($extra)) {
             return $this;

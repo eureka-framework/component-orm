@@ -12,23 +12,13 @@ declare(strict_types=1);
 namespace Eureka\Component\Orm\Query;
 
 use Eureka\Component\Orm\Exception\OrmException;
-use Eureka\Component\Orm\Query\Traits;
+use Eureka\Component\Orm\Query\Interfaces\WhereAwareInterface;
 
-/**
- * Class DeleteBuilder
- *
- * @author Romain Cottard
- */
-class DeleteBuilder extends AbstractQueryBuilder
+class DeleteBuilder extends AbstractQueryBuilder implements WhereAwareInterface
 {
-    use Traits\WhereTrait;
+    use Traits\WhereAwareTrait;
 
-    /**
-     * Clear query params
-     *
-     * @return QueryBuilderInterface
-     */
-    public function clear(): QueryBuilderInterface
+    public function clear(): static
     {
         $this->resetBind();
         $this->resetWhere();

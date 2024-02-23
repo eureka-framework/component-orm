@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class EmptyWhereClauseException extends OrmException
-{
-}
+class EmptyWhereClauseException extends OrmException {}

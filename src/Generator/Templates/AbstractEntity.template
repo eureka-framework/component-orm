@@ -9,13 +9,14 @@
 
 declare(strict_types=1);
 
-namespace {{ class.namespace }};
+namespace {{ class.namespace }}\Abstracts;
 
-use {{ orm.namespace }}\AbstractEntity;
-use {{ orm.namespace }}\RepositoryInterface;
+use {{ orm.namespace }}\EntityInterface;
+use {{ orm.namespace }}\Traits;
 use Eureka\Component\Validation\Exception\ValidationException;
 use Eureka\Component\Validation\ValidatorFactoryInterface;
 use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
+use {{ class.namespace }}\{{ class.entity }};
 {{ entity.uses }}
 
 /**
@@ -26,24 +27,32 @@ use Eureka\Component\Validation\ValidatorEntityFactoryInterface;
  *
  * @author {{ comment.author }}
  */
-abstract class Abstract{{ class.name }} extends AbstractEntity
+abstract class Abstract{{ class.name }} implements EntityInterface
 {
+    /** @use Traits\EntityTrait<{{ class.repository }}, {{ class.name }}> */
+    use Traits\EntityTrait;
+
 {{ class.properties }}
     /**
      * AbstractEntity constructor.
      *
-     * @param RepositoryInterface $repository
+     * @param {{ class.repository }} $repository
      * @param ValidatorFactoryInterface|null $validatorFactory
      * @param ValidatorEntityFactoryInterface|null $validatorEntityFactory
      */
     public function __construct(
-        RepositoryInterface $repository,
+        {{ class.repository }} $repository,
         ?ValidatorFactoryInterface $validatorFactory = null,
         ?ValidatorEntityFactoryInterface $validatorEntityFactory = null
     ) {
         $this->setRepository($repository);
         $this->setValidatorFactories($validatorFactory, $validatorEntityFactory);
 
+        $this->initializeValidatorConfig();
+    }
+
+    protected function initializeValidatorConfig(): void
+    {
         $this->setValidatorConfig([{{ validator.config }}
         ]);
     }

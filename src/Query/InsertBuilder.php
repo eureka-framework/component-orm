@@ -13,25 +13,15 @@ namespace Eureka\Component\Orm\Query;
 
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Exception\EmptySetClauseException;
-use Eureka\Component\Orm\Query\Traits;
+use Eureka\Component\Orm\Query\Interfaces\FieldAwareInterface;
+use Eureka\Component\Orm\Query\Interfaces\SetAwareInterface;
 
-/**
- * Class InsertBuilder
- *
- * @author Romain Cottard
- */
-class InsertBuilder extends AbstractQueryBuilder
+class InsertBuilder extends AbstractQueryBuilder implements FieldAwareInterface, SetAwareInterface
 {
-    use Traits\WhereTrait;
-    use Traits\FieldTrait;
-    use Traits\SetTrait;
+    use Traits\FieldAwareTrait;
+    use Traits\SetAwareTrait;
 
-    /**
-     * Clear query params
-     *
-     * @return QueryBuilderInterface
-     */
-    public function clear(): QueryBuilderInterface
+    public function clear(): static
     {
         $this->resetBind();
         $this->resetFields();
@@ -66,15 +56,19 @@ class InsertBuilder extends AbstractQueryBuilder
             $this->appendUpdateValues();
         }
 
-        return 'INSERT ' . $onDuplicateIgnoreClause . 'INTO ' . $this->repository->getTable() . $this->getQuerySet() . $this->getQueryDuplicateUpdate();
+        return 'INSERT ' . $onDuplicateIgnoreClause .
+            'INTO ' . $this->repository->getTable() .
+            $this->getQuerySet() .
+            $this->getQueryDuplicateUpdate()
+        ;
     }
 
     /**
      * Append update values
      *
-     * @return QueryBuilderInterface
+     * @return static
      */
-    private function appendUpdateValues(): QueryBuilderInterface
+    private function appendUpdateValues(): static
     {
         //~ if entity is not set, skip auto append update value
         if ($this->entity === null) {

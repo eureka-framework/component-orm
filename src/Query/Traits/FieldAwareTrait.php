@@ -11,15 +11,12 @@ declare(strict_types=1);
 
 namespace Eureka\Component\Orm\Query\Traits;
 
-use Eureka\Component\Orm\Query\QueryBuilderInterface;
 use Eureka\Component\Orm\RepositoryInterface;
 
 /**
- * Trait FieldTrait
- *
- * @author Romain Cottard
+ * @template TRepository of RepositoryInterface
  */
-trait FieldTrait
+trait FieldAwareTrait
 {
     /** @var string[] $fields */
     private array $fields = [];
@@ -30,77 +27,42 @@ trait FieldTrait
     /** @var bool $calculateFoundRows */
     private bool $calculateFoundRows = false;
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    protected function resetFields(): QueryBuilderInterface
+    protected function resetFields(): static
     {
         $this->fields = [];
 
         return $this;
     }
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    public function enableCalculateFoundRows(): QueryBuilderInterface
+    public function enableCalculateFoundRows(): static
     {
         $this->calculateFoundRows = true;
 
         return $this;
     }
 
-    /**
-     * @return self|QueryBuilderInterface
-     */
-    public function disableCalculateFoundRows(): QueryBuilderInterface
+    public function disableCalculateFoundRows(): static
     {
         $this->calculateFoundRows = false;
 
         return $this;
     }
 
-    /**
-     * @param  string $name
-     * @param  string $alias
-     * @param  bool $escape
-     * @return void
-     */
     public function addField(string $name, string $alias = '', bool $escape = true): void
     {
         $name = $escape ? '`' . $name . '`' : $name;
         $this->fields[] = $name . (!empty($alias) ? ' AS ' . '`' . $alias . '`' : '');
     }
 
-    /**
-     * @param  string $name
-     * @param  string $alias
-     * @return void
-     */
-    public function addFrom(string $name, string $alias = ''): void
+    public function setFrom(string $table, string $alias = ''): void
     {
-        $this->from = '`' . $name . '`' . (!empty($alias) ? ' AS ' . '`' . $alias . '`' : '');
-    }
-
-    /**
-     * @param  string[] $fields
-     * @return string
-     */
-    public function getQueryFieldsPersonalized(array $fields = []): string
-    {
-        if (!empty($fields)) {
-            foreach ($fields as $field => $alias) {
-                $this->addField($field, $alias);
-            }
-        }
-
-        return ($this->calculateFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '') . implode(', ', $this->fields);
+        $this->from = '`' . $table . '`' . (!empty($alias) ? ' AS ' . '`' . $alias . '`' : '');
     }
 
     /**
      * Get fields to select
      *
-     * @param  RepositoryInterface $repository
+     * @param  TRepository $repository
      * @param  bool $isPrefixed Add table prefix in list of field
      * @param  bool $onlyPrimaryKeys Get only primary key(s) field(s)
      * @return string
@@ -119,18 +81,33 @@ trait FieldTrait
             $fields = $this->getQueryFieldsList($repository, $isPrefixed, $onlyPrimaryKeys);
         }
 
-        return $calc . implode(', ', $fields);
+        return $calc . \implode(', ', $fields);
+    }
+
+    /**
+     * @param  string[] $fields
+     * @return string
+     */
+    public function getQueryFieldsPersonalized(array $fields = []): string
+    {
+        if (!empty($fields)) {
+            foreach ($fields as $field => $alias) {
+                $this->addField($field, $alias);
+            }
+        }
+
+        return ($this->calculateFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '') . \implode(', ', $this->fields);
     }
 
     /**
      * Get fields to select
      *
-     * @param RepositoryInterface $repository
+     * @param TRepository $repository
      * @param bool $isPrefixed
      * @param bool $onlyPrimaryKeys
      * @param string|null $aliasPrefix
      * @param string|null $aliasSuffix
-     * @return array
+     * @return string[]
      */
     public function getQueryFieldsList(
         RepositoryInterface $repository,
@@ -154,10 +131,11 @@ trait FieldTrait
 
         return $fields;
     }
+
     /**
      * Get FROM clause
      *
-     * @param  RepositoryInterface $repository
+     * @param  TRepository $repository
      * @return string
      */
     public function getQueryFrom(RepositoryInterface $repository): string

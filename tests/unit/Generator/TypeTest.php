@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Validation\Tests;
+namespace Eureka\Component\Orm\Tests\Unit\Generator;
 
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Type;
@@ -26,7 +26,7 @@ class TypeTest extends TestCase
      * @dataProvider typeProvider
      *
      * @param string $sqlType
-     * @param string $classType
+     * @param class-string $classType
      * @return void
      * @throws GeneratorException
      */
@@ -65,7 +65,7 @@ class TypeTest extends TestCase
     /**
      * @return string[][]
      */
-    public function typeProvider(): array
+    public static function typeProvider(): array
     {
         return [
             'bigint'     => ['bigint(20)', Type\TypeBigint::class],
@@ -100,7 +100,7 @@ class TypeTest extends TestCase
     /**
      * @return string[][]
      */
-    public function invalidTypeProvider(): array
+    public static function invalidTypeProvider(): array
     {
         return [
             ['_invalid'],

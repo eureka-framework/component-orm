@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace {{ class.namespace }};
 
+use {{ orm.namespace }}\Traits;
+use {{ entity.namespace }}\{{ class.entity }};
 use {{ repository.namespace }}\{{ class.repository }};
 
 /**
@@ -20,4 +22,6 @@ use {{ repository.namespace }}\{{ class.repository }};
  */
 class {{ class.mapper }} extends Abstracts\Abstract{{ class.mapper }} implements {{ class.repository }}
 {
+    /** @use Traits\RepositoryTrait<{{ class.repository }}, {{ class.entity }}> */
+    use Traits\RepositoryTrait;
 }

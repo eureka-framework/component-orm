@@ -9,27 +9,32 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm;
+namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\Traits\ValidatorAwareTrait;
+use Eureka\Component\Orm\EntityInterface;
+use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
- * DataMapper Data abstract class.
+ * Entity Trait.
  *
  * @author Romain Cottard
+ *
+ * @template TRepository of RepositoryInterface
+ * @template TEntity of EntityInterface
+ * @implements EntityInterface<TRepository, TEntity>
  */
-abstract class AbstractEntity implements EntityInterface
+trait EntityTrait
 {
     use ValidatorAwareTrait;
 
     /** @var bool $exists If data already exists in db for example. */
     private bool $exists = false;
 
-    /** @var array $updated List of updated field */
+    /** @var bool[] $updated List of updated field */
     private array $updated = [];
 
-    /** @var RepositoryInterface $repository Entity repository */
+    /** @phpstan-var TRepository $repository Entity repository */
     private RepositoryInterface $repository;
 
     /**
@@ -43,11 +48,11 @@ abstract class AbstractEntity implements EntityInterface
      * Set auto increment value.
      * Must be overridden to use internal property setter method, according to the data class definition.
      *
-     * @param  int $id
-     * @return $this
+     * @param int $id
+     * @return static
      * @codeCoverageIgnore
      */
-    public function setAutoIncrementId(int $id)
+    public function setAutoIncrementId(int $id): static
     {
         return $this;
     }
@@ -65,12 +70,12 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * If the data set exists.
      *
-     * @param  bool $exists
+     * @param bool $exists
      * @return $this
      */
-    public function setExists(bool $exists): EntityInterface
+    public function setExists(bool $exists): static
     {
-        $this->exists = (bool) $exists;
+        $this->exists = $exists;
 
         return $this;
     }
@@ -79,22 +84,22 @@ abstract class AbstractEntity implements EntityInterface
      * If at least one data has been updated.
      * If property name is specified, check only property.
      *
-     * @param  ?string $property
+     * @param string|null $property
      * @return bool
      */
-    public function isUpdated(string $property = null): bool
+    public function isUpdated(?string $property = null): bool
     {
         if (null === $property) {
-            return (count($this->updated) > 0);
+            return \count($this->updated) > 0;
         }
 
-        return (isset($this->updated[$property]) && $this->updated[$property] === true);
+        return isset($this->updated[$property]) && $this->updated[$property] === true;
     }
 
     /**
      * Flag property as updated
      *
-     * @param  string $property
+     * @param string $property
      * @return void
      */
     protected function markFieldAsUpdated(string $property): void
@@ -105,9 +110,9 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Reset updated list of properties
      *
-     * @return $this
+     * @return static
      */
-    public function resetUpdated(): EntityInterface
+    public function resetUpdated(): static
     {
         $this->updated = [];
 
@@ -121,14 +126,14 @@ abstract class AbstractEntity implements EntityInterface
     {
         $attributes = get_object_vars($this);
         foreach ($attributes as $attribute => $value) {
-            if (strpos($attribute, 'join') === 0) {
+            if (str_starts_with($attribute, 'join')) {
                 $this->$attribute = null;
             }
         }
     }
 
     /**
-     * @return RepositoryInterface
+     * @return TRepository
      */
     public function getRepository(): RepositoryInterface
     {
@@ -138,10 +143,9 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Get form entity container.
      *
-     * @param  void
      * @return GenericEntity
      */
-    public function getGenericEntity()
+    public function getGenericEntity(): GenericEntity
     {
         $genericEntity = $this->newGenericEntity([]);
         $repository    = $this->getRepository();
@@ -160,10 +164,10 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Hydrate entity with form entity values
      *
-     * @param  GenericEntity $genericEntity
-     * @return $this
+     * @param GenericEntity $genericEntity
+     * @return static
      */
-    public function hydrateFromGenericEntity(GenericEntity $genericEntity)
+    public function hydrateFromGenericEntity(GenericEntity $genericEntity): static
     {
         $repository = $this->getRepository();
         foreach ($repository->getFields() as $field) {
@@ -181,7 +185,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * @param RepositoryInterface $repository
+     * @param TRepository $repository
      * @return void
      */
     protected function setRepository(RepositoryInterface $repository): void

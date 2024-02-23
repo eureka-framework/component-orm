@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class GeneratorException extends OrmException
-{
-}
+class GeneratorException extends OrmException {}

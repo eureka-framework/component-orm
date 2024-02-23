@@ -16,6 +16,4 @@ namespace Eureka\Component\Orm\Exception;
  *
  * @author Romain Cottard
  */
-class InvalidQueryException extends OrmException
-{
-}
+class InvalidQueryException extends OrmException {}

@@ -28,7 +28,7 @@ class AbstractMethodCompiler extends AbstractCompiler
      * AbstractCompiler constructor.
      *
      * @param Config\ConfigInterface $config
-     * @param array $templates
+     * @param array<string, bool> $templates
      */
     public function __construct(Config\ConfigInterface $config, array $templates)
     {

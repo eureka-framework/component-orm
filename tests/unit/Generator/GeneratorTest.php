@@ -9,26 +9,28 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Validation\Tests;
+namespace Eureka\Component\Orm\Tests\Unit\Generator;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Enumerator\JoinType;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Generator;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class GeneratorTest
  *
  * @author Romain Cottard
+ * @phpstan-import-type ConfigList from \Eureka\Component\Orm\Generator\Generator
  */
 class GeneratorTest extends TestCase
 {
     /**
      * @return void
      */
-    public function testICanInstantiateGenerator()
+    public function testICanInstantiateGenerator(): void
     {
         $generator = new Generator();
         $this->assertInstanceOf(Generator::class, $generator);
@@ -38,7 +40,7 @@ class GeneratorTest extends TestCase
      * @return void
      * @throws GeneratorException
      */
-    public function testICanGenerateMappersAndEntityClassesAccordingToConfigAndMockedDatabase()
+    public function testICanGenerateMappersAndEntityClassesAccordingToConfigAndMockedDatabase(): void
     {
         $generator = new Generator();
         $generator->generate($this->getConnectionMock(), $this->getConfig(), '', false);
@@ -50,7 +52,7 @@ class GeneratorTest extends TestCase
      * @return void
      * @throws GeneratorException
      */
-    public function testICanGenerateMappersAndEntityClassesAccordingToConfigAndMockedDatabaseAndFilteredOnUniqueConfigName()
+    public function testICanGenerateMappersAndEntityClassesAccordingToConfigAndMockedDatabaseAndFilteredOnUniqueConfigName(): void
     {
         $generator = new Generator();
         $generator->generate($this->getConnectionMock(), $this->getConfig(), 'user', false);
@@ -62,7 +64,19 @@ class GeneratorTest extends TestCase
      * @return void
      * @throws GeneratorException
      */
-    public function testIHaveAnExceptionWhenITryToGenerateCodeWithEmptyConfig()
+    public function testICanGenerateMappersAndEntityClassesAccordingToConfigAndMockedDatabaseAndFilteredOnPatternConfigName(): void
+    {
+        $generator = new Generator();
+        $generator->generate($this->getConnectionMock(), $this->getConfig(), 'user.*', false);
+
+        $this->assertInstanceOf(Generator::class, $generator);
+    }
+
+    /**
+     * @return void
+     * @throws GeneratorException
+     */
+    public function testIHaveAnExceptionWhenITryToGenerateCodeWithEmptyConfig(): void
     {
         $generator = new Generator();
         $this->expectException(\RuntimeException::class);
@@ -76,10 +90,10 @@ class GeneratorTest extends TestCase
      * @return void
      * @throws GeneratorException
      */
-    public function testIHaveAnExceptionWhenITryToGenerateCodeWithNotDefinedJoinedConfigName()
+    public function testIHaveAnExceptionWhenITryToGenerateCodeWithNotDefinedJoinedConfigName(): void
     {
         $generator = new Generator();
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(GeneratorException::class);
         $this->expectExceptionMessage('Invalid orm config file for "user_invalid"');
         $generator->generate($this->getConnectionMock(), $this->getInvalidJoinConfig(), '', false);
 
@@ -90,22 +104,20 @@ class GeneratorTest extends TestCase
      * @return void
      * @throws GeneratorException
      */
-    public function testIHaveAnExceptionWhenITryToGenerateCodeWithNonExistingJoinedConfigName()
+    public function testIHaveAnExceptionWhenITryToGenerateCodeWithNonExistingJoinedConfigName(): void
     {
         $generator = new Generator();
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(GeneratorException::class);
         $this->expectExceptionMessage('Invalid config. Joined config "not_exist" does not exist!');
         $generator->generate($this->getConnectionMock(), $this->getConfigWithMissingJoinedConfig(), '', false);
 
         $this->assertInstanceOf(Generator::class, $generator);
     }
 
-    /**
-     * @return Connection
-     */
-    private function getConnectionMock(): Connection
+    private function getConnectionMock(): Connection&MockObject
     {
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();
+        /** @var Connection&MockObject $connection */
         $connection  = $mockBuilder->getMock();
 
         $map = [
@@ -176,9 +188,13 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_parent_has_test', 'Type' => 'tinyint(1)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_comment', 'Type' => 'varchar(100)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'no comment', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_bigint', 'Type' => 'bigint(20)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_bigint_unsigned', 'Type' => 'bigint(20) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_mediumint', 'Type' => 'mediumint(8)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_mediumint_unsigned', 'Type' => 'mediumint(8) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_smallint', 'Type' => 'smallint(5)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_smallint_unsigned', 'Type' => 'smallint(5) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_tinyint', 'Type' => 'tinyint(3)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_parent_tinyint_unsigned', 'Type' => 'tinyint(3) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_float', 'Type' => 'float(5,2)', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 0.0, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_longtext', 'Type' => 'longtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_mediumtext', 'Type' => 'mediumtext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
@@ -218,17 +234,22 @@ class GeneratorTest extends TestCase
         return $connection;
     }
 
+    /**
+     * @param array<\stdClass|bool> $mockedData
+     * @return \PDOStatement
+     */
     private function getPDOStatementMock(array $mockedData = []): \PDOStatement
     {
         $mockBuilder = $this->getMockBuilder(\PDOStatement::class);
+        /** @var \PDOStatement&MockObject $statement */
         $statement   = $mockBuilder->getMock();
-        $statement->method('fetch')->with(Connection::FETCH_OBJ)->willReturnOnConsecutiveCalls(...$mockedData);
+        $statement->method('fetch')->with(\PDO::FETCH_OBJ)->willReturnOnConsecutiveCalls(...$mockedData);
 
         return $statement;
     }
 
     /**
-     * @return array
+     * @return ConfigList
      */
     private function getConfig(): array
     {
@@ -239,9 +260,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -294,9 +315,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -326,9 +347,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -358,9 +379,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -395,7 +416,7 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return ConfigList
      */
     private function getInvalidJoinConfig(): array
     {
@@ -406,9 +427,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -446,9 +467,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -476,7 +497,7 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return ConfigList
      */
     private function getConfigWithMissingJoinedConfig(): array
     {
@@ -487,9 +508,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
