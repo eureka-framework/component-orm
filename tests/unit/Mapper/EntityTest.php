@@ -9,17 +9,16 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm\Tests\Mapper;
+namespace Eureka\Component\Orm\Tests\Unit\Mapper;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Exception\OrmException;
-use Eureka\Component\Orm\Tests\Generated\Entity\User;
-use Eureka\Component\Orm\Tests\Generated\Entity\UserParent;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserParentMapper;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserParentRepositoryInterface;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\User;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\UserParent;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserParentRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -76,7 +75,7 @@ class EntityTest extends TestCase
     public function testICanCreateNewUserEntityFromNonEmptyContent(): void
     {
         $repository = $this->getUserRepository();
-        /** @var User $user */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User $user */
         $user       = $repository->newEntity(
             (object) [
                 'user_id'          => 1,
@@ -98,7 +97,7 @@ class EntityTest extends TestCase
     public function testICanUpdateAnEntity(): void
     {
         $repository = $this->getUserRepository();
-        /** @var User $user */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User $user */
         $user       = $repository->newEntity(
             (object) [
                 'user_id'          => 1,
@@ -346,7 +345,7 @@ class EntityTest extends TestCase
     private function getUserParentRepository(): UserParentRepositoryInterface
     {
         $connectionFactory = $this->getConnectionFactoryMock();
-        return new UserParentMapper(
+        return new \Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserParentMapper(
             'common',
             $connectionFactory,
             new ValidatorFactory(),

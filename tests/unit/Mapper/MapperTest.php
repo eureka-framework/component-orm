@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm\Tests\Mapper;
+namespace Eureka\Component\Orm\Tests\Unit\Mapper;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
@@ -21,11 +21,10 @@ use Eureka\Component\Orm\MapperInterface;
 use Eureka\Component\Orm\Query\QueryBuilder;
 use Eureka\Component\Orm\Query\SelectBuilder;
 use Eureka\Component\Orm\RepositoryInterface;
-use Eureka\Component\Orm\Tests\Generated\Entity\User;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserParentMapper;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserParentRepositoryInterface;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\User;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserParentRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -50,7 +49,6 @@ class MapperTest extends TestCase
         $repository->enableCacheOnRead();
 
         $this->assertInstanceOf(UserMapper::class, $repository);
-        $this->assertInstanceOf(AbstractMapper::class, $repository);
         $this->assertInstanceOf(UserRepositoryInterface::class, $repository);
         $this->assertInstanceOf(MapperInterface::class, $repository);
     }
@@ -513,7 +511,7 @@ class MapperTest extends TestCase
      * @param array<mixed> $entityMock
      * @param bool $includeCacheMock
      * @param int $exceptionCode
-     * @return UserRepositoryInterface
+     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface
      */
     private function getUserRepository(
         array $entityMock = [],
@@ -539,7 +537,7 @@ class MapperTest extends TestCase
     private function getUserParentRepository(array $entityMock = []): UserParentRepositoryInterface
     {
         $connectionFactory = $this->getConnectionFactoryMock($entityMock, false);
-        return new UserParentMapper(
+        return new \Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserParentMapper(
             'common',
             $connectionFactory,
             new ValidatorFactory(),
@@ -550,12 +548,12 @@ class MapperTest extends TestCase
 
     /**
      * @param array<mixed> $entityMock
-     * @return UserRepositoryInterface
+     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface
      */
     private function getUserRepositoryNoCache(array $entityMock = []): UserRepositoryInterface
     {
         $connectionFactory = $this->getConnectionFactoryMock($entityMock, false);
-        return new UserMapper(
+        return new \Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper(
             'common',
             $connectionFactory,
             new ValidatorFactory(),

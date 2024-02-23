@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm\Tests\Generator;
+namespace Eureka\Component\Orm\Tests\Unit\Generator;
 
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Type;

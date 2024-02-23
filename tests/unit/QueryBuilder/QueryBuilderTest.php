@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm\Tests\QueryBuilder;
+namespace Eureka\Component\Orm\Tests\Unit\QueryBuilder;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
@@ -20,13 +20,13 @@ use Eureka\Component\Orm\Exception\EmptyWhereClauseException;
 use Eureka\Component\Orm\Exception\InvalidQueryException;
 use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Query\DeleteBuilder;
+use Eureka\Component\Orm\Query\InsertBuilder;
 use Eureka\Component\Orm\Query\QueryBuilder;
 use Eureka\Component\Orm\Query\QueryBuilderFactory;
-use Eureka\Component\Orm\Query\InsertBuilder;
 use Eureka\Component\Orm\Query\SelectBuilder;
 use Eureka\Component\Orm\Query\UpdateBuilder;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -401,7 +401,7 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @param array<mixed> $entityMock
-     * @return UserRepositoryInterface
+     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface
      */
     private function getUserRepository(array $entityMock = []): UserRepositoryInterface
     {

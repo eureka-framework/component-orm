@@ -9,22 +9,22 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm\Tests\Mapper;
+namespace Eureka\Component\Orm\Tests\Unit\Mapper;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Database\ConnectionFactory;
 use Eureka\Component\Orm\Exception\OrmException;
 use Eureka\Component\Orm\Exception\UndefinedMapperException;
 use Eureka\Component\Orm\Query\SelectBuilder;
-use Eureka\Component\Orm\Tests\Generated\Entity\Address;
-use Eureka\Component\Orm\Tests\Generated\Entity\Comment;
-use Eureka\Component\Orm\Tests\Generated\Entity\User;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\AddressMapper;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\CommentMapper;
-use Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper\UserMapper;
-use Eureka\Component\Orm\Tests\Generated\Repository\AddressRepositoryInterface;
-use Eureka\Component\Orm\Tests\Generated\Repository\CommentRepositoryInterface;
-use Eureka\Component\Orm\Tests\Generated\Repository\UserRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\Address;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\Comment;
+use Eureka\Component\Orm\Tests\Unit\Generated\Entity\User;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\AddressMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\CommentMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\AddressRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\CommentRepositoryInterface;
+use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface;
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -47,7 +47,7 @@ class MapperJoinTest extends TestCase
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne());
         $addressRepository = $this->getAddressRepository($this->getMockEntityAddressFindOne());
 
-        /** @var User[] $users */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserAddress', 'Unknown']);
         /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
@@ -62,7 +62,7 @@ class MapperJoinTest extends TestCase
             true
         );
 
-        /** @var Address $expectedAddress */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\Address $expectedAddress */
         $expectedAddress = $addressRepository->newEntity(
             (object) [
                 'address_id'       => 1,
@@ -92,7 +92,7 @@ class MapperJoinTest extends TestCase
 
         /** @var User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserComment']);
-        /** @var User $expectedUser */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User $expectedUser */
         $expectedUser = $userRepository->newEntity(
             (object) [
                 'user_id'          => 1,
@@ -133,7 +133,7 @@ class MapperJoinTest extends TestCase
         );
 
         $commentRepository = $this->getCommentRepository();
-        /** @var Comment $expectedComment */
+        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\Comment $expectedComment */
         $expectedComment   = $commentRepository->newEntity(
             (object) [
                 'comment_id'       => 1,
@@ -219,7 +219,7 @@ class MapperJoinTest extends TestCase
 
     /**
      * @param array<mixed> $entityMock
-     * @return CommentRepositoryInterface
+     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\CommentRepositoryInterface
      */
     private function getCommentRepository(array $entityMock = []): CommentRepositoryInterface
     {

@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Eureka\Component\Orm\Tests\Generator;
+namespace Eureka\Component\Orm\Tests\Unit\Generator;
 
 use Eureka\Component\Database\Connection;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
@@ -266,9 +266,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -321,9 +321,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -353,9 +353,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -385,9 +385,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -452,9 +452,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -492,9 +492,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
@@ -552,9 +552,9 @@ class GeneratorTest extends TestCase
                     'copyright' => 'Test Author',
                 ],
                 'namespace' => [
-                    'entity'     => 'Eureka\Component\Orm\Tests\Generated\Entity',
-                    'mapper'     => 'Eureka\Component\Orm\Tests\Generated\Infrastructure\Mapper',
-                    'repository' => 'Eureka\Component\Orm\Tests\Generated\Repository',
+                    'entity'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Entity',
+                    'mapper'     => 'Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper',
+                    'repository' => 'Eureka\Component\Orm\Tests\Unit\Generated\Repository',
                 ],
                 'path' => [
                     'entity'     => __DIR__ . '/../Generated/Entity',
