@@ -140,8 +140,8 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
-                    ]
-                )
+                    ],
+                ),
             ],
             [
                 'SHOW FULL COLUMNS FROM address',
@@ -158,7 +158,7 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'address_number', 'Type' => 'varchar(50)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'address_text', 'Type' => 'text', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
-                    ]
+                    ],
                 ),
             ],
             [
@@ -174,7 +174,7 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'comment_text', 'Type' => 'varchar(140)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
-                    ]
+                    ],
                 ),
             ],
             [
@@ -216,7 +216,7 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_parent_tinytext', 'Type' => 'tinytext', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_parent_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => 'CURRENT_TIMESTAMP', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
-                    ]
+                    ],
                 ),
             ],
         ];
@@ -228,7 +228,7 @@ class GeneratorTest extends TestCase
         }
 
         $connection->method('query')->will(
-            $this->returnValueMap($map)
+            $this->returnValueMap($map),
         );
 
         return $connection;
@@ -411,7 +411,7 @@ class GeneratorTest extends TestCase
                         ],
                     ],
                 ],
-            ]
+            ],
         ];
     }
 

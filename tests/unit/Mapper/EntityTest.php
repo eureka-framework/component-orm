@@ -84,7 +84,7 @@ class EntityTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $this->assertInstanceOf(User::class, $user);
@@ -106,7 +106,7 @@ class EntityTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $user->setExists(true);
@@ -139,7 +139,7 @@ class EntityTest extends TestCase
                 'email'      => 'user@example.com',
                 'password'   => md5('password'),
                 'dateCreate' => '2020-01-01 10:00:00',
-            ]
+            ],
         );
 
         $expected = $repository->newEntity(
@@ -150,7 +150,7 @@ class EntityTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $a = $expected->getId();
@@ -175,7 +175,7 @@ class EntityTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
                 'hey'              => true,
-            ]
+            ],
         );
         $repository->disableIgnoreNotMappedFields();
         $this->assertInstanceOf(User::class, $user);
@@ -200,7 +200,7 @@ class EntityTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
                 'hey'              => true,
-            ]
+            ],
         );
     }
 
@@ -219,7 +219,7 @@ class EntityTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $this->expectException(\DomainException::class);
@@ -243,7 +243,7 @@ class EntityTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $expected = $repository->newGenericEntity(
@@ -254,7 +254,7 @@ class EntityTest extends TestCase
                 'password'    => md5('password'),
                 'date_create' => '2020-01-01 10:00:00',
                 'date_update' => null,
-            ]
+            ],
         );
 
         $generic = $user->getGenericEntity();
@@ -277,7 +277,7 @@ class EntityTest extends TestCase
                 'password'    => md5('password'),
                 'date_create' => '2020-01-01 10:00:00',
                 'date_update' => null,
-            ]
+            ],
         );
 
         $user = $repository->newEntityFromGeneric($generic);
@@ -290,7 +290,7 @@ class EntityTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $this->assertEquals($expected, $user);

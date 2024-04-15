@@ -63,7 +63,7 @@ class JoinCompiler extends AbstractMethodCompiler
         array $joinConfig,
         array $fields,
         Context $mainContext,
-        string $name = ''
+        string $name = '',
     ) {
         if ($joinConfig['relation'] === 'many') {
             $templates = [
@@ -77,7 +77,7 @@ class JoinCompiler extends AbstractMethodCompiler
 
         parent::__construct(
             $config,
-            $templates
+            $templates,
         );
 
         $this->joinConfig  = $joinConfig;
@@ -127,19 +127,19 @@ class JoinCompiler extends AbstractMethodCompiler
                     'joinManyCache' . $name,
                     '?array',
                     $className . '[]|null',
-                    'null'
+                    'null',
                 );
             } else {
                 $compiler = new PropertyCompiler(
                     'joinOneCache' . $name,
                     '?' . $className,
                     $className . '|null',
-                    'null'
+                    'null',
                 );
             }
             $this->mainContext->add(
                 'class.properties',
-                $classProperties . "\n" . implode("\n", $compiler->compile())
+                $classProperties . "\n" . implode("\n", $compiler->compile()),
             );
         }
 

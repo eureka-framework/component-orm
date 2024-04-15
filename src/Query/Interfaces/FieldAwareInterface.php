@@ -37,7 +37,7 @@ interface FieldAwareInterface
     public function getQueryFields(
         RepositoryInterface $repository,
         bool $isPrefixed = false,
-        bool $onlyPrimaryKeys = false
+        bool $onlyPrimaryKeys = false,
     ): string;
 
     /**
@@ -61,7 +61,7 @@ interface FieldAwareInterface
         bool $isPrefixed = false,
         bool $onlyPrimaryKeys = false,
         ?string $aliasPrefix = null,
-        ?string $aliasSuffix = null
+        ?string $aliasSuffix = null,
     ): array;
 
     /**

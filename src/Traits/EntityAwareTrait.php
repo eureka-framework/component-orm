@@ -181,7 +181,7 @@ trait EntityAwareTrait
         if (!isset($this->entityNamesMap[$field]['property'])) {
             // @codeCoverageIgnoreStart
             throw new \DomainException(
-                'Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')'
+                'Cannot define field as updated: field have not mapping with entity instance (field: ' . $field . ')',
             );
             // @codeCoverageIgnoreEnd
         }
@@ -199,7 +199,7 @@ trait EntityAwareTrait
     {
         if (!isset($this->entityNamesMap[$field]['get'])) {
             throw new \DomainException(
-                'Cannot get field value: field have no mapping with entity instance (field: ' . $field . ')'
+                'Cannot get field value: field have no mapping with entity instance (field: ' . $field . ')',
             );
         }
 

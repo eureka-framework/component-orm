@@ -36,7 +36,7 @@ class MapperCompiler extends AbstractClassCompiler
             [
                 __DIR__ . '/../Templates/Mapper.template'         => false,
                 __DIR__ . '/../Templates/AbstractMapper.template' => true,
-            ]
+            ],
         );
     }
 
@@ -117,7 +117,7 @@ class MapperCompiler extends AbstractClassCompiler
             if (!($config instanceof Config\ConfigInterface)) {
                 // @codeCoverageIgnoreStart
                 throw new GeneratorException(
-                    'Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'
+                    'Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')',
                 );
                 // @codeCoverageIgnoreEnd
             }
@@ -153,7 +153,7 @@ class MapperCompiler extends AbstractClassCompiler
             if (!($config instanceof Config\ConfigInterface)) {
                 // @codeCoverageIgnoreStart
                 throw new GeneratorException(
-                    'Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')'
+                    'Joined class is not an instance of ConfigInterface! (class: ' . get_class($config) . ')',
                 );
                 // @codeCoverageIgnoreEnd
             }

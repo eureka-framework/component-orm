@@ -93,7 +93,7 @@ trait CacheAwareTrait
      */
     protected function selectFromCache(
         RepositoryInterface $repository,
-        Query\SelectBuilder $queryBuilder
+        Query\SelectBuilder $queryBuilder,
     ): array {
         if (!$this->isCacheEnabledOnRead) {
             return []; // @codeCoverageIgnore

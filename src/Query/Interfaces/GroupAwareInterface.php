@@ -28,7 +28,7 @@ interface GroupAwareInterface
         string $field,
         string|int|float|bool|null $value,
         Operator $operator = Operator::Equal,
-        ClauseConcat $clauseConcat = ClauseConcat::And
+        ClauseConcat $clauseConcat = ClauseConcat::And,
     ): static;
 
     /**

@@ -27,7 +27,7 @@ class FieldSetterAutoIncrementCompiler extends AbstractFieldCompiler
             $field,
             [
                 __DIR__ . '/../../Templates/FieldSetterAutoIncrement.template' => false,
-            ]
+            ],
         );
     }
 

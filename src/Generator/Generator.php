@@ -59,7 +59,7 @@ class Generator
         Connection $connection,
         array $configList,
         string $configName = '',
-        bool $isVerbose = true
+        bool $isVerbose = true,
     ): void {
         $configs = $this->buildConfigs($configList, $configName);
 
@@ -134,7 +134,7 @@ class Generator
 
                 if (!isset($baseConfig[$join['config']])) {
                     throw new GeneratorException(
-                        'Invalid config. Joined config "' . $join['config'] . '" does not exist!'
+                        'Invalid config. Joined config "' . $join['config'] . '" does not exist!',
                     );
                 }
 

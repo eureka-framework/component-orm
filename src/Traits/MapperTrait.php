@@ -169,7 +169,7 @@ trait MapperTrait
             /** @var \stdClass $row */
             if (!empty($indexedBy) && !isset($row->{$indexedBy})) {
                 throw new Exception\OrmException(
-                    'List is supposed to be indexed by a column that does not exist: ' . $indexedBy
+                    'List is supposed to be indexed by a column that does not exist: ' . $indexedBy,
                 );
             }
 
@@ -395,7 +395,7 @@ trait MapperTrait
                 $keyLeft,
                 $this->getTable(),
                 $keyRight,
-                $aliasPrefix
+                $aliasPrefix,
             );
         }
 

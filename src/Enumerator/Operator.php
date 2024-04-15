@@ -14,10 +14,15 @@ namespace Eureka\Component\Orm\Enumerator;
 enum Operator: string
 {
     case Equal = '=';
+    case NotEqual = '!=';
+    case NotEqualAlias = '<>';
     case GreaterThan = '>';
     case GreaterThanOrEqual = '>=';
     case LesserThan = '<';
     case LesserThanOrEqual  = '<=';
+    case NullSafeEqualTo = '<=>';
     case Like = 'LIKE';
     case Regexp = 'REGEXP';
+    case Is = 'IS';
+    case IsNot = 'IS NOT';
 }

@@ -70,7 +70,7 @@ trait FieldAwareTrait
     public function getQueryFields(
         RepositoryInterface $repository,
         bool $isPrefixed = false,
-        bool $onlyPrimaryKeys = false
+        bool $onlyPrimaryKeys = false,
     ): string {
 
         $calc = ($this->calculateFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '');
@@ -114,7 +114,7 @@ trait FieldAwareTrait
         bool $isPrefixed = false,
         bool $onlyPrimaryKeys = false,
         ?string $aliasPrefix = null,
-        ?string $aliasSuffix = null
+        ?string $aliasSuffix = null,
     ): array {
 
         $fields = $onlyPrimaryKeys ? $repository->getPrimaryKeys() : $repository->getFields();

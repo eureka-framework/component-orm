@@ -74,7 +74,7 @@ interface RepositoryInterface extends
     public function persist(
         EntityInterface $entity,
         bool $onDuplicateUpdate = false,
-        bool $onDuplicateIgnore = false
+        bool $onDuplicateIgnore = false,
     ): bool;
 
     /**
@@ -101,7 +101,7 @@ interface RepositoryInterface extends
     public function insert(
         EntityInterface $entity,
         bool $onDuplicateUpdate = false,
-        bool $onDuplicateIgnore = false
+        bool $onDuplicateIgnore = false,
     ): bool;
 
     /**

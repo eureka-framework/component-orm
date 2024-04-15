@@ -63,7 +63,7 @@ class AbstractClassCompiler extends AbstractCompiler
         if ($statement === false) {
             // @codeCoverageIgnoreStart
             throw new GeneratorException(
-                "Cannot get list of columns for table '{$this->config->getDbTable()}'"
+                "Cannot get list of columns for table '{$this->config->getDbTable()}'",
             );
             // @codeCoverageIgnoreEnd
         }
@@ -157,7 +157,7 @@ class AbstractClassCompiler extends AbstractCompiler
         if (!is_dir($basePath) && !mkdir($basePath, 0755, true)) {
             // @codeCoverageIgnoreStart
             throw new \UnexpectedValueException(
-                'Cannot created output directory! (dir:' . $basePath . ')'
+                'Cannot created output directory! (dir:' . $basePath . ')',
             );
             // @codeCoverageIgnoreEnd
         }

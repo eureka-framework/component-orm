@@ -39,7 +39,7 @@ class EntityCompiler extends AbstractClassCompiler
             [
                 __DIR__ . '/../Templates/Entity.template'         => false,
                 __DIR__ . '/../Templates/AbstractEntity.template' => true,
-            ]
+            ],
         );
     }
 
@@ -74,23 +74,23 @@ class EntityCompiler extends AbstractClassCompiler
         foreach ($this->fields as $field) {
             $compiledTemplate['properties'] = array_merge(
                 $compiledTemplate['properties'],
-                (new FieldPropertyCompiler($field))->compile()
+                (new FieldPropertyCompiler($field))->compile(),
             );
 
             $compiledTemplate['getters'] = array_merge(
                 $compiledTemplate['getters'],
-                (new FieldGetterCompiler($field))->compile()
+                (new FieldGetterCompiler($field))->compile(),
             );
 
             $compiledTemplate['setters'] = array_merge(
                 $compiledTemplate['setters'],
-                (new FieldSetterCompiler($field))->compile()
+                (new FieldSetterCompiler($field))->compile(),
             );
 
             if ($field->isAutoIncrement()) {
                 $compiledTemplate['setters'] = array_merge(
                     $compiledTemplate['setters'],
-                    (new FieldSetterAutoIncrementCompiler($field))->compile()
+                    (new FieldSetterAutoIncrementCompiler($field))->compile(),
                 );
             }
         }
