@@ -12,7 +12,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
-## [6.0.0] - 2023-07
+## [6.0.1] - 2024-04-15
+[6.0.1]: https://github.com/eureka-framework/component-orm/compare/6.0.0...6.0.1
+### Added
+- Add missing Enum Operators (`!=`, `IS`, `NOT IS`, `<=>`)
+
+## [6.0.0] - 2024-02-23
 [6.0.0]: https://github.com/eureka-framework/component-orm/compare/5.4.0...6.0.0
 ### Removed
 - Drop support of PHP 7.4 & PHP 8.0
