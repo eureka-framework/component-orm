@@ -43,7 +43,7 @@ trait ValidatorAwareTrait
         if ($this->getValidatorEntityFactory() === null) {
             // @codeCoverageIgnoreStart
             throw new \LogicException(
-                'Validator Entity Factory is null, cannot create generic entity from this service!'
+                'Validator Entity Factory is null, cannot create generic entity from this service!',
             );
             // @codeCoverageIgnoreEnd
         }
@@ -59,7 +59,7 @@ trait ValidatorAwareTrait
      */
     protected function setValidatorFactories(
         ?ValidatorFactoryInterface $validatorFactory,
-        ?ValidatorEntityFactoryInterface $validatorEntityFactory
+        ?ValidatorEntityFactoryInterface $validatorEntityFactory,
     ): static {
         $this->validatorFactory       = $validatorFactory;
         $this->validatorEntityFactory = $validatorEntityFactory;

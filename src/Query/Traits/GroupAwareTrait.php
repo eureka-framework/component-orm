@@ -44,7 +44,7 @@ trait GroupAwareTrait
         string $field,
         string|int|float|bool|null $value,
         Operator $operator = Operator::Equal,
-        ClauseConcat $clauseConcat = ClauseConcat::And
+        ClauseConcat $clauseConcat = ClauseConcat::And,
     ): static {
         $fieldHaving = (0 < count($this->havingList) ? ' ' . $clauseConcat->value . ' ' . $field : $field);
 

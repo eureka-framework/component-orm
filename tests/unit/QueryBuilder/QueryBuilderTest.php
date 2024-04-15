@@ -113,7 +113,7 @@ class QueryBuilderTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $queryBuilder = (new QueryBuilderFactory())->newInsertBuilder($repository, $user);

@@ -40,7 +40,7 @@ trait WhereAwareTrait
         string $field,
         array $values,
         ClauseConcat $whereConcat = ClauseConcat::And,
-        bool $not = false
+        bool $not = false,
     ): static {
         if (empty($values)) {
             throw new InvalidQueryException('Values for addIn must be non empty!');
@@ -75,7 +75,7 @@ trait WhereAwareTrait
         string|int|float|bool|null $value,
         Operator $operator = Operator::Equal,
         ClauseConcat $whereConcat = ClauseConcat::And,
-        string $prefix = ''
+        string $prefix = '',
     ): static {
         $fieldWithPrefix = !empty($prefix) ? $prefix . '.' . $field : $field;
         if (0 < \count($this->whereList)) {
@@ -121,7 +121,7 @@ trait WhereAwareTrait
     public function addWhereKeysOr(
         array $keys,
         Operator $operator = Operator::Equal,
-        ClauseConcat $whereConcat = ClauseConcat::Or
+        ClauseConcat $whereConcat = ClauseConcat::Or,
     ): static {
         $whereList = [];
 

@@ -70,7 +70,7 @@ class MapperTest extends TestCase
                 'user_password'    => md5('password'),
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
-            ]
+            ],
         );
 
         $this->assertFalse($user->exists(), 'User should not exists');
@@ -97,7 +97,7 @@ class MapperTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
             ],
-            true
+            true,
         );
 
         $repository->persist($user); // nothing happen, entity is not updated
@@ -126,7 +126,7 @@ class MapperTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
             ],
-            true
+            true,
         );
 
         $this->assertTrue($user->exists(), 'User should always exists');
@@ -155,7 +155,7 @@ class MapperTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
             ],
-            true
+            true,
         );
         $this->assertEquals($expected, $user);
 
@@ -187,7 +187,7 @@ class MapperTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
             ],
-            true
+            true,
         );
         $this->assertEquals($expected, $user);
 
@@ -239,7 +239,7 @@ class MapperTest extends TestCase
                     'user_date_create' => '2020-01-01 10:00:00',
                     'user_date_update' => null,
                 ],
-                true
+                true,
             ),
             'user02@example.com' => $repository->newEntity(
                 (object) [
@@ -250,7 +250,7 @@ class MapperTest extends TestCase
                     'user_date_create' => '2020-01-02 10:00:00',
                     'user_date_update' => null,
                 ],
-                true
+                true,
             ),
         ];
 
@@ -461,7 +461,7 @@ class MapperTest extends TestCase
     private function getConnectionFactoryMock(
         array $entityMock = [],
         bool $includeCacheMock = true,
-        int $exceptionCode = 0
+        int $exceptionCode = 0,
     ): ConnectionFactory {
         if (empty($entityMock)) {
             $entityMock = $this->getMockEntityNone();
@@ -516,7 +516,7 @@ class MapperTest extends TestCase
     private function getUserRepository(
         array $entityMock = [],
         bool $includeCacheMock = true,
-        int $exceptionCode = 0
+        int $exceptionCode = 0,
     ): UserRepositoryInterface {
         $connectionFactory = $this->getConnectionFactoryMock($entityMock, $includeCacheMock, $exceptionCode);
         return new UserMapper(
@@ -542,7 +542,7 @@ class MapperTest extends TestCase
             $connectionFactory,
             new ValidatorFactory(),
             new ValidatorEntityFactory(new ValidatorFactory()),
-            []
+            [],
         );
     }
 
@@ -681,46 +681,46 @@ class MapperTest extends TestCase
         }
 
         return [
-           (object) ['user_id' => 1],
-           (object) ['user_id' => 2],
-           false,
-           (object) [
-               'user_id'          => 1,
-               'user_is_enabled'  => true,
-               'user_email'       => 'user@example.com',
-               'user_password'    => md5('password'),
-               'user_date_create' => '2020-01-01 10:00:00',
-               'user_date_update' => null,
-           ],
-           (object) [
-               'user_id'          => 2,
-               'user_is_enabled'  => true,
-               'user_email'       => 'user02@example.com',
-               'user_password'    => md5('password'),
-               'user_date_create' => '2020-01-02 10:00:00',
-               'user_date_update' => null,
-           ],
-           false,
-           (object) ['user_id' => 1],
-           (object) ['user_id' => 2],
-           false,
-           (object) [
-               'user_id'          => 1,
-               'user_is_enabled'  => true,
-               'user_email'       => 'user@example.com',
-               'user_password'    => md5('password'),
-               'user_date_create' => '2020-01-01 10:00:00',
-               'user_date_update' => null,
-           ],
-           (object) [
-               'user_id'          => 2,
-               'user_is_enabled'  => true,
-               'user_email'       => 'user02@example.com',
-               'user_password'    => md5('password'),
-               'user_date_create' => '2020-01-02 10:00:00',
-               'user_date_update' => null,
-           ],
-           false,
+            (object) ['user_id' => 1],
+            (object) ['user_id' => 2],
+            false,
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            (object) [
+                'user_id'          => 2,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user02@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-02 10:00:00',
+                'user_date_update' => null,
+            ],
+            false,
+            (object) ['user_id' => 1],
+            (object) ['user_id' => 2],
+            false,
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            (object) [
+                'user_id'          => 2,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user02@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-02 10:00:00',
+                'user_date_update' => null,
+            ],
+            false,
         ];
     }
 

@@ -26,8 +26,8 @@ class FieldGetterCompiler extends AbstractFieldCompiler
         parent::__construct(
             $field,
             [
-                __DIR__ . '/../../Templates/FieldGetter.template' => false
-            ]
+                __DIR__ . '/../../Templates/FieldGetter.template' => false,
+            ],
         );
     }
 

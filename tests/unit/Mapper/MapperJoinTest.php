@@ -59,7 +59,7 @@ class MapperJoinTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
             ],
-            true
+            true,
         );
 
         /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\Address $expectedAddress */
@@ -70,12 +70,12 @@ class MapperJoinTest extends TestCase
                 'address_number'   => '13',
                 'address_text'     => 'Backer Street',
             ],
-            true
+            true,
         );
         $expectedUser->setAllUserAddress(
             [
-                $expectedAddress
-            ]
+                $expectedAddress,
+            ],
         );
 
         $this->assertEquals([$expectedUser], $users);
@@ -102,7 +102,7 @@ class MapperJoinTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
             ],
-            true
+            true,
         );
 
         $this->assertEquals([$expectedUser], $users);
@@ -129,7 +129,7 @@ class MapperJoinTest extends TestCase
                 'user_date_create' => '2020-01-01 10:00:00',
                 'user_date_update' => null,
             ],
-            true
+            true,
         );
 
         $commentRepository = $this->getCommentRepository();
@@ -140,7 +140,7 @@ class MapperJoinTest extends TestCase
                 'user_id'          => 1,
                 'comment_text'     => 'This is my comment',
             ],
-            true
+            true,
         );
         $expectedUser->setUserComment($expectedComment);
 

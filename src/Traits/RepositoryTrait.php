@@ -40,7 +40,7 @@ trait RepositoryTrait
         if (count($this->getPrimaryKeys()) > 1) {
             // @codeCoverageIgnoreStart
             throw new \LogicException(
-                __METHOD__ . '|Cannot use findById() method for table with multiple primary keys !'
+                __METHOD__ . '|Cannot use findById() method for table with multiple primary keys !',
             );
             // @codeCoverageIgnoreEnd
         }
@@ -118,7 +118,7 @@ trait RepositoryTrait
     public function insert(
         EntityInterface $entity,
         bool $onDuplicateUpdate = false,
-        bool $onDuplicateIgnore = false
+        bool $onDuplicateIgnore = false,
     ): bool {
         if ($entity->exists() && !$entity->isUpdated()) {
             return false;
@@ -129,13 +129,13 @@ trait RepositoryTrait
 
         $statement = $this->execute(
             $queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore),
-            $queryBuilder->getAllBind()
+            $queryBuilder->getAllBind(),
         );
 
         if ($onDuplicateIgnore && $statement->rowCount() === 0) {
             // @codeCoverageIgnoreStart
             throw new Exception\InsertFailedException(
-                __METHOD__ . 'INSERT IGNORE could not insert (duplicate key or error)'
+                __METHOD__ . 'INSERT IGNORE could not insert (duplicate key or error)',
             );
             // @codeCoverageIgnoreEnd
         }
@@ -195,7 +195,7 @@ trait RepositoryTrait
     public function persist(
         EntityInterface $entity,
         bool $onDuplicateUpdate = false,
-        bool $onDuplicateIgnore = false
+        bool $onDuplicateIgnore = false,
     ): bool {
         if ($entity->exists()) {
             return $this->update($entity);

@@ -24,12 +24,12 @@ class PropertyCompiler extends AbstractCompiler
         private readonly string $name,
         private readonly string $typeHint,
         private readonly string $typeDoc,
-        private readonly string|int|float|bool|null $defaultValue = null
+        private readonly string|int|float|bool|null $defaultValue = null,
     ) {
         parent::__construct(
             [
                 __DIR__ . '/../Templates/FieldProperty.template' => false,
-            ]
+            ],
         );
     }
 

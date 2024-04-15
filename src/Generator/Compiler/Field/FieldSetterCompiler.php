@@ -28,7 +28,7 @@ class FieldSetterCompiler extends AbstractFieldCompiler
             $field,
             [
                 __DIR__ . '/../../Templates/FieldSetter.template' => false,
-            ]
+            ],
         );
     }
 

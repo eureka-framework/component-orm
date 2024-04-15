@@ -27,7 +27,7 @@ class FieldPropertyCompiler extends AbstractFieldCompiler
             $field,
             [
                 __DIR__ . '/../../Templates/FieldProperty.template' => false,
-            ]
+            ],
         );
     }
 

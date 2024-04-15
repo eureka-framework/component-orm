@@ -19,7 +19,7 @@ interface JoinAwareInterface
         string $mainField,
         string $mainAlias,
         string $joinField,
-        string $joinAlias
+        string $joinAlias,
     ): static;
 
     public function hasJoin(): bool;

@@ -27,7 +27,7 @@ trait JoinAwareTrait
         string $mainField,
         string $mainAlias,
         string $joinField,
-        string $joinAlias
+        string $joinAlias,
     ): static {
 
         $using    = 'ON ' . $mainAlias . '.' . $mainField . ' = ' . $joinAlias . '.' . $joinField;

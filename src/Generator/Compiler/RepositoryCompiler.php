@@ -32,7 +32,7 @@ class RepositoryCompiler extends AbstractClassCompiler
             self::TYPE_REPOSITORY,
             [
                 __DIR__ . '/../Templates/RepositoryInterface.template' => false,
-            ]
+            ],
         );
     }
 

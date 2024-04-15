@@ -145,7 +145,7 @@ abstract class AbstractCompiler
         $methodName = str_replace(
             ' ',
             '',
-            ucwords((string) preg_replace($toReplace, ' ', strtolower($field->getName(true))))
+            ucwords((string) preg_replace($toReplace, ' ', strtolower($field->getName(true)))),
         );
 
         $type = $field->getType();
