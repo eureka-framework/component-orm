@@ -163,11 +163,16 @@ trait EntityAwareTrait
             return null;
         }
 
+        $entityExists = true;
         foreach ($data as $field => $value) {
-            $this->setEntityValue($entity, $field, $value);
+            try {
+                $this->setEntityValue($entity, $field, $value);
+            } catch (\TypeError) { // @codeCoverageIgnoreStart
+                $entityExists = false;
+            } // @codeCoverageIgnoreEnd
         }
 
-        $entity->setExists(true);
+        $entity->setExists($entityExists);
 
         return $entity;
     }
@@ -231,6 +236,7 @@ trait EntityAwareTrait
      *
      * @phpstan-param  TEntity $entity
      * @throws \DomainException
+     * @throws \TypeError
      */
     protected function setEntityValue(EntityInterface $entity, string $field, mixed $value): static
     {
