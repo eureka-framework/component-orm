@@ -10,9 +10,8 @@ parameters:
     - ./scripts
     - ./tests
 
-  checkGenericClassInNonGenericObjectType: false
-
   bootstrapFiles:
     - ./vendor/autoload.php
 
-  ignoreErrors: []
+  ignoreErrors:
+    - identifier: missingType.generics
