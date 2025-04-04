@@ -133,7 +133,7 @@ abstract class AbstractCompiler
      */
     protected function getNameForGetter(Field $field): string
     {
-        $toReplace  = array(
+        $toReplace  = [
             '/^(is_)/i',
             '/^(has_)/i',
             '/^(in_)/i', // db_prefix is empty
@@ -141,7 +141,7 @@ abstract class AbstractCompiler
             '/(_has_)/i',
             '/(_in_)/i', // db_prefix is not empty
             '/(_)/',
-        );
+        ];
         $methodName = str_replace(
             ' ',
             '',

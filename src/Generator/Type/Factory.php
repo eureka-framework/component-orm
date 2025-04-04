@@ -30,7 +30,7 @@ class Factory
      */
     public static function create(string $sqlType, string $sqlComment): TypeInterface
     {
-        $matches = array();
+        $matches = [];
         if (!(bool) preg_match('`^([a-z]+)\(?(\d*)\)? ?(.*)$`i', $sqlType, $matches)) {
             throw new GeneratorException('Invalid sql type');
         }

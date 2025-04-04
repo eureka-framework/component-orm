@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
+## [6.0.3] - 2025-04-04
+[6.0.3]: https://github.com/eureka-framework/component-orm/compare/6.0.2...6.0.3
+### changed
+- Fix lastInsertId() usage when reconnection is done during insert query.
+
 ## [6.0.2] - 2024-04-24
 [6.0.2]: https://github.com/eureka-framework/component-orm/compare/6.0.1...6.0.2
 ### Changed

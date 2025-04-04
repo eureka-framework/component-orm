@@ -125,7 +125,6 @@ trait RepositoryTrait
         }
 
         $queryBuilder = new Query\InsertBuilder($this, $entity);
-        $connection   = $this->getConnection();
 
         $statement = $this->execute(
             $queryBuilder->getQuery($onDuplicateUpdate, $onDuplicateIgnore),
@@ -141,7 +140,7 @@ trait RepositoryTrait
         }
 
         //~ If we have auto increment key (commonly, is a primary key), set value
-        $lastInsertId = (int) $connection->lastInsertId();
+        $lastInsertId = (int) $this->getConnection()->lastInsertId();
         if ($lastInsertId > 0) {
             $this->setLastId($lastInsertId);
 
