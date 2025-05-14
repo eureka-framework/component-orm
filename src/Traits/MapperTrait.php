@@ -14,6 +14,7 @@ namespace Eureka\Component\Orm\Traits;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinRelation;
 use Eureka\Component\Orm\Exception;
+use Eureka\Component\Orm\Exception\ConnectionLostDuringTransactionException;
 use Eureka\Component\Orm\Query;
 use Eureka\Component\Orm\Query\Interfaces\QueryBuilderInterface;
 use Eureka\Component\Orm\RepositoryInterface;
@@ -113,6 +114,20 @@ trait MapperTrait
     public function rowCount(): int
     {
         return $this->rowCount;
+    }
+
+    /**
+     *  Returns the number of rows affected by the last SQL SELECT statement with SQL_CALC_FOUND_ROWS enabled
+     *
+     * @return int
+     * @throws ConnectionLostDuringTransactionException
+     */
+    public function rowCountOnSelect(): int
+    {
+        $statement = $this->execute('SELECT FOUND_ROWS()');
+        /** @var int $count */
+        $count = $statement->fetchColumn(0);
+        return $count;
     }
 
     /**

@@ -40,6 +40,13 @@ interface MapperInterface
     public function rowCount(): int;
 
     /**
+     *  Returns the number of rows affected by the last SQL SELECT statement with SQL_CALC_FOUND_ROWS enabled
+     *
+     * @return int
+     */
+    public function rowCountOnSelect(): int;
+
+    /**
      * Return autoincrement id of the last insert query.
      *
      * @return int
