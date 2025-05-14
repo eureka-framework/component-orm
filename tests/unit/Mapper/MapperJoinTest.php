@@ -47,7 +47,7 @@ class MapperJoinTest extends TestCase
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne());
         $addressRepository = $this->getAddressRepository($this->getMockEntityAddressFindOne());
 
-        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User[] $users */
+        /** @var User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserAddress', 'Unknown']);
         /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
@@ -62,7 +62,7 @@ class MapperJoinTest extends TestCase
             true,
         );
 
-        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\Address $expectedAddress */
+        /** @var Address $expectedAddress */
         $expectedAddress = $addressRepository->newEntity(
             (object) [
                 'address_id'       => 1,
@@ -92,7 +92,7 @@ class MapperJoinTest extends TestCase
 
         /** @var User[] $users */
         $users = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserComment']);
-        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\User $expectedUser */
+        /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
             (object) [
                 'user_id'          => 1,
@@ -133,7 +133,7 @@ class MapperJoinTest extends TestCase
         );
 
         $commentRepository = $this->getCommentRepository();
-        /** @var \Eureka\Component\Orm\Tests\Unit\Generated\Entity\Comment $expectedComment */
+        /** @var Comment $expectedComment */
         $expectedComment   = $commentRepository->newEntity(
             (object) [
                 'comment_id'       => 1,
@@ -219,7 +219,7 @@ class MapperJoinTest extends TestCase
 
     /**
      * @param array<mixed> $entityMock
-     * @return \Eureka\Component\Orm\Tests\Unit\Generated\Repository\CommentRepositoryInterface
+     * @return CommentRepositoryInterface
      */
     private function getCommentRepository(array $entityMock = []): CommentRepositoryInterface
     {

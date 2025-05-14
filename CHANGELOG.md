@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
+## [6.1.0] - 2025-05-14
+[6.1.0]: https://github.com/eureka-framework/component-orm/compare/6.0.3...6.1.0
+### Added
+- Add new rowCountOnSelect() method to MapperTrait (when SQL_CALC_FOUND_ROWS is used)
+
+
 ## [6.0.3] - 2025-04-04
 [6.0.3]: https://github.com/eureka-framework/component-orm/compare/6.0.2...6.0.3
 ### changed
