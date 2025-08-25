@@ -78,7 +78,7 @@ class MapperJoinTest extends TestCase
             ],
         );
 
-        $this->assertEquals([$expectedUser], $users);
+        self::assertEquals([$expectedUser], $users);
     }
 
     /**
@@ -105,7 +105,7 @@ class MapperJoinTest extends TestCase
             true,
         );
 
-        $this->assertEquals([$expectedUser], $users);
+        self::assertEquals([$expectedUser], $users);
     }
 
     /**
@@ -117,9 +117,7 @@ class MapperJoinTest extends TestCase
     {
         $userRepository = $this->getUserRepository($this->getMockEntityFindOne(true));
 
-        /** @var User $user */
         $user = $userRepository->selectJoin(new SelectBuilder($userRepository), ['UserComment']);
-        /** @var User $expectedUser */
         $expectedUser = $userRepository->newEntity(
             (object) [
                 'user_id'          => 1,
@@ -144,7 +142,7 @@ class MapperJoinTest extends TestCase
         );
         $expectedUser->setUserComment($expectedComment);
 
-        $this->assertEquals([$expectedUser], $user);
+        self::assertEquals([$expectedUser], $user);
     }
 
     /**
@@ -162,7 +160,7 @@ class MapperJoinTest extends TestCase
         $statementMock = $this->getMockBuilder(\PDOStatement::class)->getMock();
         $statementMock->method('execute')->willReturn(true);
         $statementMock->method('rowCount')->willReturn($count);
-        $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...$entityMock);
+        $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...\array_values($entityMock));
         $statementMock->method('fetchColumn')->willReturn($count);
 
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();

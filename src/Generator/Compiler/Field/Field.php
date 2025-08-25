@@ -14,6 +14,17 @@ namespace Eureka\Component\Orm\Generator\Compiler\Field;
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Type;
 
+/**
+ * @phpstan-type FieldType object{
+ *      Field: string,
+ *      Key: string,
+ *      Type: string,
+ *      Comment: string,
+ *      Null: string,
+ *      Default: string,
+ *      Extra: string,
+ *  }&\stdClass
+ */
 class Field
 {
     protected string $name = '';
@@ -35,7 +46,7 @@ class Field
     /**
      * Field constructor.
      *
-     * @param \stdClass $field
+     * @param FieldType $field
      * @param string[] $dbPrefixes
      * @param array{
      *          extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>,
@@ -121,6 +132,7 @@ class Field
     }
 
     /**
+     * @param FieldType $field
      * @throws GeneratorException
      */
     protected function setData(\stdClass $field): static

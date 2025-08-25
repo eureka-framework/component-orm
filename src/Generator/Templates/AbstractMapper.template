@@ -51,7 +51,7 @@ abstract class Abstract{{ class.mapper }}
         ValidatorEntityFactory|null $validatorEntityFactory = null,
         array $mappers = [],
         CacheItemPoolInterface|null $cache = null,
-        bool $enableCacheOnRead = false
+        bool $enableCacheOnRead = false,
     ) {
         $this->setConnectionName($connectionName);
         $this->setConnectionFactory($connectionFactory);

@@ -6,11 +6,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ```
 ## [template]
-[template]: https://github.com/eureka-framework/component-orm/compare/6.0.0...master
+[template]: https://github.com/eureka-framework/component-orm/compare/7.0.0...master
 ### Changed
 ### Added
 ### Removed
 ```
+
+## [7.0.0] - 2025-08-25
+[7.0.0]: https://github.com/eureka-framework/component-orm/compare/6.1.0...7.0.0
+### Added
+- PHP 8.4 support
+### Removed
+- Drop support for PHP 8.1, 8.2
+### Changed
+- Improve some phpdoc typing
+- Fix some CS issues in generated classes
+- Fix some php 8.4 deprecations
+- Dependencies updates
+
+---
 
 ## [6.1.0] - 2025-05-14
 [6.1.0]: https://github.com/eureka-framework/component-orm/compare/6.0.3...6.1.0

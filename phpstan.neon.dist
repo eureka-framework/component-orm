@@ -1,9 +1,10 @@
 includes:
   - ./vendor/phpstan/phpstan-phpunit/extension.neon
   - ./vendor/phpstan/phpstan-phpunit/rules.neon
+  #- ./vendor/phpstan/phpstan-strict-rules/rules.neon # For next major release
 
 parameters:
-  phpVersion: 80100 # PHP 8.1 - Current minimal version supported
+  phpVersion: 80300
   level: max
   paths:
     - ./src
@@ -15,3 +16,18 @@ parameters:
 
   ignoreErrors:
     - identifier: missingType.generics
+    -
+      path: 'src/Traits/EntityAwareTrait.php'
+      identifier: argument.type
+      count: 8
+    -
+      path: 'src/Traits/MapperTrait.php'
+      identifier: argument.type
+      count: 8
+    -
+      path: 'src/Generator/Compiler/MapperCompiler.php'
+      identifier: instanceof.alwaysTrue
+      count: 2
+    -
+      path: 'tests/unit/'
+      identifier: staticMethod.alreadyNarrowedType

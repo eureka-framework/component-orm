@@ -31,25 +31,24 @@
   },
 
   "require": {
-    "php": "8.1.*||8.2.*||8.3.*",
+    "php": "8.3.*||8.4.*",
     "ext-pdo": "*",
 
-    "eureka/component-database": "^3.2",
-    "eureka/component-validation": "^5.2",
-    "eureka/component-console": "^6.1.0",
+    "eureka/component-database": "^3.4",
+    "eureka/component-validation": "^6.0",
+    "eureka/component-console": "^6.3",
 
-    "psr/cache": "^1.0||^2.0||^3.0",
-    "psr/log": "^1.1||^2.0||^3.0"
+    "psr/cache": "^1.0||^2.0||^3.0"
   },
 
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "^3.75.0",
-    "maglnet/composer-require-checker": "^3.8||^4.7.1",
-    "phpstan/phpstan": "^1.12.23",
-    "phpstan/phpstan-phpunit": "^1.4.2",
-    "phpstan/phpstan-strict-rules": "^1.6.2",
-    "phpunit/phpcov": "^9.0.2",
-    "phpunit/phpunit": "^10.5.45",
-    "symfony/cache": "^5.4.0||^6.4.20"
+    "friendsofphp/php-cs-fixer": "^3.86.0",
+    "phpstan/phpstan": "^2.1.22",
+    "phpstan/phpstan-phpunit": "^2.0.7",
+    "phpstan/phpstan-strict-rules": "^2.0.6",
+    "phpunit/phpcov": "^11.0.1",
+    "phpunit/phpunit": "^12.3.6",
+    "symfony/cache": "^7.3.2",
+    "shipmonk/composer-dependency-analyser": "^1.8.3"
   }
 }

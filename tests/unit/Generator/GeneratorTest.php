@@ -33,7 +33,7 @@ class GeneratorTest extends TestCase
     public function testICanInstantiateGenerator(): void
     {
         $generator = new Generator();
-        $this->assertInstanceOf(Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
     }
 
     /**
@@ -45,7 +45,7 @@ class GeneratorTest extends TestCase
         $generator = new Generator();
         $generator->generate($this->getConnectionMock(), $this->getConfig(), '', false);
 
-        $this->assertInstanceOf(Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
     }
 
     /**
@@ -57,7 +57,7 @@ class GeneratorTest extends TestCase
         $generator = new Generator();
         $generator->generate($this->getConnectionMock(), $this->getConfig(), 'user', false);
 
-        $this->assertInstanceOf(Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
     }
 
     /**
@@ -69,7 +69,7 @@ class GeneratorTest extends TestCase
         $generator = new Generator();
         $generator->generate($this->getConnectionMock(), $this->getConfig(), 'user.*', false);
 
-        $this->assertInstanceOf(Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
     }
 
     /**
@@ -83,7 +83,7 @@ class GeneratorTest extends TestCase
         $this->expectExceptionMessage('Invalid config. Empty information about orm!');
         $generator->generate($this->getConnectionMock(), [], '', false);
 
-        $this->assertInstanceOf(Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
     }
 
     /**
@@ -97,7 +97,7 @@ class GeneratorTest extends TestCase
         $this->expectExceptionMessage('Invalid orm config file for "user_invalid"');
         $generator->generate($this->getConnectionMock(), $this->getInvalidJoinConfig(), '', false);
 
-        $this->assertInstanceOf(Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
     }
 
     /**
@@ -111,7 +111,7 @@ class GeneratorTest extends TestCase
         $this->expectExceptionMessage('Invalid config. Joined config "not_exist" does not exist!');
         $generator->generate($this->getConnectionMock(), $this->getConfigWithMissingJoinedConfig(), '', false);
 
-        $this->assertInstanceOf(Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
     }
 
     private function getConnectionMock(): Connection&MockObject
@@ -227,9 +227,7 @@ class GeneratorTest extends TestCase
             }
         }
 
-        $connection->method('query')->will(
-            $this->returnValueMap($map),
-        );
+        $connection->method('query')->willReturnMap($map);
 
         return $connection;
     }
@@ -243,7 +241,7 @@ class GeneratorTest extends TestCase
         $mockBuilder = $this->getMockBuilder(\PDOStatement::class);
         /** @var \PDOStatement&MockObject $statement */
         $statement   = $mockBuilder->getMock();
-        $statement->method('fetch')->with(\PDO::FETCH_OBJ)->willReturnOnConsecutiveCalls(...$mockedData);
+        $statement->method('fetch')->with(\PDO::FETCH_OBJ)->willReturnOnConsecutiveCalls(...\array_values($mockedData));
 
         return $statement;
     }

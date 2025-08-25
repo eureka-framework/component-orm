@@ -30,6 +30,7 @@ use Eureka\Component\Validation\ValidatorFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub\Exception;
 use PHPUnit\Framework\TestCase;
+use Random\Engine\Mt19937;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 /**
@@ -48,9 +49,9 @@ class MapperTest extends TestCase
         $repository->disableCacheOnRead();
         $repository->enableCacheOnRead();
 
-        $this->assertInstanceOf(UserMapper::class, $repository);
-        $this->assertInstanceOf(UserRepositoryInterface::class, $repository);
-        $this->assertInstanceOf(MapperInterface::class, $repository);
+        self::assertInstanceOf(UserMapper::class, $repository);
+        self::assertInstanceOf(UserRepositoryInterface::class, $repository);
+        self::assertInstanceOf(MapperInterface::class, $repository);
     }
 
     /**
@@ -73,9 +74,9 @@ class MapperTest extends TestCase
             ],
         );
 
-        $this->assertFalse($user->exists(), 'User should not exists');
+        self::assertFalse($user->exists(), 'User should not exists');
         $repository->persist($user);
-        $this->assertTrue($user->exists(), 'User should exists');
+        self::assertTrue($user->exists(), 'User should exists');
         $repository->insert($user);
     }
 
@@ -103,9 +104,9 @@ class MapperTest extends TestCase
         $repository->persist($user); // nothing happen, entity is not updated
 
         $user->setDateUpdate('2020-01-01 10:00:00');
-        $this->assertTrue($user->isUpdated());
+        self::assertTrue($user->isUpdated());
         $repository->persist($user);
-        $this->assertFalse($user->isUpdated());
+        self::assertFalse($user->isUpdated());
     }
 
     /**
@@ -129,9 +130,9 @@ class MapperTest extends TestCase
             true,
         );
 
-        $this->assertTrue($user->exists(), 'User should always exists');
+        self::assertTrue($user->exists(), 'User should always exists');
         $repository->delete($user);
-        $this->assertFalse($user->exists(), 'User should not exists anymore');
+        self::assertFalse($user->exists(), 'User should not exists anymore');
     }
 
     /**
@@ -157,14 +158,14 @@ class MapperTest extends TestCase
             ],
             true,
         );
-        $this->assertEquals($expected, $user);
+        self::assertEquals($expected, $user);
 
         //~ Then retrieve from cache
         /** @var User $user */
         $user = $repository->findById(1);
-        $this->assertEquals($expected, $user);
-        $this->assertSame(1, $repository->rowCount());
-        $this->assertSame(1, $repository->rowCountOnSelect());
+        self::assertEquals($expected, $user);
+        self::assertSame(1, $repository->rowCount());
+        self::assertSame(1, $repository->rowCountOnSelect());
     }
 
     /**
@@ -190,10 +191,10 @@ class MapperTest extends TestCase
             ],
             true,
         );
-        $this->assertEquals($expected, $user);
+        self::assertEquals($expected, $user);
 
         $repository->delete($user);
-        $this->assertFalse($user->exists());
+        self::assertFalse($user->exists());
     }
 
     /**
@@ -218,7 +219,7 @@ class MapperTest extends TestCase
 
         $users = $repository->findAllByKeys(['user_id' => 1]);
 
-        $this->assertCount(2, $users);
+        self::assertCount(2, $users);
     }
 
     /**
@@ -255,7 +256,7 @@ class MapperTest extends TestCase
             ),
         ];
 
-        $this->assertEquals($expected, $collection);
+        self::assertEquals($expected, $collection);
     }
 
     /**
@@ -271,9 +272,9 @@ class MapperTest extends TestCase
         $users = $repository->select($builder);
         $ids   = array_keys($users);
 
-        $this->assertCount(2, $users);
-        $this->assertSame($ids[0], $users[$ids[0]]->getId());
-        $this->assertSame($ids[1], $users[$ids[1]]->getId());
+        self::assertCount(2, $users);
+        self::assertSame($ids[0], $users[$ids[0]]->getId());
+        self::assertSame($ids[1], $users[$ids[1]]->getId());
 
         //~ Also test when retrieve all entities from cache
         $builder = new SelectBuilder($repository);
@@ -282,9 +283,9 @@ class MapperTest extends TestCase
         /** @var User[] $users */
         $users = $repository->select($builder);
 
-        $this->assertCount(2, $users);
-        $this->assertSame($ids[0], $users[$ids[0]]->getId());
-        $this->assertSame($ids[1], $users[$ids[1]]->getId());
+        self::assertCount(2, $users);
+        self::assertSame($ids[0], $users[$ids[0]]->getId());
+        self::assertSame($ids[1], $users[$ids[1]]->getId());
     }
 
     /**
@@ -308,7 +309,7 @@ class MapperTest extends TestCase
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
-        $this->assertTrue($repository->rowExists((new SelectBuilder($repository))->addWhere('user_id', 1)));
+        self::assertTrue($repository->rowExists((new SelectBuilder($repository))->addWhere('user_id', 1)));
     }
 
     /**
@@ -318,7 +319,7 @@ class MapperTest extends TestCase
     {
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
 
-        $this->assertSame(2, $repository->count(new QueryBuilder($repository)));
+        self::assertSame(2, $repository->count(new QueryBuilder($repository)));
     }
 
     /**
@@ -329,7 +330,7 @@ class MapperTest extends TestCase
     {
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
-        $this->assertFalse($repository->rowExists((new SelectBuilder($repository))->addWhere('user_id', 1)));
+        self::assertFalse($repository->rowExists((new SelectBuilder($repository))->addWhere('user_id', 1)));
     }
 
     /**
@@ -339,7 +340,7 @@ class MapperTest extends TestCase
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1());
 
-        $this->assertSame(1, $repository->getMaxId());
+        self::assertSame(1, $repository->getMaxId());
     }
 
     /**
@@ -349,7 +350,7 @@ class MapperTest extends TestCase
     {
         $repository = $this->getUserRepository($this->getMockEntityFindId1(), true, 2006);
 
-        $this->assertSame(1, $repository->getMaxId());
+        self::assertSame(1, $repository->getMaxId());
     }
 
     /**
@@ -367,7 +368,7 @@ class MapperTest extends TestCase
         $entity->setExists(true);
         $entity->setEmail('new@email.com');
 
-        $this->assertTrue($repository->persist($entity));
+        self::assertTrue($repository->persist($entity));
     }
 
     /**
@@ -403,10 +404,9 @@ class MapperTest extends TestCase
         $repository = $this->getUserRepository($this->getMockEntityNone());
 
         $this->expectException(UndefinedMapperException::class);
-        $this->expectExceptionMessage('Mapper does not exist! (mapper: \Unknown\Mapper\ClassName)');
+        $this->expectExceptionMessage('Mapper does not exist! (mapper: ' . Mt19937::class . ')');
 
-        /** @var class-string<RepositoryInterface> $mapperClass */
-        $mapperClass = '\Unknown\Mapper\ClassName';
+        $mapperClass = Mt19937::class; // Not a mapper class
         $repository->getMapper($mapperClass);
     }
 
@@ -476,7 +476,7 @@ class MapperTest extends TestCase
 
         $statementMock = $this->getMockBuilder(\PDOStatement::class)->getMock();
         $statementMock->method('rowCount')->willReturn($count);
-        $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...$entityMock);
+        $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...\array_values($entityMock));
         $statementMock->method('fetchColumn')->willReturn($count);
 
         if ($exceptionCode > 0) {

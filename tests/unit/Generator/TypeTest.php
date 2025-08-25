@@ -13,6 +13,7 @@ namespace Eureka\Component\Orm\Tests\Unit\Generator;
 
 use Eureka\Component\Orm\Exception\GeneratorException;
 use Eureka\Component\Orm\Generator\Type;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -23,18 +24,17 @@ use PHPUnit\Framework\TestCase;
 class TypeTest extends TestCase
 {
     /**
-     * @dataProvider typeProvider
-     *
      * @param string $sqlType
      * @param class-string $classType
      * @return void
      * @throws GeneratorException
      */
+    #[DataProvider('typeProvider')]
     public function testICanCreateTypeWithFactory(string $sqlType, string $classType)
     {
         $type = Type\Factory::create($sqlType, '');
 
-        $this->assertInstanceOf($classType, $type);
+        self::assertInstanceOf($classType, $type);
     }
 
     /**
@@ -52,9 +52,8 @@ class TypeTest extends TestCase
      * @param string $sqlType
      * @return void
      * @throws GeneratorException
-     *
-     * @dataProvider invalidTypeProvider
      */
+    #[DataProvider('invalidTypeProvider')]
     public function testIHaveAnExceptionWhenITryToGetTypeWithInvalidSqlType(string $sqlType)
     {
         $this->expectException(GeneratorException::class);

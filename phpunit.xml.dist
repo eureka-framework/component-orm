@@ -2,28 +2,22 @@
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
-        backupGlobals="true"
         colors="true"
-        processIsolation="false"
-        stopOnError="false"
-        stopOnFailure="false"
-        stopOnIncomplete="false"
-        stopOnSkipped="false"
-        stopOnRisky="false"
-        timeoutForSmallTests="1"
-        timeoutForMediumTests="10"
-        timeoutForLargeTests="60"
-        cacheDirectory="./build/.phpunit.cache"
-        backupStaticProperties="false"
-        requireCoverageMetadata="false">
-  <testsuites>
-    <testsuite name="unit">
-      <directory>./tests/unit</directory>
-    </testsuite>
-  </testsuites>
+        cacheDirectory="build/.phpunit.cache"
+>
   <source>
     <include>
       <directory>./src</directory>
     </include>
   </source>
+
+  <testsuites>
+    <testsuite name="unit">
+      <directory>./tests/unit</directory>
+    </testsuite>
+    <testsuite name="integration">
+      <directory>./tests/integration</directory>
+    </testsuite>
+  </testsuites>
+
 </phpunit>

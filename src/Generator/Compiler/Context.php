@@ -70,7 +70,7 @@ class Context
      */
     public function getKeys(): array
     {
-        return array_keys($this->context);
+        return \array_keys($this->context);
     }
 
     /**
@@ -78,7 +78,7 @@ class Context
      */
     public function getValues(): array
     {
-        return array_values($this->context);
+        return \array_values($this->context);
     }
 
     /**

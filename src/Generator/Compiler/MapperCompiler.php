@@ -75,10 +75,10 @@ class MapperCompiler extends AbstractClassCompiler
             if ($onlyKey && !$field->isPrimaryKey()) {
                 continue;
             }
-            $names[] = "'" . $field->getName() . "'";
+            $names[] = "'" . $field->getName() . "',";
         }
 
-        return implode(",\n            ", $names);
+        return implode("\n            ", $names);
     }
 
     /**

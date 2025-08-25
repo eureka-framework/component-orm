@@ -105,7 +105,10 @@ trait MapperTrait
 
         $statement = $this->execute($query);
 
-        return $statement->fetch(PDO::FETCH_OBJ)->{$field};
+        /** @var int $value */
+        $value = $statement->fetch(PDO::FETCH_OBJ)->{$field};
+
+        return $value;
     }
 
     /**
@@ -249,7 +252,6 @@ trait MapperTrait
         $listIndexedByField = $queryBuilder->getListIndexedByField();
 
         if ($this->isCacheEnabledOnRead) {
-            /** @var TRepository $repository */
             $repository = $this;
             $collection = $this->selectFromCache($repository, $queryBuilder);
         }
@@ -377,7 +379,6 @@ trait MapperTrait
      */
     private function getRawResultsWithJoin(Query\SelectBuilder $queryBuilder, array $joinConfigs): array
     {
-        /** @var TRepository $repository */
         $repository = $this;
 
         //~ Add main fields to query builder
@@ -450,7 +451,9 @@ trait MapperTrait
             //~ Resolve one-many relations
             $ids = [];
             foreach ($getters as $getterPrimaryKey) {
-                $ids[] = '|' . $data->$getterPrimaryKey();
+                /** @var int|string $primaryValue */
+                $primaryValue = $data->$getterPrimaryKey();
+                $ids[] = '|' . $primaryValue;
             }
             $hash = md5(implode('|', $ids));
 
@@ -467,7 +470,7 @@ trait MapperTrait
 
                 $mapper->enableIgnoreNotMappedFields();
 
-                /** @var TEntity $dataJoin */
+                /** @var TEntity|null $dataJoin */
                 $dataJoin = $mapper->newEntitySuffixAware($row, $aliasSuffix, $join['type']);
 
                 if (!isset($relations[$name][$hash])) {

@@ -61,9 +61,8 @@ trait EntityAwareTrait
      *
      * @phpstan-return TEntity
      */
-    public function newEntity(\stdClass $row = null, bool $exists = false): object
+    public function newEntity(\stdClass|null $row = null, bool $exists = false): object
     {
-        /** @var TEntity $entity */
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
         if ($row instanceof \stdClass) {
@@ -138,10 +137,6 @@ trait EntityAwareTrait
         /** @var TEntity $entity */
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
-        if (!($entity instanceof EntityInterface)) {
-            throw new \LogicException('Entity object is not an instance of AbstractData class!'); // @codeCoverageIgnore
-        }
-
         $data              = [];
         $hasSomeJoinValues = ($type !== JoinType::LEFT);
 
@@ -179,7 +174,7 @@ trait EntityAwareTrait
 
 
     /**
-     * @phpstan-param  TEntity $entity
+     * @phpstan-param TEntity $entity
      */
     public function isEntityUpdated(EntityInterface $entity, string $field): bool
     {
@@ -197,10 +192,9 @@ trait EntityAwareTrait
     }
 
     /**
-     * @phpstan-param  TEntity $entity
-     * @return string|int|float|bool|null
+     * @phpstan-param TEntity $entity
      */
-    public function getEntityValue(EntityInterface $entity, string $field): mixed
+    public function getEntityValue(EntityInterface $entity, string $field): string|int|float|bool|null
     {
         if (!isset($this->entityNamesMap[$field]['get'])) {
             throw new \DomainException(
@@ -208,15 +202,18 @@ trait EntityAwareTrait
             );
         }
 
-        $method = $this->entityNamesMap[$field]['get'];
+        $getter = $this->entityNamesMap[$field]['get'];
 
-        return $entity->{$method}();
+        /** @var string|int|float|bool|null $value */
+        $value  = $entity->{$getter}();
+
+        return $value;
     }
 
     /**
      * Get array "key" => "value" for primaries keys.
      *
-     * @phpstan-param  TEntity $entity
+     * @phpstan-param TEntity $entity
      * @return array<string|int|float|bool|null>
      */
     public function getEntityPrimaryKeysValues(EntityInterface $entity): array
@@ -225,7 +222,10 @@ trait EntityAwareTrait
 
         foreach ($this->getPrimaryKeys() as $key) {
             $getter       = $this->getGetterForField($key);
-            $values[$key] = $entity->{$getter}();
+
+            /** @var string|int|float|bool|null $value */
+            $value        = $entity->{$getter}();
+            $values[$key] = $value;
         }
 
         return $values;

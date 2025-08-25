@@ -329,27 +329,27 @@ interface PostRepositoryInterface extends RepositoryInterface
 
 You can run tests on your side with following commands:
 ```bash
-make tests   # run tests with coverage
-make testdox # run tests without coverage reports but with prettified output
+make php/tests   # run tests with coverage
+make php/test    # run tests with coverage
+make php/testdox # run tests without coverage reports but with prettified output
 ```
 
 You also can run code style check or code style fixes with following commands:
 ```bash
-make phpcs   # run checks on check style
-make phpcbf  # run check style auto fix
+make php/check   # run checks on check style
+make php/fix     # run check style auto fix
 ```
 
 To perform a static analyze of your code (with phpstan, lvl 9 at default), you can use the following command:
 ```bash
-make phpstan
-make analyze # Same as phpstan but with CLI output as table
+make php/analyze # Same as phpstan but with CLI output as table
 ```
 
 To ensure you code still compatible with current supported version and futures versions of php, you need to
 run the following commands (both are required for full support):
 ```bash
-make php74compatibility # run compatibility check on current minimal version of php we support
-make php81compatibility # run compatibility check on last version of php we will support in future
+make php/min-compatibility # run compatibility check on current minimal version of php we support
+make php/max-compatibility # run compatibility check on last version of php we will support in future
 ```
 
 And the last "helper" commands, you can run before commit and push is:
