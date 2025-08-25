@@ -60,7 +60,6 @@ trait RepositoryTrait
      */
     public function findByKeys(array $keys): object
     {
-        /** @var TRepository $this */
         $queryBuilder = new Query\SelectBuilder($this);
         foreach ($keys as $field => $value) {
             $queryBuilder->addWhere($field, $value);
@@ -76,7 +75,6 @@ trait RepositoryTrait
      */
     public function findAllByKeys(array $keys): array
     {
-        /** @var TRepository $this */
         $queryBuilder = new Query\SelectBuilder($this);
         foreach ($keys as $field => $value) {
             $queryBuilder->addWhere($field, $value);

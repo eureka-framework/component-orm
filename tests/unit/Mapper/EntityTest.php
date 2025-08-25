@@ -66,7 +66,7 @@ class EntityTest extends TestCase
         $repository = $this->getUserRepository();
         $user       = $repository->newEntity();
 
-        $this->assertInstanceOf(User::class, $user);
+        self::assertInstanceOf(User::class, $user);
     }
 
     /**
@@ -87,8 +87,8 @@ class EntityTest extends TestCase
             ],
         );
 
-        $this->assertInstanceOf(User::class, $user);
-        $this->assertInstanceOf(UserRepositoryInterface::class, $user->getRepository());
+        self::assertInstanceOf(User::class, $user);
+        self::assertInstanceOf(UserRepositoryInterface::class, $user->getRepository());
     }
 
     /**
@@ -113,17 +113,17 @@ class EntityTest extends TestCase
         $user->setAutoIncrementId(2);
         $user->setDateUpdate('2020-01-02 10:00:00');
 
-        $this->assertTrue($user->isUpdated());
-        $this->assertTrue($user->isUpdated('id'));
-        $this->assertTrue($user->isUpdated('dateUpdate'));
+        self::assertTrue($user->isUpdated());
+        self::assertTrue($user->isUpdated('id'));
+        self::assertTrue($user->isUpdated('dateUpdate'));
 
-        $this->assertTrue($repository->isEntityUpdated($user, 'user_id'));
-        $this->assertTrue($repository->isEntityUpdated($user, 'user_date_update'));
+        self::assertTrue($repository->isEntityUpdated($user, 'user_id'));
+        self::assertTrue($repository->isEntityUpdated($user, 'user_date_update'));
 
         $user->resetUpdated();
-        $this->assertFalse($user->isUpdated());
-        $this->assertFalse($user->isUpdated('id'));
-        $this->assertFalse($user->isUpdated('dateUpdate'));
+        self::assertFalse($user->isUpdated());
+        self::assertFalse($user->isUpdated('id'));
+        self::assertFalse($user->isUpdated('dateUpdate'));
     }
 
     /**
@@ -155,7 +155,7 @@ class EntityTest extends TestCase
 
         $a = $expected->getId();
 
-        $this->assertEquals($expected, $user);
+        self::assertEquals($expected, $user);
     }
 
 
@@ -178,7 +178,7 @@ class EntityTest extends TestCase
             ],
         );
         $repository->disableIgnoreNotMappedFields();
-        $this->assertInstanceOf(User::class, $user);
+        self::assertInstanceOf(User::class, $user);
     }
 
     /**
@@ -259,7 +259,7 @@ class EntityTest extends TestCase
 
         $generic = $user->getGenericEntity();
 
-        $this->assertEquals($expected, $generic);
+        self::assertEquals($expected, $generic);
     }
 
     /**
@@ -293,7 +293,7 @@ class EntityTest extends TestCase
             ],
         );
 
-        $this->assertEquals($expected, $user);
+        self::assertEquals($expected, $user);
     }
 
     /**
@@ -307,7 +307,7 @@ class EntityTest extends TestCase
 
         $user->setUserParent($this->getUserParentRepository()->newEntity());
 
-        $this->assertInstanceOf(UserParent::class, $user->getUserParent());
+        self::assertInstanceOf(UserParent::class, $user->getUserParent());
 
         $user->resetLazyLoadedData();
     }

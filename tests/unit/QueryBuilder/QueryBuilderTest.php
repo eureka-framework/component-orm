@@ -50,8 +50,8 @@ class QueryBuilderTest extends TestCase
         $queryBuilder->setListIndexedByField('user_id');
         $queryBuilder->bindAll([':user_id' => 1]);
 
-        $this->assertSame('user_id', $queryBuilder->getListIndexedByField());
-        $this->assertSame([':user_id' => 1], $queryBuilder->getAllBind());
+        self::assertSame('user_id', $queryBuilder->getListIndexedByField());
+        self::assertSame([':user_id' => 1], $queryBuilder->getAllBind());
     }
     /**
      * @return void
@@ -61,11 +61,11 @@ class QueryBuilderTest extends TestCase
         $repository = $this->getUserRepository($this->getMockEntityFindAll());
         $factory   = new QueryBuilderFactory();
 
-        $this->assertInstanceOf(QueryBuilder::class, $factory->newQueryBuilder($repository));
-        $this->assertInstanceOf(SelectBuilder::class, $factory->newSelectBuilder($repository));
-        $this->assertInstanceOf(DeleteBuilder::class, $factory->newDeleteBuilder($repository));
-        $this->assertInstanceOf(InsertBuilder::class, $factory->newInsertBuilder($repository));
-        $this->assertInstanceOf(UpdateBuilder::class, $factory->newUpdateBuilder($repository));
+        self::assertInstanceOf(QueryBuilder::class, $factory->newQueryBuilder($repository));
+        self::assertInstanceOf(SelectBuilder::class, $factory->newSelectBuilder($repository));
+        self::assertInstanceOf(DeleteBuilder::class, $factory->newDeleteBuilder($repository));
+        self::assertInstanceOf(InsertBuilder::class, $factory->newInsertBuilder($repository));
+        self::assertInstanceOf(UpdateBuilder::class, $factory->newUpdateBuilder($repository));
     }
 
     /**
@@ -84,18 +84,18 @@ class QueryBuilderTest extends TestCase
         $suffix = '\_[a-z0-9]{13}';
         $insertQuery  = $queryBuilder->getQuery();
         $patternQuery = "/INSERT INTO user SET `user_id` = :user_id$suffix, `user_name` = :user_name$suffix/";
-        $this->assertMatchesRegularExpression($patternQuery, $insertQuery);
+        self::assertMatchesRegularExpression($patternQuery, $insertQuery);
 
         //~ Query with IGNORE for duplicate
         $insertQuery  = $queryBuilder->getQuery(false, true);
         $patternQuery = "/INSERT IGNORE INTO user SET `user_id` = :user_id$suffix, `user_name` = :user_name$suffix/";
-        $this->assertMatchesRegularExpression($patternQuery, $insertQuery);
+        self::assertMatchesRegularExpression($patternQuery, $insertQuery);
 
         //~ Query with IGNORE for duplicate
         $queryBuilder->addUpdate('user_name', 'test');
         $insertQuery  = $queryBuilder->getQuery(true);
         $patternQuery = "/INSERT INTO user SET `user_id` = :user_id$suffix, `user_name` = :user_name$suffix ON DUPLICATE KEY UPDATE `user_name` = :user_name$suffix/";
-        $this->assertMatchesRegularExpression($patternQuery, $insertQuery);
+        self::assertMatchesRegularExpression($patternQuery, $insertQuery);
     }
 
     /**
@@ -119,7 +119,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = (new QueryBuilderFactory())->newInsertBuilder($repository, $user);
         $query = $queryBuilder->getQuery(true);
 
-        $this->assertIsString($query);
+        self::assertIsString($query);
     }
 
     /**
@@ -135,7 +135,7 @@ class QueryBuilderTest extends TestCase
 
         $query = $queryBuilder->getQuery();
         $expected = 'SELECT `user_id` FROM `user`';
-        $this->assertSame($expected, $query);
+        self::assertSame($expected, $query);
     }
 
     /**
@@ -147,7 +147,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryField = $queryBuilder->getQueryFieldsPersonalized(['user_id' => 'usr_id', 'user_name' => '']);
 
-        $this->assertSame('`user_id` AS `usr_id`, `user_name`', $queryField);
+        self::assertSame('`user_id` AS `usr_id`, `user_name`', $queryField);
     }
 
     /**
@@ -160,7 +160,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder->addField('user_id');
         $queryField   = $queryBuilder->getQueryFields($repository);
 
-        $this->assertSame('`user_id`', $queryField);
+        self::assertSame('`user_id`', $queryField);
     }
 
     /**
@@ -172,7 +172,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryField   = $queryBuilder->getQueryFields($repository, true, true);
 
-        $this->assertSame('user.user_id', $queryField);
+        self::assertSame('user.user_id', $queryField);
     }
 
     /**
@@ -184,7 +184,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryField   = $queryBuilder->getQueryFieldsList($repository, true, true, 'usr_alias', '_suffix');
 
-        $this->assertSame('usr_alias.user_id AS user_id_suffix', $queryField[0]);
+        self::assertSame('usr_alias.user_id AS user_id_suffix', $queryField[0]);
     }
 
     /**
@@ -197,12 +197,12 @@ class QueryBuilderTest extends TestCase
 
         $queryBuilder->enableCalculateFoundRows();
         $queryField = $queryBuilder->getQueryFieldsPersonalized(['user_id' => 'usr_id', 'user_name' => '']);
-        $this->assertSame('SQL_CALC_FOUND_ROWS `user_id` AS `usr_id`, `user_name`', $queryField);
+        self::assertSame('SQL_CALC_FOUND_ROWS `user_id` AS `usr_id`, `user_name`', $queryField);
 
         $queryBuilder->clear();
         $queryBuilder->disableCalculateFoundRows();
         $queryField = $queryBuilder->getQueryFieldsPersonalized(['user_id' => 'usr_id', 'user_name' => '']);
-        $this->assertSame('`user_id` AS `usr_id`, `user_name`', $queryField);
+        self::assertSame('`user_id` AS `usr_id`, `user_name`', $queryField);
     }
 
     /**
@@ -214,7 +214,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryBuilder->addOrder('user_id');
 
-        $this->assertSame(' ORDER BY user_id ASC', $queryBuilder->getQueryOrderBy());
+        self::assertSame(' ORDER BY user_id ASC', $queryBuilder->getQueryOrderBy());
     }
 
     /**
@@ -226,7 +226,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = (new QueryBuilderFactory())->newQueryBuilder($repository);
         $queryBuilder->addGroupBy('user_id');
 
-        $this->assertSame(' GROUP BY user_id ', $queryBuilder->getQueryGroupBy());
+        self::assertSame(' GROUP BY user_id ', $queryBuilder->getQueryGroupBy());
     }
 
     /**
@@ -240,7 +240,7 @@ class QueryBuilderTest extends TestCase
 
         $suffix = '\_[a-z0-9]{13}';
         $patternQuery = "/ HAVING user_id > :user_id$suffix /";
-        $this->assertMatchesRegularExpression($patternQuery, $queryBuilder->getQueryHaving());
+        self::assertMatchesRegularExpression($patternQuery, $queryBuilder->getQueryHaving());
     }
 
     /**
@@ -253,7 +253,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder->addJoin(JoinType::INNER, 'address', 'user_id', 'user', 'user_id', 'address');
 
         $expected = ' INNER JOIN address AS address ON user.user_id = address.user_id ';
-        $this->assertSame($expected, $queryBuilder->getQueryJoin());
+        self::assertSame($expected, $queryBuilder->getQueryJoin());
     }
 
     /**
@@ -266,7 +266,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = new QueryBuilder($repository);
         $queryBuilder->addWhere('user_name', 'test[a-z]', Operator::Regexp);
 
-        $this->assertSame(' WHERE user_name REGEXP \'test[a-z]\' ', $queryBuilder->getQueryWhere());
+        self::assertSame(' WHERE user_name REGEXP \'test[a-z]\' ', $queryBuilder->getQueryWhere());
     }
 
     /**
@@ -283,7 +283,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder->addWhere('user_name', 'any');
 
         $pattern = "` WHERE user_id = :user_id_$suffix AND user_name = :user_name_$suffix `";
-        $this->assertMatchesRegularExpression($pattern, $queryBuilder->getQueryWhere());
+        self::assertMatchesRegularExpression($pattern, $queryBuilder->getQueryWhere());
     }
 
     /**
@@ -297,7 +297,7 @@ class QueryBuilderTest extends TestCase
         $queryBuilder->addWhereRaw('user_id IS NULL');
         $queryBuilder->addWhereRaw('user_name LIKE "test"');
 
-        $this->assertSame(' WHERE user_id IS NULL  AND user_name LIKE "test" ', $queryBuilder->getQueryWhere());
+        self::assertSame(' WHERE user_id IS NULL  AND user_name LIKE "test" ', $queryBuilder->getQueryWhere());
     }
 
     /**
@@ -313,7 +313,7 @@ class QueryBuilderTest extends TestCase
 
         $suffix = '\_[a-z0-9]{13}';
         $patternQuery = "/ WHERE  \(primary_key_1 = :primary_key_1$suffix AND primary_key_2 = :primary_key_2$suffix\)   OR  \(primary_key_1 = :primary_key_1$suffix AND primary_key_2 = :primary_key_2$suffix\)  /";
-        $this->assertMatchesRegularExpression($patternQuery, $queryBuilder->getQueryWhere());
+        self::assertMatchesRegularExpression($patternQuery, $queryBuilder->getQueryWhere());
     }
 
     /**
@@ -383,7 +383,7 @@ class QueryBuilderTest extends TestCase
         $statementMock = $this->getMockBuilder(\PDOStatement::class)->getMock();
         $statementMock->method('execute')->willReturn(true);
         $statementMock->method('rowCount')->willReturn($count);
-        $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...$entityMock);
+        $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...\array_values($entityMock));
         $statementMock->method('fetchColumn')->willReturn($count);
 
         $mockBuilder = $this->getMockBuilder(Connection::class)->disableOriginalConstructor();

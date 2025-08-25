@@ -60,7 +60,7 @@ class EntityCompiler extends AbstractClassCompiler
         /** @var string $repositoryName */
         $repositoryName = $context->get('class.repository');
         $context->add('entity.uses', [
-            "use {$this->config->getBaseNamespaceForRepository()}\\{$repositoryName};",
+            "{$this->config->getBaseNamespaceForRepository()}\\{$repositoryName}" => "use {$this->config->getBaseNamespaceForRepository()}\\{$repositoryName};",
         ]);
 
         $compiledTemplate = [

@@ -55,7 +55,7 @@ abstract class AbstractCompiler
      */
     public function setVerbose(bool $verbose): self
     {
-        $this->verbose = (bool) $verbose;
+        $this->verbose = $verbose;
 
         return $this;
     }
@@ -85,7 +85,12 @@ abstract class AbstractCompiler
         $content = $this->readTemplate($template);
 
         //~ Replace template vars
-        $content = str_replace($context->getKeys(), $context->getValues(), $content);
+        $content = str_replace(
+            $context->getKeys(),
+            \array_map(fn($value) => is_scalar($value) ? (string) $value : '', $context->getValues()),
+            $content,
+        );
+
         return str_replace(["\n\n\n", "    }\n\n}"], ["\n\n", "    }\n}"], $content); // clean double empty lines
     }
 

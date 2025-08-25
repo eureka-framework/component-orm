@@ -72,7 +72,7 @@ trait CacheAwareTrait
      * @param CacheItemPoolInterface|null $cache
      * @return static
      */
-    protected function setCache(CacheItemPoolInterface $cache = null): static
+    protected function setCache(CacheItemPoolInterface|null $cache = null): static
     {
         $this->cache = $cache;
 

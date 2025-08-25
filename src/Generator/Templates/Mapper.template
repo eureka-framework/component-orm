@@ -24,4 +24,6 @@ class {{ class.mapper }} extends Abstracts\Abstract{{ class.mapper }} implements
 {
     /** @use Traits\RepositoryTrait<{{ class.repository }}, {{ class.entity }}> */
     use Traits\RepositoryTrait;
+    /** @use Traits\MapperTrait<{{ class.repository }}, {{ class.entity }}> */
+    use Traits\MapperTrait;
 }

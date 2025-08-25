@@ -34,7 +34,7 @@ trait ValidatorAwareTrait
     private array $validationConfig = [];
 
     /**
-     * @param array<mixed> $data
+     * @param array<string, int|float|bool|string|null> $data
      * @param array<string, array{type?:string, options?: array<string, string|int|float>}> $config
      * @return GenericEntity
      */
@@ -48,7 +48,7 @@ trait ValidatorAwareTrait
             // @codeCoverageIgnoreEnd
         }
 
-        $config = !empty($config) ? $config : $this->getValidatorConfig();
+        $config = $config !== [] ? $config : $this->getValidatorConfig();
         return $this->getValidatorEntityFactory()->createGeneric($config, $data);
     }
 

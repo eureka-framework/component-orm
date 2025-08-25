@@ -43,7 +43,7 @@ abstract class Abstract{{ class.name }} implements EntityInterface
     public function __construct(
         {{ class.repository }} $repository,
         ?ValidatorFactoryInterface $validatorFactory = null,
-        ?ValidatorEntityFactoryInterface $validatorEntityFactory = null
+        ?ValidatorEntityFactoryInterface $validatorEntityFactory = null,
     ) {
         $this->setRepository($repository);
         $this->setValidatorFactories($validatorFactory, $validatorEntityFactory);

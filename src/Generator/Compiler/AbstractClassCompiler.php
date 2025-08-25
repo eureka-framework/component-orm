@@ -18,15 +18,13 @@ use Eureka\Component\Orm\Generator\Compiler\Field\Field;
 use Eureka\Component\Orm\Generator\Compiler\Field\FieldValidatorService;
 
 /**
- * Class AbstractClassCompiler
- *
- * @author Romain Cottard
+ * @phpstan-import-type FieldType from Field
  */
 class AbstractClassCompiler extends AbstractCompiler
 {
-    protected const TYPE_REPOSITORY = 'repository';
-    protected const TYPE_MAPPER     = 'mapper';
-    protected const TYPE_ENTITY     = 'entity';
+    protected const string TYPE_REPOSITORY = 'repository';
+    protected const string TYPE_MAPPER     = 'mapper';
+    protected const string TYPE_ENTITY     = 'entity';
 
     /** @var string $type */
     private string $type;
@@ -70,7 +68,7 @@ class AbstractClassCompiler extends AbstractCompiler
 
         $this->fields = [];
         while (false !== ($column = $statement->fetch(\PDO::FETCH_OBJ))) {
-            /** @var \stdClass $column */
+            /** @var FieldType $column */
             $this->fields[] = new Field($column, $this->config->getDbPrefix(), $this->config->getValidation());
         }
 

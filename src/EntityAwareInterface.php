@@ -35,7 +35,7 @@ interface EntityAwareInterface
      * @param  bool $exists
      * @return TEntity
      */
-    public function newEntity(\stdClass $row = null, bool $exists = false): object;
+    public function newEntity(\stdClass|null $row = null, bool $exists = false): object;
 
     /**
      * Create new entity from array.
