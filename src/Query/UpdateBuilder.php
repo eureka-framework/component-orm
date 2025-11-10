@@ -57,6 +57,11 @@ class UpdateBuilder extends AbstractQueryBuilder implements FieldAwareInterface,
                 continue;
             }
 
+            //~ Skip fields that are not updated
+            if (!$this->repository->isEntityUpdated($this->entity, $field)) {
+                continue;
+            }
+
             $this->addSet($field, $value);
         }
 

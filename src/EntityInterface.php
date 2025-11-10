@@ -78,7 +78,7 @@ interface EntityInterface
      * @param  string|null $property
      * @return bool
      */
-    public function isUpdated(string|null $property = null): bool;
+    public function isUpdated(?string $property = null): bool;
 
     /**
      * Reset updated list of properties
