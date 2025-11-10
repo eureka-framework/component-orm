@@ -56,10 +56,10 @@ class InsertBuilder extends AbstractQueryBuilder implements FieldAwareInterface,
             $this->appendUpdateValues();
         }
 
-        return 'INSERT ' . $onDuplicateIgnoreClause .
-            'INTO ' . $this->repository->getTable() .
-            $this->getQuerySet() .
-            $this->getQueryDuplicateUpdate()
+        return 'INSERT ' . $onDuplicateIgnoreClause
+            . 'INTO ' . $this->repository->getTable()
+            . $this->getQuerySet()
+            . $this->getQueryDuplicateUpdate()
         ;
     }
 

@@ -42,13 +42,13 @@
   },
 
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "^3.86.0",
-    "phpstan/phpstan": "^2.1.22",
+    "friendsofphp/php-cs-fixer": "^3.89.2",
+    "phpstan/phpstan": "^2.1.31",
     "phpstan/phpstan-phpunit": "^2.0.7",
-    "phpstan/phpstan-strict-rules": "^2.0.6",
-    "phpunit/phpcov": "^11.0.1",
-    "phpunit/phpunit": "^12.3.6",
-    "symfony/cache": "^7.3.2",
+    "phpstan/phpstan-strict-rules": "^2.0.7",
+    "phpunit/phpcov": "^11.0.2",
+    "phpunit/phpunit": "^12.4.2",
+    "symfony/cache": "^7.3.6",
     "shipmonk/composer-dependency-analyser": "^1.8.3"
   }
 }

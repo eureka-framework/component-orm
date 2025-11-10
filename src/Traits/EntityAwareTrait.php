@@ -11,10 +11,8 @@ declare(strict_types=0);
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\EntityAwareInterface;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinType;
-use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**
@@ -61,7 +59,7 @@ trait EntityAwareTrait
      *
      * @phpstan-return TEntity
      */
-    public function newEntity(\stdClass|null $row = null, bool $exists = false): object
+    public function newEntity(?\stdClass $row = null, bool $exists = false): object
     {
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 

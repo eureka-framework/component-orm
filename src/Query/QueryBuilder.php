@@ -24,13 +24,13 @@ class QueryBuilder extends SelectBuilder
      */
     public function getQuery(bool $usePrefix = false, string $prefix = '', bool $onlyPrimaryKey = false): string
     {
-        return 'SELECT ' . $this->getQueryFieldsPersonalized() .
-            $this->getQueryFromPersonalized() .
-            $this->getQueryWhere() .
-            $this->getQueryGroupBy() .
-            $this->getQueryHaving() .
-            $this->getQueryOrderBy() .
-            $this->getQueryLimit()
+        return 'SELECT ' . $this->getQueryFieldsPersonalized()
+            . $this->getQueryFromPersonalized()
+            . $this->getQueryWhere()
+            . $this->getQueryGroupBy()
+            . $this->getQueryHaving()
+            . $this->getQueryOrderBy()
+            . $this->getQueryLimit()
         ;
     }
 
@@ -43,10 +43,10 @@ class QueryBuilder extends SelectBuilder
      */
     public function getQueryCount(string $field = '*'): string
     {
-        return 'SELECT COUNT(' . $field . ') AS nb_results' .
-            $this->getQueryFrom($this->repository) .
-            $this->getQueryWhere() .
-            $this->getQueryGroupBy()
+        return 'SELECT COUNT(' . $field . ') AS nb_results'
+            . $this->getQueryFrom($this->repository)
+            . $this->getQueryWhere()
+            . $this->getQueryGroupBy()
         ;
     }
 }

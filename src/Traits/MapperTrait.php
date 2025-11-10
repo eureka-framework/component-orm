@@ -191,6 +191,7 @@ trait MapperTrait
                 );
             }
 
+            /** @var string|int $index */
             $index              = !empty($indexedBy) ? $row->{$indexedBy} : $id++;
             $entity = $this->newEntity($row, true);
             $collection[$index] = $entity;
@@ -501,7 +502,9 @@ trait MapperTrait
         $nameMap = $this->getNamesMap($listIndexedBy);
         $getter = $nameMap['get'];
         foreach ($rawCollection as $item) {
-            $collection[$item->$getter()] = $item;
+            /** @var string|int $index */
+            $index = $item->$getter();
+            $collection[$index] = $item;
         }
 
         return $collection;
