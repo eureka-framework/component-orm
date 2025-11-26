@@ -52,6 +52,7 @@ class QueryBuilderTest extends TestCase
 
         self::assertSame('user_id', $queryBuilder->getListIndexedByField());
         self::assertSame([':user_id' => 1], $queryBuilder->getAllBind());
+        self::assertNotEmpty($queryBuilder->getQuery());
     }
     /**
      * @return void
