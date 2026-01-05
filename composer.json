@@ -31,24 +31,24 @@
   },
 
   "require": {
-    "php": "8.3.*||8.4.*",
+    "php": ">=8.3",
     "ext-pdo": "*",
 
-    "eureka/component-database": "^3.4",
+    "eureka/component-database": "^4.0",
     "eureka/component-validation": "^6.0",
-    "eureka/component-console": "^6.3",
+    "eureka/component-console": "^7.0",
 
     "psr/cache": "^1.0||^2.0||^3.0"
   },
 
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "^3.86.0",
-    "phpstan/phpstan": "^2.1.22",
-    "phpstan/phpstan-phpunit": "^2.0.7",
-    "phpstan/phpstan-strict-rules": "^2.0.6",
-    "phpunit/phpcov": "^11.0.1",
-    "phpunit/phpunit": "^12.3.6",
-    "symfony/cache": "^7.3.2",
-    "shipmonk/composer-dependency-analyser": "^1.8.3"
+    "friendsofphp/php-cs-fixer": "^3.92.4",
+    "phpstan/phpstan": "^2.1.33",
+    "phpstan/phpstan-phpunit": "^2.0.11",
+    "phpstan/phpstan-strict-rules": "^2.0.7",
+    "phpunit/phpcov": "^11.0.3",
+    "phpunit/phpunit": "^12.5.4",
+    "symfony/cache": "^7.4.3",
+    "shipmonk/composer-dependency-analyser": "^1.8.4"
   }
 }

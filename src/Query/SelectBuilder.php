@@ -59,13 +59,13 @@ class SelectBuilder extends AbstractQueryBuilder implements
      */
     public function getQuery(bool $usePrefix = false, string $prefix = '', bool $onlyPrimaryKey = false): string
     {
-        return 'SELECT ' . $this->getQueryFields($this->repository, $usePrefix, $onlyPrimaryKey) .
-            $this->getQueryFrom($this->repository) .
-            $this->getQueryJoin() .
-            $this->getQueryWhere() .
-            $this->getQueryGroupBy() .
-            $this->getQueryHaving() .
-            $this->getQueryOrderBy() .
-            $this->getQueryLimit();
+        return 'SELECT ' . $this->getQueryFields($this->repository, $usePrefix, $onlyPrimaryKey)
+            . $this->getQueryFrom($this->repository)
+            . $this->getQueryJoin()
+            . $this->getQueryWhere()
+            . $this->getQueryGroupBy()
+            . $this->getQueryHaving()
+            . $this->getQueryOrderBy()
+            . $this->getQueryLimit();
     }
 }

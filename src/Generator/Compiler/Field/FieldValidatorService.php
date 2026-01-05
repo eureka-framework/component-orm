@@ -112,21 +112,21 @@ class FieldValidatorService
     private function getIntegerOptions(string $typeClass, bool $isUnsigned): array
     {
         return match ($typeClass) {
-            Type\TypeBigint::class => $isUnsigned ?
-                IntegerValidator::BIGINT_UNSIGNED :
-                IntegerValidator::BIGINT_SIGNED,
-            Type\TypeInt::class => $isUnsigned ?
-                IntegerValidator::INT_UNSIGNED :
-                IntegerValidator::INT_SIGNED,
-            Type\TypeMediumint::class => $isUnsigned ?
-                IntegerValidator::MEDIUMINT_UNSIGNED :
-                IntegerValidator::MEDIUMINT_SIGNED,
-            Type\TypeSmallint::class => $isUnsigned ?
-                IntegerValidator::SMALLINT_UNSIGNED :
-                IntegerValidator::SMALLINT_SIGNED,
-            Type\TypeTinyint::class => $isUnsigned ?
-                IntegerValidator::TINYINT_UNSIGNED :
-                IntegerValidator::TINYINT_SIGNED,
+            Type\TypeBigint::class => $isUnsigned
+                ? IntegerValidator::BIGINT_UNSIGNED
+                : IntegerValidator::BIGINT_SIGNED,
+            Type\TypeInt::class => $isUnsigned
+                ? IntegerValidator::INT_UNSIGNED
+                : IntegerValidator::INT_SIGNED,
+            Type\TypeMediumint::class => $isUnsigned
+                ? IntegerValidator::MEDIUMINT_UNSIGNED
+                : IntegerValidator::MEDIUMINT_SIGNED,
+            Type\TypeSmallint::class => $isUnsigned
+                ? IntegerValidator::SMALLINT_UNSIGNED
+                : IntegerValidator::SMALLINT_SIGNED,
+            Type\TypeTinyint::class => $isUnsigned
+                ? IntegerValidator::TINYINT_UNSIGNED
+                : IntegerValidator::TINYINT_SIGNED,
             default => [],
         };
     }

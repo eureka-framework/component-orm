@@ -4,8 +4,8 @@ return (new PhpCsFixer\Config())
     //~ Rules
     ->setRules(
         [
-            '@PER-CS2.0' => true,
-        ]
+            '@PER-CS3x0' => true,
+        ],
     )
 
     //~ Format

@@ -1,8 +1,8 @@
 .PHONY: validate install update php/deps php/check php/fix php/min-compatibility php/max-compatibility php/phpstan php/analyze php/tests php/test php/testdox ci clean
 
-PHP_VERSION_MIN := 8.3
-PHP_VERSION_MAX := 8.4
-
+PHP_MIN_VERSION := "8.3"
+PHP_MAX_VERSION := "8.5"
+COMPOSER_BIN := composer
 define header =
     @if [ -t 1 ]; then printf "\n\e[37m\e[100m  \e[104m $(1) \e[0m\n"; else printf "\n### $(1)\n"; fi
 endef
@@ -10,23 +10,23 @@ endef
 #~ Composer dependency
 validate:
 	$(call header,Composer Validation)
-	@composer validate
+	@${COMPOSER_BIN} validate
 
 install:
 	$(call header,Composer Install)
-	@composer install
+	@${COMPOSER_BIN} install
 
 update:
 	$(call header,Composer Update)
-	@composer update
-	@composer bump --dev-only
+	@${COMPOSER_BIN} update
+	@${COMPOSER_BIN} bump --dev-only
 
 composer.lock: install
 
 #~ Vendor binaries dependencies
-vendor/bin/php-cs-fixer:
-vendor/bin/phpstan:
-vendor/bin/phpunit:
+vendor/bin/php-cs-fixer: composer.lock
+vendor/bin/phpstan: composer.lock
+vendor/bin/phpunit: composer.lock
 
 #~ Report directories dependencies
 build/reports/phpunit:
@@ -42,23 +42,25 @@ php/deps: composer.json
 
 php/check: vendor/bin/php-cs-fixer
 	$(call header,Checking Code Style)
-	@./vendor/bin/php-cs-fixer check -v --diff
-
+	@XDEBUG_MODE=off ./vendor/bin/php-cs-fixer check
 php/fix: vendor/bin/php-cs-fixer
 	$(call header,Fixing Code Style)
-	@./vendor/bin/php-cs-fixer fix -v
+	@XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix -v
 
 php/min-compatibility: vendor/bin/phpstan build/reports/phpstan
-	$(call header,Checking PHP ${PHP_VERSION_MIN} compatibility)
+	$(call header,Checking PHP ${PHP_MIN_VERSION} compatibility)
 	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/phpmin-compatibility.neon --error-format=table
 
 php/max-compatibility: vendor/bin/phpstan build/reports/phpstan #ci
-	$(call header,Checking PHP ${PHP_VERSION_MAX} compatibility)
+	$(call header,Checking PHP ${PHP_MAX_VERSION} compatibility)
 	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --configuration=./ci/phpmax-compatibility.neon --error-format=table
 
 php/analyze: vendor/bin/phpstan build/reports/phpstan #manual & ci
 	$(call header,Running Static Analyze - Pretty tty format)
 	@XDEBUG_MODE=off ./vendor/bin/phpstan analyse --error-format=table
+
+php/clean-tests:
+	$(call header,Clean previous generated classes from tests)
 
 php/tests: vendor/bin/phpunit build/reports/phpunit #ci
 	$(call header,Running Unit Tests)
@@ -78,4 +80,10 @@ clean:
 	$(call header,Cleaning previous build) #manual
 	@if [ "$(shell ls -A ./build)" ]; then rm -rf ./build/*; fi; echo " done"
 
-ci: clean validate install php/deps php/check php/tests php/integration php/min-compatibility php/max-compatibility php/analyze
+clean-tests:
+	$(call header,Cleaning generated classes from tests) #manual
+	@if [ "$(shell ls -A ./tests/unit/Generated/Entity)" ]; then rm -rf ./tests/unit/Generated/Entity; fi; echo " . Removing entities: done"
+	@if [ "$(shell ls -A ./tests/unit/Generated/Infrastructure)" ]; then rm -rf ./tests/unit/Generated/Infrastructure; fi; echo " . Removing infrastructure: done"
+	@if [ "$(shell ls -A ./tests/unit/Generated/Repository)" ]; then rm -rf ./tests/unit/Generated/Repository; fi; echo " . Removing repositories: done"
+
+ci: clean clean-tests validate install php/deps php/check php/tests php/integration php/min-compatibility php/max-compatibility php/analyze

@@ -61,7 +61,7 @@ trait EntityAwareTrait
      *
      * @phpstan-return TEntity
      */
-    public function newEntity(\stdClass|null $row = null, bool $exists = false): object
+    public function newEntity(?\stdClass $row = null, bool $exists = false): object
     {
         $entity = new $this->entityClass($this, $this->getValidatorFactory(), $this->getValidatorEntityFactory());
 
