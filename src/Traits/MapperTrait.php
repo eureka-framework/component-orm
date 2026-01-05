@@ -191,11 +191,8 @@ trait MapperTrait
                 );
             }
 
-            $index = $indexedBy !== '' ? $row->{$indexedBy} : $id++;
-            if (!\is_string($index) && !\is_int($index)) {
-                $index = $id++;
-            }
-
+            /** @var string|int $index */
+            $index              = !empty($indexedBy) ? $row->{$indexedBy} : $id++;
             $entity = $this->newEntity($row, true);
             $collection[$index] = $entity;
         }

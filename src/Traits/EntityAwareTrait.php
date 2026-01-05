@@ -11,10 +11,8 @@ declare(strict_types=0);
 
 namespace Eureka\Component\Orm\Traits;
 
-use Eureka\Component\Orm\EntityAwareInterface;
 use Eureka\Component\Orm\EntityInterface;
 use Eureka\Component\Orm\Enumerator\JoinType;
-use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Validation\Entity\GenericEntity;
 
 /**

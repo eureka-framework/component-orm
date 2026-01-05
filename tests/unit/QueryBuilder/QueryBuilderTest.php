@@ -369,6 +369,33 @@ class QueryBuilderTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws OrmException
+     */
+    public function testIHavePartialQueryUpdateWhenOnlySomePropertyAreUpdated(): void
+    {
+        $repository = $this->getUserRepository($this->getMockEntityFindAll());
+        $user       = $repository->newEntity(
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            true,
+        );
+
+        $user->setDateUpdate('2020-01-01 10:00:00');
+        $queryBuilder = new UpdateBuilder($repository, $user);
+
+        $suffix       = '[a-z0-9]{13}';
+        $patternQuery = "#UPDATE user SET `user_date_update` = :user_date_update_$suffix WHERE user_id = :user_id_$suffix#";
+        self::assertMatchesRegularExpression($patternQuery, $queryBuilder->getQuery());
+    }
+
+    /**
      * @param array<mixed> $entityMock
      * @return ConnectionFactory
      */
