@@ -1,4 +1,4 @@
-name: CI
+name: SonarQube
 
 on:
   push:
@@ -41,6 +41,6 @@ jobs:
         run: make php/tests # To generate the coverage report
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6.0.0
+        uses: SonarSource/sonarqube-scan-action@v7
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
