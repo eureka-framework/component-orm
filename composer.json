@@ -34,9 +34,9 @@
     "php": ">=8.3",
     "ext-pdo": "*",
 
-    "eureka/component-database": "^4.0",
+    "eureka/component-database": "^3.0||^4.0",
     "eureka/component-validation": "^6.0",
-    "eureka/component-console": "^7.0",
+    "eureka/component-console": "^6.0||^7.0",
 
     "psr/cache": "^1.0||^2.0||^3.0"
   },
