@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
+## [7.1.1] - 2026-01-07
+[7.1.1]: https://github.com/eureka-framework/component-orm/compare/7.0.0...7.1.1
+### Changed
+- Re-allow previous dependencies version of `component-console` & `component-database`
+
 ## [7.1.0] - 2026-01-05
 [7.1.0]: https://github.com/eureka-framework/component-orm/compare/7.0.0...7.1.0
 ### Added
