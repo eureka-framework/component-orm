@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
  * Class GeneratorTest
  *
  * @author Romain Cottard
- * @phpstan-import-type ConfigList from \Eureka\Component\Orm\Generator\Generator
+ * @phpstan-import-type ConfigList from Generator
  */
 class GeneratorTest extends TestCase
 {
@@ -129,15 +129,15 @@ class GeneratorTest extends TestCase
                         (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'auto_increment', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_is_enabled', 'Type' => 'tinyint(1) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_email', 'Type' => 'varchar(200)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                        (object) ['Field' => 'user_password', 'Type' => 'varchar(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                        (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_password', 'Type' => 'varbinary(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => 'x\'5b5d\'', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'current_timestamp()', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
                         (object) ['Field' => 'user_id', 'Type' => 'int(10) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => 'PRI', 'Default' => null, 'Extra' => 'autoincrement', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_is_enabled', 'Type' => 'tinyint(1) unsigned', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 1, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_email', 'Type' => 'varchar(200)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => 'UNI', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                        (object) ['Field' => 'user_password', 'Type' => 'varchar(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
-                        (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_password', 'Type' => 'varchar(100)', 'Collation' => 'utf8_unicode_ci', 'Null' => 'NO', 'Key' => '', 'Default' => 'x\'5b5d\'', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
+                        (object) ['Field' => 'user_date_create', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'NO', 'Key' => '', 'Default' => 'current_timestamp()', 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         (object) ['Field' => 'user_date_update', 'Type' => 'datetime', 'Collation' => null, 'Null' => 'YES', 'Key' => '', 'Default' => null, 'Extra' => '', 'Privileges' => '', 'Comment' => ''],
                         false,
                     ],

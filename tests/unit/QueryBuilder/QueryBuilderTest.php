@@ -124,6 +124,41 @@ class QueryBuilderTest extends TestCase
 
     /**
      * @return void
+     * @throws OrmException
+     */
+    public function testICanGetWellFormattedInsertQueryWithDefaultDateFromInsertQueryBuilderWithEntity(): void
+    {
+        $data = [
+            'user_id'          => 1,
+            'user_is_enabled'  => true,
+            'user_email'       => 'user@example.com',
+            'user_password'    => md5('password'),
+            'user_date_update' => null,
+        ];
+
+        $id = '[a-f0-9]{13}';
+        $patternQuery1  = "/INSERT INTO user SET `user_id` = :user_id_$id, `user_is_enabled` = :user_is_enabled_$id, `user_email` = :user_email_$id, `user_password` = :user_password_$id, `user_date_create` = current_timestamp\(\), `user_date_update` = :user_date_update_$id ON DUPLICATE KEY UPDATE `user_is_enabled` = :user_is_enabled_$id, `user_email` = :user_email_$id, `user_password` = :user_password_$id, `user_date_create` = current_timestamp\(\), `user_date_update` = :user_date_update_$id/";
+        $patternQuery2  = "/INSERT INTO user SET `user_id` = :user_id_$id, `user_is_enabled` = :user_is_enabled_$id, `user_email` = :user_email_$id, `user_password` = :user_password_$id, `user_date_create` = :user_date_create_$id, `user_date_update` = :user_date_update_$id ON DUPLICATE KEY UPDATE `user_is_enabled` = :user_is_enabled_$id, `user_email` = :user_email_$id, `user_password` = :user_password_$id, `user_date_create` = :user_date_create_$id, `user_date_update` = :user_date_update_$id/";
+
+        $repository = $this->getUserRepository($this->getMockEntityFindAll());
+
+        //~ create entity and use default date (with current_timestamp() as default)
+        $user         = $repository->newEntity((object) $data);
+        $queryBuilder = (new QueryBuilderFactory())->newInsertBuilder($repository, $user);
+        $query        = $queryBuilder->getQuery(true);
+
+        self::assertMatchesRegularExpression($patternQuery1, $query, 'should match with date_create default without binding');
+
+        //~ create entity and define date_create
+        $user         = $repository->newEntity((object) ($data + ['user_date_create' => '2020-01-01 10:00:00']));
+        $queryBuilder = (new QueryBuilderFactory())->newInsertBuilder($repository, $user);
+        $query        = $queryBuilder->getQuery(true);
+
+        self::assertMatchesRegularExpression($patternQuery2, $query, 'should match with date_create with binding');
+    }
+
+    /**
+     * @return void
      * @throws EmptyWhereClauseException
      */
     public function testICanGetQueryFromQueryBuilder(): void

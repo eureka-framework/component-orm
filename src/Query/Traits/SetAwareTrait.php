@@ -20,6 +20,19 @@ use Eureka\Component\Orm\Exception\EmptySetClauseException;
  */
 trait SetAwareTrait
 {
+    /** @var list<string> $noBindOnSetValues */
+    protected static array $noBindOnSetValues = [
+        'curdate()',
+        'current_date',
+        'current_date()',
+        'now()',
+        'current_timestamp',
+        'current_timestamp()',
+        'curtime()',
+        'current_time',
+        'current_time()',
+    ];
+
     /** @var string[] $setList List of set for current query (update or insert) */
     protected array $setList = [];
 
@@ -28,6 +41,12 @@ trait SetAwareTrait
 
     public function addSet(string $field, string|int|float|bool|null $value): static
     {
+        if (\in_array(\strtolower((string) $value), self::$noBindOnSetValues, true)) {
+            $this->setList[] = '`' . $field . '` = ' . $value;
+
+            return $this;
+        }
+
         $bindName = $this->bind($field, $value, true);
 
         $this->setList[] = '`' . $field . '` = ' . $bindName;
@@ -37,6 +56,12 @@ trait SetAwareTrait
 
     public function addUpdate(string $field, string|int|float|bool|null $value): static
     {
+        if (\in_array(\strtolower((string) $value), self::$noBindOnSetValues, true)) {
+            $this->updateList[] = '`' . $field . '` = ' . $value;
+
+            return $this;
+        }
+
         $bindName = $this->bind($field, $value, true);
 
         $this->updateList[] = '`' . $field . '` = ' . $bindName;

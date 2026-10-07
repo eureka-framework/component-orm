@@ -2,6 +2,8 @@ includes:
   - ./vendor/phpstan/phpstan-phpunit/extension.neon
   - ./vendor/phpstan/phpstan-phpunit/rules.neon
   #- ./vendor/phpstan/phpstan-strict-rules/rules.neon # For next major release
+  - ./vendor/phpstan/phpstan-deprecation-rules/rules.neon
+  - phar://phpstan.phar/conf/bleedingEdge.neon
 
 parameters:
   phpVersion: 80300
@@ -28,6 +30,12 @@ parameters:
       path: 'src/Generator/Compiler/MapperCompiler.php'
       identifier: instanceof.alwaysTrue
       count: 2
+
+    #~ Config definition related. This part should be entirely reworked to suppress the phpstan errors
+    -
+      path: 'src/Generator/Generator.php'
+      identifier: varTag.nativeType
+      count: 1
     -
       path: 'tests/unit/'
       identifier: staticMethod.alreadyNarrowedType

@@ -65,8 +65,12 @@ class EntityTest extends TestCase
     {
         $repository = $this->getUserRepository();
         $user       = $repository->newEntity();
+        $user->setDeleted(true);
 
         self::assertInstanceOf(User::class, $user);
+        self::assertSame('[]', $user->getPassword()); // Check for default value binary decoded to plain text
+        self::assertSame('current_timestamp()', $user->getDateCreate()); // Check for default value for datetime default not nullable
+        self::assertTrue($user->deleted()); // Check for deleted flag
     }
 
     /**
@@ -113,17 +117,17 @@ class EntityTest extends TestCase
         $user->setAutoIncrementId(2);
         $user->setDateUpdate('2020-01-02 10:00:00');
 
-        self::assertTrue($user->isUpdated());
-        self::assertTrue($user->isUpdated('id'));
-        self::assertTrue($user->isUpdated('dateUpdate'));
+        self::assertTrue($user->updated());
+        self::assertTrue($user->updated('id'));
+        self::assertTrue($user->updated('dateUpdate'));
 
         self::assertTrue($repository->isEntityUpdated($user, 'user_id'));
         self::assertTrue($repository->isEntityUpdated($user, 'user_date_update'));
 
         $user->resetUpdated();
-        self::assertFalse($user->isUpdated());
-        self::assertFalse($user->isUpdated('id'));
-        self::assertFalse($user->isUpdated('dateUpdate'));
+        self::assertFalse($user->updated());
+        self::assertFalse($user->updated('id'));
+        self::assertFalse($user->updated('dateUpdate'));
     }
 
     /**
@@ -153,9 +157,8 @@ class EntityTest extends TestCase
             ],
         );
 
-        $a = $expected->getId();
-
         self::assertEquals($expected, $user);
+        self::assertSame(1, $user->getId());
     }
 
 

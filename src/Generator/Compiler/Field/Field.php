@@ -191,17 +191,12 @@ class Field
 
     protected function setDefaultValue(string|int|float|bool|null $default): static
     {
-        $isTimeType = ($this->getType() instanceof Type\TypeTimestamp || $this->getType() instanceof Type\TypeDatetime);
+        if (\is_string($default) && ($this->getType() instanceof Type\TypeBinary || $this->getType() instanceof Type\TypeVarbinary)) {
+            $default = $this->decodeBinaryDefaultValue($default);
+        }
 
         if ($this->isNullable() && $default === null) {
             $this->default = 'null';
-
-            return $this;
-        }
-
-        //~ Handle date time that have default value as current timestamp but not nullable
-        if ($isTimeType && ($default === 'CURRENT_TIMESTAMP' || $default === 'CURRENT_TIMESTAMP()')) {
-            $this->default = $this->getType()->getEmptyValue();
 
             return $this;
         }
@@ -232,5 +227,14 @@ class Field
         }
 
         return $this;
+    }
+
+    private function decodeBinaryDefaultValue(string $default): string
+    {
+        if (\str_starts_with($default, 'x\'')) {
+            $default = (string) \hex2bin(\substr($default, 2, -1));
+        }
+
+        return $default;
     }
 }

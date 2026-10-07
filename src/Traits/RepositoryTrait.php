@@ -118,7 +118,7 @@ trait RepositoryTrait
         bool $onDuplicateUpdate = false,
         bool $onDuplicateIgnore = false,
     ): bool {
-        if ($entity->exists() && !$entity->isUpdated()) {
+        if ($entity->exists() && !$entity->updated()) {
             return false;
         }
 
@@ -163,7 +163,7 @@ trait RepositoryTrait
      */
     public function update(EntityInterface $entity): bool
     {
-        if (!$entity->isUpdated()) {
+        if (!$entity->updated()) {
             return false;
         }
 
