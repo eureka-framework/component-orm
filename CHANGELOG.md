@@ -12,8 +12,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
+## [7.2.0] - 2026-10-07
+[7.2.0]: https://github.com/eureka-framework/component-orm/compare/7.1.1...7.2.0
+### Changed
+- Now decode binary default values for binary fields.
+- Now can use date/time default internal values rather than default string `0000-00-00 00:00:00`.
+- Deprecate `Entity::isUpdated()`.
+
+### Added
+- Add `Entity::update()`, `Entity::deleted()` && `Entity::setDeleted()` methods
+
+
 ## [7.1.1] - 2026-01-07
-[7.1.1]: https://github.com/eureka-framework/component-orm/compare/7.0.0...7.1.1
+[7.1.1]: https://github.com/eureka-framework/component-orm/compare/7.1.0...7.1.1
 ### Changed
 - Re-allow previous dependencies version of `component-console` & `component-database`
 

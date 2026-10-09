@@ -19,7 +19,6 @@ use Eureka\Component\Orm\Exception\UndefinedMapperException;
 use Eureka\Component\Orm\MapperInterface;
 use Eureka\Component\Orm\Query\QueryBuilder;
 use Eureka\Component\Orm\Query\SelectBuilder;
-use Eureka\Component\Orm\RepositoryInterface;
 use Eureka\Component\Orm\Tests\Unit\Generated\Entity\User;
 use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserMapper;
 use Eureka\Component\Orm\Tests\Unit\Generated\Infrastructure\Mapper\UserParentMapper;
@@ -28,7 +27,6 @@ use Eureka\Component\Orm\Tests\Unit\Generated\Repository\UserRepositoryInterface
 use Eureka\Component\Validation\Entity\ValidatorEntityFactory;
 use Eureka\Component\Validation\ValidatorFactory;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\MockObject\Stub\Exception;
 use PHPUnit\Framework\TestCase;
 use Random\Engine\Mt19937;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -40,6 +38,8 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
  */
 class MapperTest extends TestCase
 {
+    private static int $callCount = 0;
+
     /**
      * @return void
      */
@@ -104,9 +104,9 @@ class MapperTest extends TestCase
         $repository->persist($user); // nothing happen, entity is not updated
 
         $user->setDateUpdate('2020-01-01 10:00:00');
-        self::assertTrue($user->isUpdated());
+        self::assertTrue($user->updated());
         $repository->persist($user);
-        self::assertFalse($user->isUpdated());
+        self::assertFalse($user->updated());
     }
 
     /**
@@ -479,17 +479,16 @@ class MapperTest extends TestCase
         $statementMock->method('fetch')->willReturnOnConsecutiveCalls(...\array_values($entityMock));
         $statementMock->method('fetchColumn')->willReturn($count);
 
+
         if ($exceptionCode > 0) {
             $exception = new \PDOException('Exception', $exceptionCode);
             $exception->errorInfo = [0 => 'HY000', 1 => $exceptionCode, 2 => 'Exception'];
+
+            self::$callCount = 0;
             $statementMock
                 ->expects($this->exactly($exceptionCode === 2006 ? 2 : 1))
                 ->method('execute')
-                ->willReturnOnConsecutiveCalls(...
-                [
-                    new Exception($exception),
-                    true,
-                ]);
+                ->willReturnCallback(fn() => self::getReturnCallbackMock($exception));
         } else {
             $statementMock->method('execute')->willReturn(true);
         }
@@ -563,6 +562,15 @@ class MapperTest extends TestCase
             null,
             false,
         );
+    }
+
+    private static function getReturnCallbackMock(\Throwable $throwable): true
+    {
+        self::$callCount++;
+        return match (self::$callCount) {
+            1 => throw $throwable,
+            default => true,
+        };
     }
 
     /**

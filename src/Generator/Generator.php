@@ -100,7 +100,7 @@ class Generator
         $configs    = [];
         $baseConfig = [];
 
-        if (empty($configList)) {
+        if ($configList === []) {
             throw new \RuntimeException('Invalid config. Empty information about orm!');
         }
 

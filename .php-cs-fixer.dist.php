@@ -16,5 +16,5 @@ return (new PhpCsFixer\Config())
     ->setCacheFile(__DIR__ . '/build/.php-cs-fixer.cache')
 
     //~ Finder
-    ->setFinder((new PhpCsFixer\Finder())->in([__DIR__ . '/src', __DIR__ . '/tests']))
+    ->setFinder((new PhpCsFixer\Finder())->in([__DIR__ . '/src', __DIR__ . '/scripts', __DIR__ . '/tests']))
 ;
