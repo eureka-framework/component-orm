@@ -42,7 +42,7 @@ abstract class Abstract{{ class.mapper }}
     use Traits\ValidatorAwareTrait;
 
     /**
-     * @param array<class-string, RepositoryInterface> $mappers
+     * @param array<class-string, RepositoryInterface<*>> $mappers
      */
     public function __construct(
         string $connectionName,
