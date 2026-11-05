@@ -85,7 +85,8 @@ class Config implements ConfigInterface
      *      extended_validation?: array<array{type?: string, options?: array<string, string|int|float>}>|null,
      *      enabled?: bool,
      *      auto?: bool
-     *  }
+     *  },
+     *  joins?: array<string, array{eager_loading?: bool, config?: string, relation?: string, type?: string, keys?: array<string, bool|string>}>
      * } $config $config
      * @throws \InvalidArgumentException
      */
@@ -279,6 +280,7 @@ class Config implements ConfigInterface
      *      enabled?: bool,
      *      auto?: bool
      *  },
+     *  joins?: array<string, array{eager_loading?: bool, config?: string, relation?: string, type?: string, keys?: array<string, bool|string>}>
      * } $config
      * @return $this
      */

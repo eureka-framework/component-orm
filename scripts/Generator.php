@@ -37,7 +37,7 @@ class Generator extends AbstractScript
      */
     public function __construct(
         private readonly ConnectionFactory $factory = new ConnectionFactory([]),
-        private readonly array $ormConfigs = []
+        private readonly array $ormConfigs = [],
     ) {
         $this->setDescription('Orm generator');
         $this->setExecutable();
@@ -49,8 +49,8 @@ class Generator extends AbstractScript
                         shortName: '',
                         longName: 'config-name',
                         description: 'Name (like "user") or pattern (like "user.+") for config(s) to generate',
-                        hasArgument: true
-                    )
+                        hasArgument: true,
+                    ),
                 )
                 ->add(
                     new Option(
@@ -58,17 +58,17 @@ class Generator extends AbstractScript
                         longName: 'connection-name',
                         description: 'Name of the connection to use for generation (default: common)',
                         hasArgument: true,
-                        default: 'common'
-                    )
+                        default: 'common',
+                    ),
                 )
                 ->add(
                     new Option(
                         shortName: '',
                         longName: 'without-repository',
                         description: 'Do not generate repository interfaces',
-                        hasArgument: false
-                    )
-                )
+                        hasArgument: false,
+                    ),
+                ),
         );
     }
 
@@ -82,7 +82,7 @@ class Generator extends AbstractScript
      */
     public function run(): void
     {
-        $configName     = trim((string) $this->options()->value('config-name'));
+        $configName     = \trim((string) $this->options()->value('config-name'));
         $connectionName = (string) $this->options()->value('connection-name');
 
         try {

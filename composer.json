@@ -46,6 +46,7 @@
     "phpstan/phpstan": "^2.3.5",
     "phpstan/phpstan-phpunit": "^2.1.1",
     "phpstan/phpstan-strict-rules": "^2.1.1",
+    "phpstan/phpstan-deprecation-rules": "^2.0.5",
     "phpunit/phpcov": "^11.0.4",
     "phpunit/phpunit": "^12.5.43",
     "symfony/cache": "^7.4.23",

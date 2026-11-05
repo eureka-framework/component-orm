@@ -31,6 +31,9 @@ trait EntityTrait
     /** @var bool $exists If data already exists in db for example. */
     private bool $exists = false;
 
+    /** @var bool $deleted If data already exists in db for example. */
+    private bool $deleted = false;
+
     /** @var bool[] $updated List of updated field */
     private array $updated = [];
 
@@ -86,14 +89,47 @@ trait EntityTrait
      *
      * @param string|null $property
      * @return bool
+     * @deprecated
+     * @codeCoverageIgnore
      */
     public function isUpdated(?string $property = null): bool
+    {
+        return $this->updated($property);
+    }
+
+    /**
+     * If at least one data has been updated.
+     * If property name is specified, check only property.
+     *
+     * @param string|null $property
+     * @return bool
+     */
+    public function updated(?string $property = null): bool
     {
         if (null === $property) {
             return \count($this->updated) > 0;
         }
 
         return isset($this->updated[$property]) && $this->updated[$property] === true;
+    }
+
+    /**
+     * Whether the data must be deleted instead of persisted
+     */
+    public function deleted(): bool
+    {
+        return $this->deleted;
+    }
+
+
+    /**
+     * Set whether the data must be deleted instead of persisted
+     */
+    public function setDeleted(bool $deleted): static
+    {
+        $this->deleted = $deleted;
+
+        return $this;
     }
 
     /**

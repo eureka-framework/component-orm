@@ -78,6 +78,16 @@ interface EntityInterface
      * @param  string|null $property
      * @return bool
      */
+    public function updated(?string $property = null): bool;
+
+    /**
+     * If at least one data has been updated.
+     * If property name is specified, check only property.
+     *
+     * @param  string|null $property
+     * @return bool
+     * @deprecated
+     */
     public function isUpdated(?string $property = null): bool;
 
     /**

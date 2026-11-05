@@ -128,13 +128,13 @@ interface ConfigInterface
     public function getAllJoin(): array;
 
     /**
-     * @param  array<array{
+     * @param array<array{
      *     eager_loading?: bool,
      *     config: string,
      *     relation: string,
      *     type: string,
      *     keys: array<bool|string>,
-     *     instance: ConfigInterface
+     *     instance?: ConfigInterface
      * }> $joinList
      * @return $this
      */

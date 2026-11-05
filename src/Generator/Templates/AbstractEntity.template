@@ -26,6 +26,8 @@ use {{ class.namespace }}\{{ class.entity }};
  * You can add your specific code in child class: {{ class.name }}
  *
  * @author {{ comment.author }}
+ *
+ * @implements EntityInterface<{{ class.repository }}, {{ class.name }}>
  */
 abstract class Abstract{{ class.name }} implements EntityInterface
 {

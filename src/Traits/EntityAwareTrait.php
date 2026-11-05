@@ -186,7 +186,7 @@ trait EntityAwareTrait
 
         $property = $this->getPropertyForField($field);
 
-        return $entity->isUpdated($property);
+        return $entity->updated($property);
     }
 
     /**
