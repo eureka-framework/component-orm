@@ -91,8 +91,8 @@ class MapperJoinTest extends TestCase
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne());
         $addressRepository = $this->getAddressRepository($this->getMockEntityAddressFindOne());
 
-        /** @var User[] $users */
         $builder = (new SelectBuilder($userRepository))->setListIndexedByField('user_id');
+        /** @var User[] $users */
         $users = $userRepository->selectJoin($builder, ['UserAddress', 'Unknown']);
 
         /** @var User $expectedUser */

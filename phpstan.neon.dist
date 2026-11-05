@@ -37,9 +37,5 @@ parameters:
       identifier: varTag.nativeType
       count: 1
     -
-      path: 'src/Generator/Generator.php'
-      identifier: varTag.nativeType
-      count: 1
-    -
       path: 'tests/unit/'
       identifier: staticMethod.alreadyNarrowedType
