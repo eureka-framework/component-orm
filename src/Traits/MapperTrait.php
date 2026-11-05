@@ -321,7 +321,16 @@ trait MapperTrait
             }
         }
 
-        return array_values($collection);
+        $collection = \array_values($collection);
+
+        $listIndexedByField = $queryBuilder->getListIndexedByField();
+        if ($listIndexedByField !== '') {
+            $collection = $this->setIndexFieldsOnCollection($listIndexedByField, $collection);
+        }
+
+        $queryBuilder->clear();
+
+        return $collection;
     }
 
     /**

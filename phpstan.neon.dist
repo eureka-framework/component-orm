@@ -29,5 +29,9 @@ parameters:
       identifier: instanceof.alwaysTrue
       count: 2
     -
+      path: 'src/Generator/Generator.php'
+      identifier: varTag.nativeType
+      count: 1
+    -
       path: 'tests/unit/'
       identifier: staticMethod.alreadyNarrowedType

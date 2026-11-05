@@ -12,10 +12,42 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
-## [7.1.1] - 2026-01-07
-[7.1.1]: https://github.com/eureka-framework/component-orm/compare/7.0.0...7.1.1
+## [7.4.0] - 2026-11-02
+[7.4.0]: https://github.com/eureka-framework/component-orm/compare/7.3.1...7.4.0
+### Added
+- When use `selectJoin()`, if query builder have "indexed by field defined", use it to return collection indexed by given field
+
+## [7.3.1] - 2026-11-02
+[7.3.1]: https://github.com/eureka-framework/component-orm/compare/7.3.0...7.3.1
+### Changed
+- Add phpstan phpdoc on generated code
+
+## [7.3.0] - 2026-10-07
+[7.3.0]: https://github.com/eureka-framework/component-orm/compare/7.2.1...7.3.0
+### Changed
+- Now decode binary default values for binary fields.
+- Now can use date/time default internal values rather than default string `0000-00-00 00:00:00`.
+- Deprecate `Entity::isUpdated()`.
+### Added
+- Add `Entity::update()`, `Entity::deleted()` && `Entity::setDeleted()` methods
+
+
+## [7.2.1] - 2026-01-07
+[7.2.1]: https://github.com/eureka-framework/component-orm/compare/7.2.0...7.2.1
 ### Changed
 - Re-allow previous dependencies version of `component-console` & `component-database`
+
+
+## [7.2.0] - 2026-01-05
+[7.2.0]: https://github.com/eureka-framework/component-orm/compare/7.1.0...7.2.0
+### Added
+- PHP 8.5 support
+### Changed
+- Fix phpstan error
+- PHP code style fixes
+- Update CI
+- Update Makefile
+
 
 ## [7.1.0] - 2026-01-05
 [7.1.0]: https://github.com/eureka-framework/component-orm/compare/7.0.0...7.1.0

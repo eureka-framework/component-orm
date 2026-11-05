@@ -86,6 +86,52 @@ class MapperJoinTest extends TestCase
      * @throws OrmException
      * @throws UndefinedMapperException
      */
+    public function testICanRetrieveUserWithJoinedDataWithIndexedByField(): void
+    {
+        $userRepository    = $this->getUserRepository($this->getMockEntityFindOne());
+        $addressRepository = $this->getAddressRepository($this->getMockEntityAddressFindOne());
+
+        /** @var User[] $users */
+        $builder = (new SelectBuilder($userRepository))->setListIndexedByField('user_id');
+        $users = $userRepository->selectJoin($builder, ['UserAddress', 'Unknown']);
+
+        /** @var User $expectedUser */
+        $expectedUser = $userRepository->newEntity(
+            (object) [
+                'user_id'          => 1,
+                'user_is_enabled'  => true,
+                'user_email'       => 'user@example.com',
+                'user_password'    => md5('password'),
+                'user_date_create' => '2020-01-01 10:00:00',
+                'user_date_update' => null,
+            ],
+            true,
+        );
+
+        /** @var Address $expectedAddress */
+        $expectedAddress = $addressRepository->newEntity(
+            (object) [
+                'address_id'       => 1,
+                'user_id'          => 1,
+                'address_number'   => '13',
+                'address_text'     => 'Backer Street',
+            ],
+            true,
+        );
+        $expectedUser->setAllUserAddress(
+            [
+                $expectedAddress,
+            ],
+        );
+
+        self::assertEquals([1 => $expectedUser], $users);
+    }
+
+    /**
+     * @return void
+     * @throws OrmException
+     * @throws UndefinedMapperException
+     */
     public function testICanRetrieveUserWithoutJoinedLeftData(): void
     {
         $userRepository    = $this->getUserRepository($this->getMockEntityFindOne(false));
