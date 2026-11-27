@@ -52,6 +52,31 @@ class GeneratorTest extends TestCase
      * @return void
      * @throws GeneratorException
      */
+    public function testEntityJoiningItselfDoesNotHaveDuplicatedUseStatement(): void
+    {
+        $config = $this->getConfig([
+            'UserSelf' => [
+                'eager_loading' => false,
+                'config'        => 'user',
+                'relation'      => JoinRelation::ONE,
+                'type'          => JoinType::LEFT,
+                'keys'          => ['user_id' => 'user_id_parent'],
+            ],
+        ]);
+
+        $generator = new Generator();
+        $generator->generate($this->getConnectionMock(), $config, 'user', false);
+
+        $source = (string) \file_get_contents(__DIR__ . '/../Generated/Entity/Abstracts/AbstractUser.php');
+        $use    = 'use Eureka\\Component\\Orm\\Tests\\Unit\\Generated\\Entity\\User;';
+
+        self::assertSame(1, \substr_count($source, $use));
+    }
+
+    /**
+     * @return void
+     * @throws GeneratorException
+     */
     public function testICanGenerateMappersAndEntityClassesAccordingToConfigAndMockedDatabaseAndFilteredOnUniqueConfigName(): void
     {
         $generator = new Generator();
@@ -247,9 +272,10 @@ class GeneratorTest extends TestCase
     }
 
     /**
+     * @param array<string, array{eager_loading?: bool, config: string, relation: string, type: string, keys: array<string, bool|string>}> $extraUserJoins
      * @return ConfigList
      */
-    private function getConfig(): array
+    private function getConfig(array $extraUserJoins = []): array
     {
         return [
             'user' => [
@@ -299,6 +325,7 @@ class GeneratorTest extends TestCase
                         'type'          => JoinType::LEFT,
                         'keys'          => ['user_id' => 'user_id'],
                     ],
+                    ...$extraUserJoins,
                 ],
 
                 'validation' => [

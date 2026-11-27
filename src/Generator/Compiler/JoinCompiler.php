@@ -149,7 +149,13 @@ class JoinCompiler extends AbstractMethodCompiler
 
         $useEntityClassName = $config->getBaseNamespaceForEntity() . '\\' . $className;
         $useMapperClassName = $config->getBaseNamespaceForMapper() . '\\' . $className . 'Mapper';
-        $classUses[$useEntityClassName] = 'use ' . $useEntityClassName . ';';
+
+        //~ Entity own class is already imported by the template (self join case)
+        $ownEntityClassName = $this->config->getBaseNamespaceForEntity() . '\\' . $this->config->getClassname();
+        if ($useEntityClassName !== $ownEntityClassName) {
+            $classUses[$useEntityClassName] = 'use ' . $useEntityClassName . ';';
+        }
+
         $classUses[$useMapperClassName] = 'use ' . $useMapperClassName . ';';
 
         $this->mainContext->add('entity.uses', $classUses);
