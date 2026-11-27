@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 ```
 
+## [7.4.1] - 2026-11-27
+[7.4.1]: https://github.com/eureka-framework/component-orm/compare/7.4.0...7.4.1
+### Changed
+- When entity has join on itself, do not add use namespace on itself
+
 ## [7.4.0] - 2026-11-02
 [7.4.0]: https://github.com/eureka-framework/component-orm/compare/7.3.1...7.4.0
 ### Added

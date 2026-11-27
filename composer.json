@@ -42,14 +42,14 @@
   },
 
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "^3.95.28",
-    "phpstan/phpstan": "^2.3.5",
-    "phpstan/phpstan-phpunit": "^2.1.1",
-    "phpstan/phpstan-strict-rules": "^2.1.1",
-    "phpstan/phpstan-deprecation-rules": "^2.0.5",
+    "friendsofphp/php-cs-fixer": "^3.95.32",
+    "phpstan/phpstan": "^2.3.7",
+    "phpstan/phpstan-phpunit": "^2.1.4",
+    "phpstan/phpstan-strict-rules": "^2.1.2",
+    "phpstan/phpstan-deprecation-rules": "^2.0.6",
     "phpunit/phpcov": "^11.0.4",
-    "phpunit/phpunit": "^12.5.43",
-    "symfony/cache": "^7.4.23",
+    "phpunit/phpunit": "^12.5.45",
+    "symfony/cache": "^7.4.24",
     "shipmonk/composer-dependency-analyser": "^1.8.4"
   }
 }
